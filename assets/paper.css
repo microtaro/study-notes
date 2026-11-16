@@ -1,0 +1,182 @@
+/* 論文の解説ページの共通の部品。assets/site.css の後に読み込む。
+   見本：topics/ai-trust/papers/2x-mandate.html（英語は en/ の同じパス）
+   部品：
+     .lang         言語の切り替え（冒頭のいちばん上）
+     .src          元の論文の囲み（題名のすぐ下）
+     .qa           問いと答え（.qa-q に Q の札、.qa-a に A の札と答え、.qa-body に答えのもとになった結果 .points）
+     .conclusion   著者の結論と提言（.conclusion-head に結論、.conclusion-body に提言 .recs）
+     .key          各節の頭の結論（1〜3 文）
+     .chart .bars  横棒グラフ。ul に --max（と --min、--at：点線の位置）、棒に --to（と --from）を置く。li.main は濃い棒、li.weak はしま模様（統計ではっきりしない値）
+     .chart .db-*  2 つの割合を並べる図（ダンベル図）。色は人（青）か AI（.db-row.ai、桃）か、ほかの値は .db-row.plain（濃い灰）。白抜きと塗りの意味は凡例に書く。.db-lab.l / .db-lab.r で点のすぐ左／右に値を書く。.db-group は図の中の小見出し
+     .timeline     年表。li.mark は大事な出来事、li.rv はレビューの変化
+     .t-note       表や図の下の小さな注記
+*/
+
+.lang { margin: 0 0 1rem; font-size: 0.9rem; }
+.src { margin: 1.1rem 0 0; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; font-size: 0.95rem; line-height: 1.65; }
+.src b { margin-right: 0.4em; }
+.src .links { display: block; margin-top: 0.3rem; }
+.src .links a + a { margin-left: 1.1em; }
+
+/* 図の色。人のレビューは青、AI は site.css の AI の色（桃）。どちらも色覚の違いで見分けられることを確かめ済み */
+:root {
+  --c-human: #0072B2;
+  --c-human-soft: #A9CBE3;
+  --c-ai: #CC79A7;
+  --c-ai-soft: #EBC6DA;
+  --c-bar: #8D9AAD;
+  --c-main: #18212F;
+}
+
+
+/* 問いと答え。Q は濃い色、A は緑の帯で目立たせる */
+.qa { margin: 1.6rem 0 2.2rem; max-width: 46rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.qa-q, .qa-a { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); column-gap: 0.9rem; align-items: start; padding: 1rem 1.2rem; }
+.qa-q p, .qa-a p { margin: 0; padding-top: 0.2rem; font-weight: 700; }
+.qa-q p { font-size: 1.08rem; line-height: 1.65; }
+.qa-a { background: var(--d-tint); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.qa-a p { font-size: 1.1rem; line-height: 1.75; }
+.badge { display: inline-flex; align-items: center; justify-content: center; height: 2.1rem; border-radius: 8px; color: #fff; font-weight: 700; font-size: 1rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.badge-q { background: var(--ink); }
+.badge-a { background: var(--d); }
+.qa-body { padding: 0.9rem 1.2rem 1rem calc(1.2rem + 3.2rem + 0.9rem); }
+.qa-label { margin: 0 0 0.2rem; font-size: 0.85rem; font-weight: 700; color: var(--sub); }
+.points { list-style: none; margin: 0; padding: 0; }
+.points li { margin: 0; padding: 0.75rem 0; border-top: 1px solid var(--rule); }
+.points li:first-child { border-top: 0; padding-top: 0.3rem; }
+.points b { display: block; font-size: 1.02rem; line-height: 1.6; }
+.points .why { display: block; margin-top: 0.2rem; font-size: 0.95rem; }
+.points .how { display: block; margin-top: 0.25rem; font-size: 0.82rem; line-height: 1.55; color: var(--sub); }
+.qa-more { margin: 0.6rem 0 0; font-size: 0.9rem; }
+@media (max-width: 560px) {
+  .qa-q, .qa-a { grid-template-columns: 2.7rem minmax(0, 1fr); column-gap: 0.7rem; padding: 0.9rem; }
+  .qa-body { padding: 0.8rem 0.9rem 0.9rem; }
+}
+
+/* 著者の結論と提言。ページでいちばん強い見た目にする */
+.conclusion { margin: 1.4rem 0 2.4rem; max-width: 46rem; border: 1px solid var(--ink); border-radius: 12px; overflow: hidden; }
+.conclusion-head { padding: 1.3rem 1.4rem 1.2rem; background: var(--ink); color: #fff; }
+.conclusion-head p { margin: 0; }
+.conclusion-head .label { margin-bottom: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #C9D3E0; }
+.conclusion-head .claim { font-size: 1.3rem; font-weight: 700; line-height: 1.7; }
+.conclusion-head .en { margin-top: 0.7rem; font-size: 0.85rem; line-height: 1.6; color: #C9D3E0; }
+.conclusion-body { padding: 1.1rem 1.4rem 1.2rem; background: var(--surface); }
+.conclusion-body .label { margin: 0 0 0.3rem; font-weight: 700; }
+.recs { list-style: none; margin: 0; padding: 0; }
+.recs li { margin: 0; padding: 0.75rem 0; border-top: 1px solid var(--rule); }
+.recs b { display: block; font-size: 1.06rem; line-height: 1.6; }
+.conclusion-note { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--sub); }
+@media (max-width: 560px) {
+  .conclusion-head, .conclusion-body { padding-left: 1rem; padding-right: 1rem; }
+  .conclusion-head .claim { font-size: 1.15rem; }
+}
+
+/* 各節の頭の結論 */
+.key { margin: 0 0 1.8rem; padding: 1rem 1.2rem; max-width: 42rem; background: var(--surface); border-left: 6px solid var(--ink); border-radius: 0 10px 10px 0; font-size: 1.06rem; font-weight: 700; line-height: 1.85; }
+.key p { margin: 0; }
+.key p + p { margin-top: 0.5rem; }
+
+/* 話の流れ：共通の .cycle の枠を、このページでは中立の色にする */
+.cycle li { border-color: var(--ink); font-size: 0.95rem; }
+
+/* 図の枠 */
+.chart { margin: 2rem 0; padding: 1.1rem 1.2rem 1rem; max-width: 46rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+.chart-title { margin: 0; font-weight: 700; line-height: 1.6; }
+.chart-sub { margin: 0.2rem 0 1rem; font-size: 0.88rem; line-height: 1.65; color: var(--sub); }
+.chart figcaption { margin: 0.8rem 0 0; font-size: 0.82rem; line-height: 1.6; }
+
+/* 棒グラフ。--max（と --min、--at）を ul に、--from と --to を棒に置く */
+.bars { list-style: none; margin: 0; padding: 0; }
+.bars li { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr) 5.6rem; align-items: center; column-gap: 0.9rem; margin: 0; padding: 0.4rem 0; }
+.bars li.group { display: block; padding: 0.9rem 0 0.1rem; font-size: 0.85rem; font-weight: 700; color: var(--sub); }
+.bars li.group:first-child { padding-top: 0; }
+.bar-label { font-size: 0.92rem; line-height: 1.45; }
+.bar-label small { display: block; margin-top: 0.1rem; font-size: 0.8rem; color: var(--sub); }
+.bar-track { position: relative; height: 18px; }
+.bar {
+  position: absolute; top: 2px; height: 14px;
+  left: calc((var(--from, 0) - var(--min, 0)) / (var(--max) - var(--min, 0)) * 100%);
+  width: calc((var(--to) - var(--from, 0)) / (var(--max) - var(--min, 0)) * 100%);
+  background: var(--c-bar); border-radius: 0 4px 4px 0;
+}
+.bar.neg { border-radius: 4px 0 0 4px; }
+.bars li.main .bar { background: var(--c-main); }
+.bars li.main .bar-label, .bars li.main .bar-val { font-weight: 700; }
+.bars li.weak .bar { background: repeating-linear-gradient(135deg, var(--c-bar) 0 3px, var(--surface) 3px 6px); box-shadow: inset 0 0 0 1.5px var(--c-bar); }
+.ref { position: absolute; top: -5px; bottom: -5px; width: 0; border-left: 2px dashed var(--sub); left: calc((var(--at) - var(--min, 0)) / (var(--max) - var(--min, 0)) * 100%); }
+.bar-val { font-size: 0.95rem; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .chart { padding: 1rem 0.9rem 0.9rem; }
+  .bars li { grid-template-columns: minmax(0, 1fr) 4.9rem; row-gap: 0.15rem; padding: 0.5rem 0; }
+  .bar-label { grid-column: 1 / -1; }
+}
+
+/* 前と後の割合（ダンベル図）。色は人か AI か、白抜きは前、塗りは後 */
+.db-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0 0 0.9rem; padding: 0; list-style: none; font-size: 0.88rem; }
+.db-legend li { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; }
+.sw.before { background: var(--surface); border: 3px solid var(--ink); }
+.sw.after { background: var(--ink); }
+.sw.human { background: var(--c-human); }
+.sw.ai { background: var(--c-ai); }
+.db-row { --c: var(--c-human); --c-soft: var(--c-human-soft); margin-bottom: 1rem; }
+.db-row.ai { --c: var(--c-ai); --c-soft: var(--c-ai-soft); }
+.db-row.plain { --c: var(--c-main); --c-soft: #C3CBD6; }
+.db-group { margin: 0.9rem 0 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--sub); }
+.db-group:first-of-type { margin-top: 0; }
+.db-head { display: flex; justify-content: space-between; gap: 0.8rem; font-size: 0.93rem; line-height: 1.5; margin-bottom: 0.35rem; }
+.db-vals { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.db-track { position: relative; height: 16px; margin: 0 8px; }
+.db-track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--rule); }
+.db-line { position: absolute; top: 5px; height: 6px; background: var(--c-soft); border-radius: 3px; }
+.db-dot { position: absolute; top: 0; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); }
+.db-dot.before { background: var(--surface); border: 3px solid var(--c); }
+.db-dot.after { background: var(--c); }
+.db-lab { position: absolute; top: 0; font-size: 0.8rem; line-height: 16px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); }
+.db-lab.l { transform: translateX(calc(-100% - 12px)); }
+.db-lab.r { transform: translateX(12px); }
+.db-axis { position: relative; height: 1.4rem; margin: 0.2rem 8px 0; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--sub); }
+.db-axis span { position: absolute; top: 0.2rem; transform: translateX(-50%); white-space: nowrap; }
+.db-axis span:first-child { transform: none; }
+.db-axis span:last-child { transform: translateX(-100%); }
+
+/* 年表 */
+.timeline { list-style: none; margin: 1.4rem 0; padding: 0; max-width: 46rem; }
+.timeline li { display: grid; grid-template-columns: 7.2rem minmax(0, 1fr); column-gap: 1.1rem; margin: 0; }
+.timeline time, .timeline .when { padding-top: 0.05rem; text-align: right; font-size: 0.9rem; font-weight: 700; color: var(--sub); font-variant-numeric: tabular-nums; line-height: 1.7; }
+.timeline .ev { position: relative; padding: 0 0 1.05rem 1.2rem; border-left: 2px solid var(--rule); line-height: 1.75; }
+.timeline li:last-child .ev { padding-bottom: 0; }
+.timeline .ev::before { content: ""; position: absolute; left: -8px; top: 0.45rem; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--sub); }
+.timeline li.mark .ev::before { background: var(--ink); border-color: var(--ink); }
+.timeline li.mark .ev { font-weight: 700; }
+.timeline li.rv .ev::before { border-color: var(--c-ai); background: var(--c-ai); }
+.timeline .ev small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--sub); }
+.tl-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.6rem 0 0; padding: 0; list-style: none; font-size: 0.88rem; }
+.tl-legend li { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; }
+.sw.mark { background: var(--ink); }
+.sw.ev { background: var(--surface); border: 2px solid var(--sub); }
+@media (max-width: 560px) {
+  .timeline li { grid-template-columns: 4.9rem minmax(0, 1fr); column-gap: 0.8rem; }
+  .timeline time, .timeline .when { font-size: 0.8rem; }
+}
+
+td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.t-note { color: var(--sub); font-size: 0.88em; margin-top: 0.5rem; }
+blockquote { margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1.1rem; max-width: 40rem; border-left: 3px solid var(--rule); }
+blockquote p { margin: 0.3rem 0; }
+blockquote .en { color: var(--sub); font-size: 0.9rem; }
+
+/* ---------- 英語のページ（html lang="en"）だけの違い ---------- */
+
+html[lang="en"] body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.7; }
+html[lang="en"] .key { line-height: 1.7; }
+html[lang="en"] .chart-title { line-height: 1.5; }
+html[lang="en"] .chart-sub, html[lang="en"] .chart figcaption { line-height: 1.55; }
+html[lang="en"] .bar-label { line-height: 1.4; }
+html[lang="en"] .db-head { line-height: 1.45; }
+html[lang="en"] .timeline li { grid-template-columns: 7.6rem minmax(0, 1fr); }
+html[lang="en"] .timeline time, html[lang="en"] .timeline .when, html[lang="en"] .timeline .ev { line-height: 1.6; }
+html[lang="en"] .timeline .ev::before { top: 0.4rem; }
+@media (max-width: 560px) {
+  html[lang="en"] .timeline li { grid-template-columns: 5.4rem minmax(0, 1fr); }
+}

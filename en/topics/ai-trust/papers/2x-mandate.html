@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Writes Faster Than Humans Can Review (paper explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/papers/2x-mandate.html">
+<link rel="alternate" hreflang="en" href="2x-mandate.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#over-time"><span class="n">2</span>What changed with continued use</a></li>
+    <li><a href="#throughput"><span class="n">3</span>Did PR counts really rise? (Q1)</a></li>
+    <li><a href="#who"><span class="n">4</span>Differences by people, code, and models (Q2)</a></li>
+    <li><a href="#review"><span class="n">5</span>How AI review replaced part of human review (Q3)</a></li>
+    <li><a href="#quality"><span class="n">6</span>Did quality hold up? (Q3)</a></li>
+    <li><a href="#study"><span class="n">7</span>The company, and how the effect of AI was measured</a></li>
+    <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the study's limits</a></li>
+    <li><a href="#reading"><span class="n">9</span>How the shape of trust changed (my reading)</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/papers/2x-mandate.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Paper explainer</p>
+  <h1>AI Writes Faster Than Humans Can Review</h1>
+  <p class="src"><b>Original paper</b>He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu, “AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate,” arXiv:2607.01904 version 3 (2026-11-10), not peer reviewed, CC BY 4.0
+    <span class="links"><a href="https://arxiv.org/abs/2607.01904v3">arXiv page</a><a href="https://arxiv.org/html/2607.01904v3">Read the HTML version</a><a href="https://arxiv.org/pdf/2607.01904v3">PDF</a></span></p>
+  <p class="lead">A company's CTO set a goal to double engineering productivity with AI within twelve months, measured as merged pull requests (PRs) per engineer per month. Researchers from Carnegie Mellon University, Stanford University, and elsewhere studied the company's records over more than two years. This page explains their paper.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-16. Based on the full text and appendices of arXiv version 3 (2026-11-10); all numbers are from version 3. What the paper says is kept separate from my own reading.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>The paper asks three questions. For each one, here is the answer and the findings behind it. Reading this section alone gives you the main points. The small grey text says where each finding comes from.</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>How much and how fast did PR counts rise, and what produced the rise?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>They rose through continued use of AI. The “2×” mandate alone did not raise them, and judged strictly the effect of AI is about 1.5×. The 2× target was reached ten months after the mandate.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>AI helps only a little at first. The gain grows the longer people keep using it.</b>
+          <span class="why">PRs per developer rose about 12% when a developer started using AI, and roughly doubled (1.99×) after nine months of use. Heavier users gained more.</span>
+          <span class="how">From comparing each developer before and after they started using AI</span>
+        </li>
+        <li>
+          <b>The “2×” mandate by itself did not raise PR counts.</b>
+          <span class="why">Throughput barely changed around the mandate date (about 10%). The mandate set off a wave of AI adoption, but the gain came only after each developer started using AI. Most of the gain came from continued use.</span>
+          <span class="how">From comparing the change at the mandate date with the change at each developer's own adoption month</span>
+        </li>
+        <li>
+          <b>Judged strictly, the effect of AI is about 1.5×, not 2×.</b>
+          <span class="why">PRs per developer did rise 2.09×, but that figure includes the company-wide trend over the same months. Net of that trend, the authors' main estimate is 1.46×.</span>
+          <span class="how">From subtracting the change seen in other developers in the same month</span>
+        </li>
+        <li>
+          <b>The work really increased; people did not just hit the number.</b>
+          <span class="why">PRs got larger (median 35 to 61 lines), and the added PRs were not skewed toward routine work. Extra working days explain at most a fifth of the gain. Whether the added code was worth it was not measured.</span>
+          <span class="how">From the authors' four checks</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#over-time">2</a> (what changed with continued use) and <a href="#throughput">3</a> (PR counts)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>Does the rise differ across people, code, and AI model generations?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Not clearly across engineering tiers. Managers and newer repositories gained much more. The effect of each AI model generation could not be separated.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Managers started writing code again with AI (the authors' interpretation).</b>
+          <span class="why">The gain after adopting AI was largest for managers (+86%). The authors read this as AI letting managers who had shipped little code contribute more. Across the engineering tiers (+27% to +42%), the differences were not statistically significant.</span>
+          <span class="how">From before-and-after comparisons within each seniority tier, plus the authors' interpretation</span>
+        </li>
+        <li>
+          <b>Newer repositories gained a lot; older ones barely at all.</b>
+          <span class="why">Repositories created since 2022 gained +44%; older ones +12% (not significant). Newer repositories also use a more modern technology stack, so code age cannot be fully separated from technology.</span>
+          <span class="how">From before-and-after comparisons by when the repository was created</span>
+        </li>
+        <li>
+          <b>Which AI model raised PR counts could not be separated.</b>
+          <span class="why">Each model release coincided with a steep company-wide rise in AI use. Treating a month with no release as if it had one showed a similar effect.</span>
+          <span class="how">From splitting at release months, and a test with a fake release month</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#who">4</a> (differences by people, code, and models)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>How did the organization absorb the added PRs, and at what cost to code review and quality?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>The cost fell on review. The company kept up by moving part of human review to AI, and more of the remaining human review became approval only. Short-term quality proxies did not get worse, but whether quality holds up in the long run is unknown.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>When authoring speeds up, review falls behind.</b>
+          <span class="why">Company-wide PR volume grew 3.1×, while the pool of reviewers grew only 1.5×, so the load per reviewer roughly doubled.</span>
+          <span class="how">From the company's month-by-month records</span>
+        </li>
+        <li>
+          <b>Review moved to AI, and more of the remaining human review became approval only.</b>
+          <span class="why">The share of PRs with an AI review rose from about 19% to about 84%, and the share with at least one human review fell from 89% to 68%. PRs with a human-written review comment fell from about 39% to about 21%, and most of the added review load went to approvals without comment. Human review did not disappear.</span>
+          <span class="how">From the company's month-by-month records. The paper reports these trends as they are; it does not model their cause</span>
+        </li>
+        <li>
+          <b>Quality did not visibly drop in the short run. Whether it holds up in the long run is unknown.</b>
+          <span class="why">Reverts and quick follow-up fixes did not rise. Defects, incidents, and maintainability were not measured.</span>
+          <span class="how">From short-horizon quality proxies</span>
+        </li>
+        <li>
+          <b>If you only count PRs, you will not notice that people are looking at less of the code.</b>
+          <span class="why">The success metric (merged PRs) recorded the speedup, but not the shift in who reviews the code.</span>
+          <span class="how">From the paper's summary</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#review">5</a> (review), <a href="#quality">6</a> (quality), and <a href="#advice">8</a> (recommendations)</p>
+    </div>
+  </div>
+
+  <h3>What the authors take from the three answers</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (final section of the paper)</p>
+      <p class="claim">“organizational AI transformation unfolds through accumulated use and shifts in review practices rather than through the mandate alone. Human attention and judgment become the new bottleneck of the AI era.”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">So the authors recommend</p>
+      <ul class="recs">
+        <li><b>Treat a mandate as the start of an organizational transformation.</b> The gain arrived over time, as each developer accumulated use. Plan over several quarters, and invest in intensity of use before demanding the target.</li>
+        <li><b>Pair the target metric with other signals.</b> A count that becomes a target stops measuring what it was meant to measure (Goodhart's law).</li>
+        <li><b>Plan review capacity as carefully as authoring capacity.</b> Set targets for review coverage and depth, decide in advance which PRs may be approved without a human review, and monitor which code humans no longer review.</li>
+      </ul>
+      <p class="conclusion-note">The authors also say the result is evidence that “a near-doubling is attainable under favorable conditions and over a long enough horizon, rather than that it is typical, immediate, or free.” More in <a href="#advice">8</a>.</p>
+    </div>
+  </div>
+
+  <h3>The story in one line</h3>
+  <ol class="cycle" aria-label="The story in one line">
+    <li>The “2×” mandate</li>
+    <li>Developers start using AI</li>
+    <li>With continued use, PR counts rise</li>
+    <li>Review falls behind</li>
+    <li>Part of review moves to AI</li>
+    <li>Short-term quality proxies stay flat</li>
+  </ol>
+
+  <h3>What the paper does not answer</h3>
+  <p>The authors themselves say they could not measure the following.</p>
+  <ul>
+    <li><b>Whether there are quality costs:</b> only short-horizon proxies (merge rate, reverts, quick follow-up fixes) were measured. Defects, incidents, and maintainability were not.</li>
+    <li><b>Whether the added PRs were worth it:</b> the value of the added code was not measured.</li>
+    <li><b>Whether it lasts:</b> whether the gain levels off and whether the review shift persists needs longer panels and studies at other companies.</li>
+  </ul>
+</section>
+
+<section id="over-time">
+  <h2><span class="num">2</span>What changed with continued use</h2>
+  <div class="key">
+    <p>The paper looks at change in two ways. Per developer, by months since they started using AI, PR counts grew the longer they used it. Company-wide, by calendar month, review moved toward AI as AI use spread.</p>
+  </div>
+  <p>The two views support different strengths of claim. The per-developer results are estimates of the effect of AI, made by comparing against other developers in the same month. The company-wide changes are the records laid out over time; the paper does not estimate whether continued AI use caused them.</p>
+
+  <h3>Per developer: months since starting to use AI</h3>
+  <figure class="chart" aria-labelledby="ch-months">
+    <p class="chart-title" id="ch-months">PRs per developer, by months since starting to use AI</p>
+    <p class="chart-sub">Relative to the same developer before using AI (1× = no change, dashed line).</p>
+    <ul class="bars" style="--max: 2.2; --at: 1">
+      <li title="3 months: 1.51×"><span class="bar-label">3 months</span><span class="bar-track"><span class="bar" style="--to: 1.51"></span><span class="ref"></span></span><span class="bar-val">1.51×</span></li>
+      <li title="6 months: 1.55×"><span class="bar-label">6 months</span><span class="bar-track"><span class="bar" style="--to: 1.55"></span><span class="ref"></span></span><span class="bar-val">1.55×</span></li>
+      <li class="main" title="9 months: 1.99×"><span class="bar-label">9 months</span><span class="bar-track"><span class="bar" style="--to: 1.99"></span><span class="ref"></span></span><span class="bar-val">1.99×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's text and Supplementary Figure 14 (an event study, which estimates the effect month by month around each developer's adoption). The jump at adoption (about 12%) comes from a different estimate and is not shown here.</figcaption>
+  </figure>
+  <ul>
+    <li>PRs per developer rose about 12% when a developer started using AI, and kept rising with continued use.</li>
+    <li>Heavy users (the top quarter by usage) gained much more. The authors note that heavy use may result from high productivity as much as cause it.</li>
+    <li>The gain after adopting AI was largest for managers. The authors read this as AI letting managers who had shipped little code contribute more (<a href="#who">4</a>).</li>
+  </ul>
+
+  <h3>Company-wide: calendar months</h3>
+  <p>Company events and changes in review, in time order.</p>
+  <ul class="tl-legend" aria-hidden="true">
+    <li><i class="sw mark"></i>Start and end of the data, the mandate</li>
+    <li><i class="sw ev"></i>AI tools and models</li>
+    <li><i class="sw ai"></i>Changes in review</li>
+  </ul>
+  <ol class="timeline">
+    <li class="mark"><time datetime="2024-01">2024-01</time><span class="ev">The data starts</span></li>
+    <li><span class="when">2025-01 to 04</span><span class="ev">Baseline period (before the mandate)<small>21.2 PRs per developer per month</small></span></li>
+    <li><time datetime="2025-02">2025-02</time><span class="ev">Usage logs for the AI tool Cursor begin</span></li>
+    <li class="mark"><time datetime="2025-06">2025-06</time><span class="ev">The CTO emails the R&amp;D organization: double engineering productivity through AI within twelve months<small>The metric: merged PRs per engineer per month</small></span></li>
+    <li><time datetime="2025-07">2025-07</time><span class="ev">Usage logs for Claude Code begin<small>Introduced around the mandate, it quickly became the main tool. The mandate set off a wave of adoption</small></span></li>
+    <li class="rv"><span class="when">Months after the mandate</span><span class="ev">The share of PRs with an AI review overtakes the share with a human review</span></li>
+    <li><time datetime="2025-09">2025-09</time><span class="ev">Sonnet 4.5 is released (with Claude Code 2.0)</span></li>
+    <li><time datetime="2025-11">2025-11</time><span class="ev">Opus 4.5 is released<small>The share of AI-authored PRs rose most steeply after this</small></span></li>
+    <li class="rv"><span class="when">Through 2025</span><span class="ev">Time from first commit to merge grows longer<small>PR volume exceeded review capacity</small></span></li>
+    <li><time datetime="2026-02">2026-02</time><span class="ev">Opus 4.6 is released. Cursor is deprecated</span></li>
+    <li class="rv"><span class="when">Early 2026</span><span class="ev">Time to merge comes down<small>Not because review got faster, but because fewer PRs went through human review with comments (<a href="#review">5</a>)</small></span></li>
+    <li class="rv"><span class="when">Late in the window</span><span class="ev">The company begins routing PRs through AI review and auto-approval<small>In-house AI agents also arrived around this time</small></span></li>
+    <li class="mark"><time datetime="2026-04">2026-04</time><span class="ev">The data ends<small>44.3 PRs per developer per month (2.09×). About 90% of PRs are AI-authored. 68% of PRs get a human review, about 84% an AI review (late in the window)</small></span></li>
+  </ol>
+  <p class="t-note">Timings such as “months after the mandate” and “through 2025” follow the paper's wording. The paper does not give exact months.</p>
+
+  <h3>Before the mandate versus the end of the window</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Measure</th><th class="num">Before</th><th class="num">After</th><th>How to read it</th></tr></thead>
+      <tbody>
+        <tr><th>PRs per developer per month</th><td class="num">21.2</td><td class="num"><b>44.3</b></td><td>2.09×. Includes the company-wide trend</td></tr>
+        <tr><th>PR size (median)</th><td class="num">35 lines</td><td class="num"><b>61 lines</b></td><td>Work was not split into smaller PRs</td></tr>
+        <tr><th>Share of AI-authored PRs</th><td class="num">near 0</td><td class="num"><b>about 90%</b></td><td>Counted by the company's own label</td></tr>
+        <tr><th>PRs with at least one human review</th><td class="num">89%</td><td class="num"><b>68%</b></td><td>Fewer, but not gone</td></tr>
+        <tr><th>PRs with an AI review</th><td class="num">about 19%</td><td class="num"><b>about 84%</b></td><td>Overtook human review within months of the mandate</td></tr>
+        <tr><th>PRs with a human-written review comment</th><td class="num">about 39%</td><td class="num"><b>about 21%</b></td><td>Fewer human reviews said anything about the content</td></tr>
+        <tr><th>PRs with only a silent human approval</th><td class="num">about 50%</td><td class="num"><b>about 50%</b></td><td>Same share; more of them, since there were more PRs</td></tr>
+        <tr><th>Claude Code spend per developer-month</th><td class="num">$42</td><td class="num"><b>$856</b></td><td>About 20× (2025-07 to 2026-04)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">“Before” is the pre-mandate baseline (January to April 2025) or the start of the window; “after” is April 2026 or the end of the window. The paper does not give exact months for the review shares.</p>
+</section>
+
+<section id="throughput">
+  <h2><span class="num">3</span>Did PR counts really rise? (Q1)</h2>
+  <div class="key">
+    <p>PRs per developer rose 2.09×, but that figure includes the company-wide trend. The authors' main estimate of the effect of AI is 1.46×. Most of the gain came from continued use of AI; the mandate date itself contributed little.</p>
+  </div>
+
+  <h3>The different “×” numbers in the paper</h3>
+  <figure class="chart" aria-labelledby="ch-x">
+    <p class="chart-title" id="ch-x">How much PRs per developer rose, by how it is counted</p>
+    <p class="chart-sub">1× = no change (dashed line). The dark bar is the authors' main estimate.</p>
+    <ul class="bars" style="--max: 2.2; --at: 1">
+      <li title="PRs per developer, raw: 2.09×"><span class="bar-label">PRs per developer, raw<small>Baseline to April 2026. Includes the company-wide trend</small></span><span class="bar-track"><span class="bar" style="--to: 2.09"></span><span class="ref"></span></span><span class="bar-val">2.09×</span></li>
+      <li title="Effect nine months after starting to use AI: 1.99×"><span class="bar-label">Effect nine months after starting to use AI</span><span class="bar-track"><span class="bar" style="--to: 1.99"></span><span class="ref"></span></span><span class="bar-val">1.99×</span></li>
+      <li class="main" title="Main estimate of the effect of AI: 1.46×"><span class="bar-label">Main estimate of the effect of AI<small>At April 2026 usage, net of all company-wide monthly changes</small></span><span class="bar-track"><span class="bar" style="--to: 1.46"></span><span class="ref"></span></span><span class="bar-val">1.46×</span></li>
+      <li title="Jump at adoption: about 1.12×"><span class="bar-label">Jump when a developer starts using AI</span><span class="bar-track"><span class="bar" style="--to: 1.12"></span><span class="ref"></span></span><span class="bar-val">~1.12×</span></li>
+      <li title="Change at the mandate date: about 1.1×"><span class="bar-label">Change at the mandate date</span><span class="bar-track"><span class="bar" style="--to: 1.10"></span><span class="ref"></span></span><span class="bar-val">~1.1×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's text (Section IV-A), Tables I and II, and Supplementary Figure 14. Multipliers are the paper's log-point estimates converted the same way the paper does.</figcaption>
+  </figure>
+  <ul>
+    <li>“2×” refers to the raw 2.09×. It is the simplest count and also includes the company-wide trend that affected developers who did not use AI.</li>
+    <li>The authors' main estimate subtracts all company-wide monthly changes: “We take this more conservative 1.46× as our main estimate.”</li>
+    <li>On the mandate's own metric — merged PRs, counting months with no PRs — the rise is 2.31×. The 246 developers active throughout also rose 2.3×, so the rise is not due to turnover.</li>
+  </ul>
+
+  <h3>Breaking down the gain: continued use is the largest part</h3>
+  <figure class="chart" aria-labelledby="ch-dec">
+    <p class="chart-title" id="ch-dec">The within-developer gain, split into three parts (at April 2026 usage)</p>
+    <p class="chart-sub">In the paper's log points. The dashed line is 0 (no change). The total, +0.54, equals 1.72×.</p>
+    <ul class="bars" style="--min: -0.1; --max: 0.5; --at: 0">
+      <li title="Jump at adoption: +0.14"><span class="bar-label">Jump when a developer starts using AI</span><span class="bar-track"><span class="bar" style="--to: 0.14"></span><span class="ref"></span></span><span class="bar-val">+0.14</span></li>
+      <li class="main" title="Gain from accumulated use: +0.45"><span class="bar-label">Gain from continued use</span><span class="bar-track"><span class="bar" style="--to: 0.45"></span><span class="ref"></span></span><span class="bar-val">+0.45</span></li>
+      <li title="Residual change after the mandate: −0.05"><span class="bar-label">Residual change after the mandate<small>Company-wide change after the mandate that the other two do not explain</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.05; --to: 0"></span><span class="ref"></span></span><span class="bar-val">−0.05</span></li>
+    </ul>
+    <figcaption>Redrawn from the paper's Table II (baseline model).</figcaption>
+  </figure>
+  <p>Under the authors' preferred model, which subtracts all company-wide monthly changes, the total is +0.38 (1.46×). In both models, continued use supplies the larger share of the gain and the mandate only a small residual. The authors treat “the more you use it, the more you gain” as an association, not a cause, because productive developers may accumulate use faster.</p>
+
+  <h3>Real work, or just hitting the target number?</h3>
+  <p>A public target invites raising the number without doing more work. The authors ran four checks, and all of them support the “real work” reading.</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Check</th><th>If people just hit the number</th><th>What happened</th></tr></thead>
+      <tbody>
+        <tr><th>Timing</th><td>Everyone's count would rise right after the mandate</td><td>The change at the mandate date was small; the gain began when each developer started using AI, and took about nine months to reach 2×</td></tr>
+        <tr><th>PR size</th><td>Work would be split, so PRs would get smaller</td><td>Median PR size rose from 35 to 61 lines; the share of PRs with 10 lines or fewer fell from 31% to 22%</td></tr>
+        <tr><th>PR content</th><td>Routine work would make up the rise</td><td>At April 2026 usage, feature PRs rose 2.1×, bug-fix PRs 2.6×, and maintenance PRs (dependency updates, tests, documentation, cleanup) 1.9×, against 1.8× for all PRs. Not skewed toward routine work</td></tr>
+        <tr><th>Working time</th><td>People would just work longer</td><td>Active days rose from 14.1 to 15.2 per month and off-hours activity from 7% to 11%, but extra days account for at most a fifth of the gain</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>PR types were classified from titles and similar fields; 33% of PRs could not be classified. AI tools write titles in a more uniform format, so ease of classification may also play a part.</li>
+    <li>The authors say the checks are “evidence against metric gaming,” but they “do not show the value of the added code.”</li>
+  </ul>
+
+  <h3>What the AI tools cost</h3>
+  <figure class="chart" aria-labelledby="ch-cost">
+    <p class="chart-title" id="ch-cost">How much each rose from July 2025 to April 2026</p>
+    <p class="chart-sub">1× = no change (dashed line).</p>
+    <ul class="bars" style="--max: 21; --at: 1">
+      <li class="main" title="Claude Code spend per developer-month: about 20×"><span class="bar-label">Claude Code spend per developer-month<small>$42 to $856</small></span><span class="bar-track"><span class="bar" style="--to: 20"></span><span class="ref"></span></span><span class="bar-val">~20×</span></li>
+      <li title="PRs per developer: about 1.7×"><span class="bar-label">PRs per developer</span><span class="bar-track"><span class="bar" style="--to: 1.7"></span><span class="ref"></span></span><span class="bar-val">~1.7×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's text (Section IV-A).</figcaption>
+  </figure>
+  <p>Tool spend per PR rose more than tenfold. This is a lower bound: it leaves out Cursor spend and the time people spent writing and reviewing.</p>
+</section>
+
+<section id="who">
+  <h2><span class="num">4</span>Differences by people, code, and models (Q2)</h2>
+  <div class="key">
+    <p>Across the engineering tiers, differences in the gain were not significant; only managers gained much more. Newer repositories gained a lot, older ones barely at all. The effect of each AI model generation could not be separated.</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-who">
+    <p class="chart-title" id="ch-who">Rise in PRs per developer after starting to use AI</p>
+    <p class="chart-sub">Striped bars are not statistically clear.</p>
+    <ul class="bars" style="--max: 90">
+      <li class="group">Seniority tier (the paper's names)</li>
+      <li title="IC: +27% (163 developers)"><span class="bar-label">IC (individual contributor)<small>163 developers</small></span><span class="bar-track"><span class="bar" style="--to: 27"></span></span><span class="bar-val">+27%</span></li>
+      <li title="Senior: +42% (110 developers)"><span class="bar-label">Senior<small>110 developers</small></span><span class="bar-track"><span class="bar" style="--to: 42"></span></span><span class="bar-val">+42%</span></li>
+      <li title="Staff: +39% (55 developers)"><span class="bar-label">Staff<small>55 developers</small></span><span class="bar-track"><span class="bar" style="--to: 39"></span></span><span class="bar-val">+39%</span></li>
+      <li class="weak" title="Principal: +38% (16 developers; imprecise)"><span class="bar-label">Principal<small>16 developers; imprecise</small></span><span class="bar-track"><span class="bar" style="--to: 38"></span></span><span class="bar-val">+38%</span></li>
+      <li class="main" title="Management: +86% (42 developers)"><span class="bar-label">Management<small>42 developers</small></span><span class="bar-track"><span class="bar" style="--to: 86"></span></span><span class="bar-val">+86%</span></li>
+      <li class="group">When the repository was created</li>
+      <li title="Repositories created since 2022: +44%"><span class="bar-label">2022 or later</span><span class="bar-track"><span class="bar" style="--to: 44"></span></span><span class="bar-val">+44%</span></li>
+      <li class="weak" title="Repositories created before 2022: +12% (not significant)"><span class="bar-label">Before 2022<small>not significant</small></span><span class="bar-track"><span class="bar" style="--to: 12"></span></span><span class="bar-val">+12%</span></li>
+    </ul>
+    <figcaption>Redrawn from the paper's Table III. The paper groups the HR role titles into these five tiers; it does not describe what each tier means.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Seniority:</b> across the four engineering tiers from IC to Principal, differences in the gain were not statistically significant. Only Management stood out; the authors read this as AI letting managers who had shipped little code contribute more. The discussion also lists “managers returning to hands-on coding” as one of the new ways of working.</li>
+    <li><b>Code age:</b> newer repositories gained a lot and older ones barely at all, and the difference itself is significant. Newer repositories also use a more modern technology stack, so code age cannot be fully separated from technology.</li>
+    <li><b>Model generations:</b> the gain could not be attributed to particular model releases. Each release coincided with a steep company-wide rise in AI use. A fake release in August 2025, a month with no launch, showed as large an effect as the real ones — what looked like model effects cannot be told apart from the calendar trend.</li>
+  </ul>
+</section>
+
+<section id="review">
+  <h2><span class="num">5</span>How AI review replaced part of human review (Q3)</h2>
+  <div class="key">
+    <p>PR volume grew and human review could not keep up. The company closed the gap partly with more human review, but mostly by moving review to AI. As a result, AI review replaced part of human review, and more of the remaining human review became approval without comment.</p>
+  </div>
+
+  <h3>PR volume versus the number of reviewers</h3>
+  <figure class="chart" aria-labelledby="ch-load">
+    <p class="chart-title" id="ch-load">End of the window, relative to before the mandate (early 2025)</p>
+    <p class="chart-sub">1× = no change (dashed line).</p>
+    <ul class="bars" style="--max: 3.4; --at: 1">
+      <li title="Company-wide PR volume: 3.1×"><span class="bar-label">Company-wide PR volume</span><span class="bar-track"><span class="bar" style="--to: 3.1"></span><span class="ref"></span></span><span class="bar-val">3.1×</span></li>
+      <li title="Number of reviewers: 1.5×"><span class="bar-label">Number of reviewers</span><span class="bar-track"><span class="bar" style="--to: 1.5"></span><span class="ref"></span></span><span class="bar-val">1.5×</span></li>
+      <li class="main" title="Load per reviewer: about 2.0×"><span class="bar-label">Load per reviewer</span><span class="bar-track"><span class="bar" style="--to: 2.0"></span><span class="ref"></span></span><span class="bar-val">about 2.0×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's text (Section IV-C).</figcaption>
+  </figure>
+
+  <h3>Who reviewed: people or AI</h3>
+  <figure class="chart" aria-labelledby="db-cap">
+    <p class="chart-title" id="db-cap">Share of PRs that received each kind of review</p>
+    <p class="chart-sub">Start versus end of the window. The paper does not give exact months (values from the start and end of the paper's Figures 6 and 10).</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw before"></i>Before</li>
+      <li><i class="sw after"></i>After</li>
+      <li><i class="sw human"></i>Human review</li>
+      <li><i class="sw ai"></i>AI review</li>
+    </ul>
+    <div class="db-row" title="PRs with at least one human review: 89% to 68%">
+      <div class="db-head"><span>At least one human review</span><span class="db-vals">89% → 68%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:68%;width:21%"></span><span class="db-dot before" style="left:89%"></span><span class="db-dot after" style="left:68%"></span></div>
+    </div>
+    <div class="db-row ai" title="PRs with an AI review: about 19% to about 84%">
+      <div class="db-head"><span>An AI review</span><span class="db-vals">~19% → ~84%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:19%;width:65%"></span><span class="db-dot before" style="left:19%"></span><span class="db-dot after" style="left:84%"></span></div>
+    </div>
+    <div class="db-row" title="PRs with a human-written review comment: about 39% to about 21%">
+      <div class="db-head"><span>A human review with a comment</span><span class="db-vals">~39% → ~21%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:21%;width:18%"></span><span class="db-dot before" style="left:39%"></span><span class="db-dot after" style="left:21%"></span></div>
+    </div>
+    <div class="db-row" title="PRs with only a silent human approval: about 50%, unchanged">
+      <div class="db-head"><span>Only a silent human approval</span><span class="db-vals">~50%, unchanged</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-dot before" style="left:50%"></span><span class="db-dot after" style="left:50%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0%</span><span style="left:50%">50%</span><span style="left:100%">100%</span></div>
+    <figcaption>Redrawn from the numbers in the paper's text and Appendix C. The paper's figures are not copied.</figcaption>
+  </figure>
+  <ul>
+    <li>Within months of the mandate, the share of PRs with an AI review overtook the share with a human review.</li>
+    <li>In the paper's words: “Automated review thus replaced part of human review rather than only adding to it.” Even at the end, 68% of PRs still got a human review.</li>
+    <li><b>More of the remaining human review became approval without comment.</b> The median reviewer's commented reviews stayed flat (about 3 per month) while their silent approvals roughly doubled, so most of the added load went to approvals without comment.</li>
+    <li>Late in the window, the company began routing PRs through AI review and auto-approval.</li>
+  </ul>
+  <p class="t-note">A missing comment does not prove the reviewer did not read the code. The paper only splits reviews by whether they include a human-written comment.</p>
+
+  <h3>AI-authored PRs took longer in human review</h3>
+  <p>The paper compared post-mandate PRs by the same author in the same month, controlling for size. Compared with other PRs, AI-authored PRs had:</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Measure</th><th>AI-authored PRs</th></tr></thead>
+      <tbody>
+        <tr><th>Human comments</th><td><b>about 9% more</b></td></tr>
+        <tr><th>Time from first human review to merge</th><td><b>about 20% longer</b></td></tr>
+        <tr><th>Time from first commit to merge</th><td><b>about 22% longer</b></td></tr>
+        <tr><th>Review rounds</th><td>no change</td></tr>
+        <tr><th>Chance of getting a human review</th><td>no lower</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>Comments rose without more review rounds, so the authors read this as more reviewer engagement rather than more rework by the author.</li>
+    <li>They call it “the bottleneck one would expect when AI speeds up authoring while human review capacity stays fixed: work accumulates downstream.”</li>
+    <li>The company applies the AI label, which may reflect complexity that the controls only partly capture, so these comparisons are correlational.</li>
+    <li>Late in the window, PRs routed through AI review and auto-approval waited less for human review, which biases the measured difference toward zero; the authors call their estimate conservative.</li>
+  </ul>
+
+  <h3>How the company kept up with the added PRs</h3>
+  <div class="key">
+    <p>Review did not get faster. The company kept up by sending fewer PRs through human review with comments.</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-lat">
+    <p class="chart-title" id="ch-lat">Time from first commit to merge, for PRs that received a human review with comments</p>
+    <p class="chart-sub">90th percentile (if you line up 100 PRs, the 10th slowest).</p>
+    <ul class="bars" style="--max: 120">
+      <li title="Before the ramp: about 63 hours"><span class="bar-label">Before the ramp</span><span class="bar-track"><span class="bar" style="--to: 63"></span></span><span class="bar-val">~63 h</span></li>
+      <li class="main" title="At its peak: about 114 hours"><span class="bar-label">At its peak</span><span class="bar-track"><span class="bar" style="--to: 114"></span></span><span class="bar-val">~114 h</span></li>
+      <li title="In 2026: about 73 hours"><span class="bar-label">In 2026</span><span class="bar-track"><span class="bar" style="--to: 73"></span></span><span class="bar-val">~73 h</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Appendix C-D. The paper does not give the month of the peak.</figcaption>
+  </figure>
+  <ul>
+    <li>For all PRs, the same 90th-percentile time grew through 2025, peaked near 66 hours, and came down in early 2026.</li>
+    <li>It came down because the share of merged PRs that went through a human review with comments fell from a pre-mandate peak of about 48% to about 21%. PRs that still went through such review never got back to their earlier speed, as the chart shows.</li>
+  </ul>
+  <blockquote>
+    <p>“The company kept pace by routing work around human review rather than by reviewing faster.”</p>
+  </blockquote>
+</section>
+
+<section id="quality">
+  <h2><span class="num">6</span>Did quality hold up? (Q3)</h2>
+  <div class="key">
+    <p>The short-horizon proxies (merge rate, reverts, quick follow-up fixes) did not get worse. But the authors say that because defects, incidents, and maintainability were not measured, quality costs cannot be ruled out.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Quality proxy</th><th>Result</th><th>Caveat</th></tr></thead>
+      <tbody>
+        <tr><th>Merge rate</th><td>Fell only slightly, from 91% to 85%. AI-authored PRs merged at the same rate as other PRs, even though they were about 56% larger</td><td>Once review becomes lenient or automated, the gate itself has changed, so the merge rate says little about quality</td></tr>
+        <tr><th>Reverts</th><td>The share of PRs that are reverts declined slightly company-wide, and a developer's revert share did not rise with adoption. Revert PRs per developer rose 1.4×, more slowly than all PRs (1.8×)</td><td>As PR volume grows, revert shares are diluted</td></tr>
+        <tr><th>Quick follow-up fixes</th><td>Within 7 days after an AI-authored PR merged, its author opened a bug-fix PR in the same repository 5.3 points more often than after other PRs — but also a feature PR 4.8 points more often. The fix-minus-feature difference was 0.3 points at 7 days and 0.6 points at 14 days, not significant. Authors were busier, not disproportionately busy fixing</td><td>The link between a PR and a later fix is coarse, so the authors report this only as suggestive</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>The company applies the AI label, and it may favor safer changes.</li>
+    <li>The authors summarize this as “evidence against a sudden drop in quality,” and also write: “we do not find any evidence of a sudden drop in quality, but we cannot rule out quality costs.”</li>
+  </ul>
+
+  <h3>Costs that may build up unseen</h3>
+  <p>The authors write that this shift — less human review, partly replaced by AI review — describes a mechanism through which quality costs reported by other studies could accumulate unobserved. They list:</p>
+  <ul>
+    <li>rising complexity and churn</li>
+    <li>diluted ownership of the code</li>
+    <li>cognitive and intent debt: losing understanding of the code and of why it was written that way</li>
+  </ul>
+  <p>The reason: people examine less of the code, and the AI reviewers that replace them are only beginning to be evaluated.</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>The company, and how the effect of AI was measured</h2>
+
+  <h3>The company</h3>
+  <ul>
+    <li>A mid-sized B2B software company (anonymized) that sells a software-as-a-service platform businesses use to support their customers. Its R&amp;D organization has several hundred engineers.</li>
+    <li>The code combines a long-lived Ruby core, first written in 2012, with newer services in TypeScript, Python, and Go. Between 2024 and 2026 it grew from about 500 to over 1,000 repositories, and from about 4 to 6.5 million lines.</li>
+    <li>The company is AI-forward and provides commercial AI coding tools with no per-seat limits or token budgets. The authors call it an unusually favorable site and say the results are better read as an upper bound than as an industry average.</li>
+    <li>The company only shared data; it did not take part in the analysis or writing.</li>
+  </ul>
+
+  <h3>The data</h3>
+  <ul>
+    <li>January 2024 to April 2026 (28 months): 802 developers, 196,212 PRs (excluding bots), and 364 active repositories. Effect estimates use the 564 developers with at least three active months (451 who adopted AI and 113 who never did).</li>
+    <li>Usage logs from Cursor and Claude Code show who used AI, when, and how much. They do not record which model anyone used.</li>
+    <li>“AI-authored PRs” are counted by the company's own created-by-ai label, on 30.2% of all PRs. The researchers do not know how the label is applied, so comparisons using it are treated as correlational.</li>
+  </ul>
+
+  <h3>Terms used on this page</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Term</th><th>Meaning in this paper</th></tr></thead>
+      <tbody>
+        <tr><th>PR (pull request)</th><td>A proposed code change, submitted before it goes into the main branch; this is where people or AI review it</td></tr>
+        <tr><th>PRs per developer</th><td>PRs a developer authors in a month. The mandate's metric counts only merged ones</td></tr>
+        <tr><th>Merge</th><td>Putting a reviewed change into the main branch</td></tr>
+        <tr><th>Revert</th><td>A change that undoes an earlier change; many reverts suggest problems with what was merged</td></tr>
+        <tr><th>AI review</th><td>Review by AI review bots; the paper calls it automated review</td></tr>
+        <tr><th>Review with a comment</th><td>A human review that includes a written comment; the paper calls it substantive review</td></tr>
+        <tr><th>Silent approval</th><td>A human approval with nothing written</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>How the effect of AI was measured</h3>
+  <div class="note note-omit">
+    <p><b>This part is simplified.</b> The paper uses several regression models and estimators.</p>
+  </div>
+  <ul>
+    <li><b>Do not compare AI users with non-users directly.</b> Early adopters already had much higher PR counts before adopting (nearly two standard deviations above the rest). A direct comparison would mistake that existing gap for the effect of AI.</li>
+    <li><b>Compare each developer with themselves before AI.</b> Then subtract the change among developers whose AI use did not change in the same months, to remove company-wide shifts (the mandate, model releases, holidays, and so on). This is a difference-in-differences design; because developers adopted at different times, it is called a staggered difference-in-differences design.</li>
+    <li><b>Align on each developer's own adoption month, not on the mandate date.</b> Aligning on the mandate would mix developers at different stages of adoption and blur the effect.</li>
+    <li><b>Check the assumption.</b> The design assumes that, without AI, adopters would have moved like everyone else. Flat trends in the months before adoption support this, but cannot prove it.</li>
+    <li><b>Re-estimate with several methods.</b> The size of the adoption effect ranged from +0.13 to +0.35 across estimators. It was smaller under the two estimators that compare adopters only with developers who had not yet adopted, and one of those was not significant. The authors explain that these estimators attribute the steep company-wide rise of early 2026 to the calendar rather than to AI, which understates an effect that grows with use. They conclude that the direction is clear but the size is uncertain.</li>
+  </ul>
+  <p>An analogy: to judge a diet, do not compare the weight of people who dieted with people who did not. Take each dieter's change, and subtract the change in non-dieters over the same period (seasonal ups and downs, for example).</p>
+  <p>Reading the numbers: many of the paper's numbers are log-point differences. +0.54 means about 1.72×; +0.11 means about 1.12× (about 12% more).</p>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>The authors' recommendations and the study's limits</h2>
+
+  <h3>The authors' recommendations</h3>
+  <ul>
+    <li><b>Treat a mandate as the start of an organizational transformation.</b> The gain took time and came with new ways of working — managers returning to hands-on coding, and a review process rebuilt around AI review bots and auto-approval. The authors compare this with the IT productivity paradox of the 1970s to 1990s, when IT paid off only after a lag and alongside reorganized workflows and new skills. Plan over several quarters, and invest in intensity of use before demanding the target.</li>
+    <li><b>Pair the target metric with other signals.</b> A count that becomes a target stops measuring what it was meant to measure (Goodhart's law).</li>
+    <li><b>Human attention and judgment become the bottleneck.</b> At this company, review moved to AI, reviews with comments fell, and AI-authored PRs spent longer in human review — and the merged-PR metric showed none of it. So plan review capacity as carefully as authoring capacity: set targets for review coverage and depth alongside throughput, decide in advance which PRs may be approved without a human review, and monitor which code humans no longer review.</li>
+    <li><b>Open questions:</b> how to allocate scarce human attention across AI output, and how much a human must understand before code ships.</li>
+  </ul>
+  <blockquote>
+    <p>“Human attention and judgment become the new bottleneck of the AI era.”</p>
+  </blockquote>
+
+  <h3>The study's limits (as the authors state them)</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>AI use was not randomly assigned</th><td>Developers chose when and how much to use AI. A causal reading depends on the assumption in <a href="#study">7</a> (without AI, adopters would have moved like everyone else)</td></tr>
+        <tr><th>The size of the effect is uncertain</th><td>It ranges from +0.13 to +0.35 across estimators. “The more you use it, the more you gain” is an association, because productive developers accumulate use faster</td></tr>
+        <tr><th>Model-generation effects are not identified</th><td>Each release coincides with the rise in usage</td></tr>
+        <tr><th>PR counts are one side of productivity</th><td>They leave out satisfaction, communication, efficiency, and work outside the repositories (design, meetings, mentoring)</td></tr>
+        <tr><th>Quality proxies are short-horizon only</th><td>They miss defects, incidents, and maintainability; quality costs cannot be ruled out</td></tr>
+        <tr><th>One company</th><td>AI-forward, uncapped tool budgets, many new repositories, and a public target. Better read as an upper bound than an industry average</td></tr>
+        <tr><th>What comes next is unknown</th><td>Whether the gain levels off and the review shift persists needs longer panels and replication elsewhere</td></tr>
+        <tr><th>The company's data is not public</th><td>The analysis code is public (CMUSTRUDEL/2x-mandate on GitHub)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>How the shape of trust changed (my reading)</h2>
+  <div class="note note-view">
+    <p><b>This section is my reading, not the paper's claim.</b> The paper talks about review and about human attention and judgment; it does not frame its findings in terms of trust.</p>
+  </div>
+  <ul>
+    <li><b>This is real company data that bears directly on this theme's question: can the trust that came from people reading code move to another basis?</b> As continued AI use spread, part of the job of checking code moved from people reading it to AI review and silent human approval. Short-horizon quality proxies did not get worse. The long run is unknown.</li>
+    <li><b>The move was triggered by review falling behind the volume of PRs.</b> In the authors' words, the company routed work “around human review.” Their advice to decide in advance which PRs may be approved without a human review, and to monitor code that humans no longer review, reads to me as: decide where trust is secured before the fact, not after.</li>
+    <li><b>The success metric did not show the change in trust.</b> “More PRs” and “merged” say nothing about who checked the code. It is the same as saying that “it runs” is not, by itself, a reason to trust code.</li>
+    <li><b>The paper feels unresolved because it shows a risky mechanism but not harm.</b> The abstract ends on “strong evidence” that AI raises PR throughput, while the title and conclusion stress that human review cannot keep up. Neither quality costs nor the value of the added code was measured. Pushed to its core, the paper's answer is: it is not known yet, so measure where humans are no longer looking.</li>
+    <li><b>A caution for people building alone with AI.</b> This is about an R&amp;D organization of several hundred engineers, which is a different situation. What carries over directly is: when you can build faster, checking falls behind; and what is not checked does not show up in the numbers.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2607.01904v3">He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu, “AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate”</a> arXiv:2607.01904v3; v1 2026-07-02, v2 2026-10-27, v3 2026-11-10; not peer reviewed; license <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">Affiliations: Carnegie Mellon University (He, Agarwal, Vasilescu), Stanford University (Denisov-Blanch, Koyejo), independent researcher (Azaletskiy). He is now at Microsoft. This page is based on the HTML version of v3, main text and Appendices A–F</span></li>
+    <li><a href="https://github.com/CMUSTRUDEL/2x-mandate">CMUSTRUDEL/2x-mandate</a><span class="use">The analysis code, as given in the paper. I did not open it when writing this page</span></li>
+    <li><a href="../../../../topics/ai-trust/data/2x-mandate.json">topics/ai-trust/data/2x-mandate.json</a><span class="use">The numbers used in this page's charts and tables, with where each appears in the paper (labels in Japanese)</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>Numbers are taken from the main text, tables, figure captions, and appendices of v3. Earlier versions may differ.</li>
+    <li>On 2026-11-16, I re-read the main text and appendices and checked every statement on the Japanese page against the paper. This English page follows that checked Japanese page. Version dates and the license were checked on the paper's arXiv page.</li>
+    <li>PRs per developer in April 2026 are 44.3 in the main text and 43.4 in Supplementary Table VIII and the table in Appendix E-C. This page uses the main text's 44.3.</li>
+    <li>The effect range “+0.13 to +0.35” is the main text's wording. The table in Appendix D-D also shows +0.369 (the estimate without never-adopters), which falls slightly outside that range.</li>
+    <li>All charts are redrawn from the numbers; none of the paper's figures are copied. The “before” and “after” points for review shares are the ends of the paper's figures, since the text does not give months.</li>
+    <li>Multipliers and percentages are the paper's log-point estimates converted the same way the paper does.</li>
+  </ul>
+  <p class="stamp">The text and charts on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Quotations and numbers from the paper are under the paper's license (CC BY 4.0).</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

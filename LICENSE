@@ -1,0 +1,26 @@
+study-notes のライセンス
+
+このリポジトリにある自作の文章・図・ページは、クリエイティブ・コモンズ 表示 4.0 国際
+（CC BY 4.0）で公開します。出典（作成者 microtaro と元のページ）を示せば、
+改変や再配布を含めて自由に使えます。
+
+  概要：https://creativecommons.org/licenses/by/4.0/deed.ja
+  全文：https://creativecommons.org/licenses/by/4.0/legalcode.ja
+
+コード（assets/ にある CSS と JavaScript）は MIT ライセンスで公開します。
+全文は LICENSE-CODE にあります。
+
+論文から引用した文・数値は、それぞれの論文のライセンスによります。
+各ページの「出典」に、論文の版とライセンスを記載しています。
+
+---
+
+The original text, figures, and pages in this repository are licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
+
+The code (CSS and JavaScript in assets/) is licensed under the MIT License.
+See LICENSE-CODE for the full text.
+
+Quotations and numbers taken from papers remain under the license of each
+paper, as listed in the "Sources" section of each page.

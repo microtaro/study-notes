@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI が書く速さに、人のレビューが追いつかない（論文の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="2x-mandate.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/papers/2x-mandate.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#over-time"><span class="n">2</span>使い続けると、何が変わっていったか</a></li>
+    <li><a href="#throughput"><span class="n">3</span>変更の数は本当に増えたのか（Q1）</a></li>
+    <li><a href="#who"><span class="n">4</span>人・コード・モデルによる違い（Q2）</a></li>
+    <li><a href="#review"><span class="n">5</span>人のレビューは、どう AI のレビューに置き換わったか（Q3）</a></li>
+    <li><a href="#quality"><span class="n">6</span>品質は大丈夫だったのか（Q3）</a></li>
+    <li><a href="#study"><span class="n">7</span>調べた会社と、AI の効果の確かめ方</a></li>
+    <li><a href="#advice"><span class="n">8</span>著者の提言と、この研究の限界</a></li>
+    <li><a href="#reading"><span class="n">9</span>信頼の形はどう変わったか（私の読み方）</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/papers/2x-mandate.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">論文の解説</p>
+  <h1>AI が書く速さに、人のレビューが追いつかない</h1>
+  <p class="src"><b>元の論文</b>He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu「AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate」arXiv:2607.01904 第 3 版（2026-11-10）、未査読、CC BY 4.0
+    <span class="links"><a href="https://arxiv.org/abs/2607.01904v3">arXiv のページ</a><a href="https://arxiv.org/html/2607.01904v3">HTML 版で読む</a><a href="https://arxiv.org/pdf/2607.01904v3">PDF</a></span></p>
+  <p class="lead">ある会社の CTO が「AI で、12 か月のうちに開発の生産性を 2 倍にする」と決め、物差しを「1 人が 1 か月に取り込んだ変更の数」にしました。その会社の 2 年あまりの記録を、Carnegie Mellon 大学と Stanford 大学などの研究者が調べた論文の解説です。</p>
+  <p class="stamp">2026-11-13 作成。arXiv の第 3 版（2026-11-10）の本文と付録を読んで書きました。数字は第 3 版のものです。論文が言っていることと、私の読み方は分けて書いています。<br>2026-11-16 更新：公開に合わせて、構成を、冒頭の「問いと答え」から読める順に組み替え、図と表を足しました。原文と照合し直し、「2 倍」の読み方（AI の効果として著者が主に使う推定は 1.46 倍）と、人のレビューが「一部」置き換わったことを、原文どおりに直しました。公開していないページへの参照を外し、出典に版とライセンスを足しました。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>この論文は、3 つの問いを立てています。問いごとに、答えと、そのもとになった結果をまとめます。ここだけ読めば、論文の要点が分かるようにしています。灰色の小さな字は、それぞれを何から読み取ったかです。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>変更の数は、どれだけ、どのくらいの速さで増えたか。何が変更の数を増やしたか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>AI を使い続けたことで増えた。「2 倍」の指示だけでは増えず、AI の効果を厳しめに見ると約 1.5 倍。目標の 2 倍に届いたのは、指示から 10 か月後。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>使い始めただけでは少ししか伸びない。使い続けるほど伸びる。</b>
+          <span class="why">1 人あたりの変更の数は、AI を使い始めた時点で約 12% 増え、使い始めて 9 か月たつと約 2 倍（1.99 倍）になりました。よく使う人ほど大きく伸びました。</span>
+          <span class="how">一人ひとりの、AI を使う前と後の比較から</span>
+        </li>
+        <li>
+          <b>「2 倍にしろ」という指示だけでは、変更の数は増えなかった。</b>
+          <span class="why">指示の日の前後の変化は、約 1 割と小さいものでした。指示は AI を使い始めるきっかけにはなりましたが、増えたのは一人ひとりが使い始めてからです。伸びた分の大半は、使い続けたことによるものでした。</span>
+          <span class="how">指示の日の前後と、本人が使い始めた月の前後を、分けて比べた結果から</span>
+        </li>
+        <li>
+          <b>AI の効果を厳しめに見ると、2 倍ではなく約 1.5 倍。</b>
+          <span class="why">1 人あたりの変更の数そのものは 2.09 倍になりましたが、この数字には会社全体の時期の動きも入っています。それを差し引いた、著者が主に使う推定は 1.46 倍です。</span>
+          <span class="how">同じ月のほかの人の変化を差し引く比べ方から</span>
+        </li>
+        <li>
+          <b>数字に合わせただけではなく、実際に作業が増えた。</b>
+          <span class="why">変更 1 件は大きくなり（中央値 35 行 → 61 行）、中身も決まりきった作業に偏っていませんでした。長く働いた分で説明できるのは、増えた分の 5 分の 1 までです。ただし、増えたコードが役に立ったかは測っていません。</span>
+          <span class="how">著者の 4 つの検査から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#over-time">2</a>（使い続けると、何が変わっていったか）、<a href="#throughput">3</a>（変更の数）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>変更の数の増え方は、人、コード、AI モデルの世代によって違うか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>技術者の段階の間では、はっきりした違いはない。管理職と、新しいリポジトリで大きく伸びた。AI モデルの世代ごとの効果は、分けられなかった。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>管理職が、AI でまたコードを書くようになった（著者の読み）。</b>
+          <span class="why">AI を使い始めたあとの伸びは、管理職がいちばん大きく（+86%）なりました。著者は、あまりコードを書いていなかった管理職が、AI で書くようになったと読んでいます。技術者の段階の間（+27%〜+42%）では、差ははっきりしませんでした。</span>
+          <span class="how">肩書きの段階ごとに、AI を使う前と後を比べた結果と、著者の読みから</span>
+        </li>
+        <li>
+          <b>新しいリポジトリでは大きく伸び、古いリポジトリではほとんど伸びなかった。</b>
+          <span class="why">2022 年以降に作ったリポジトリでは +44%、それより前のリポジトリでは +12%（はっきりした差とは言えない）でした。新しいリポジトリは使っている技術も新しいので、古さと技術の違いは分けられません。</span>
+          <span class="how">リポジトリを作った時期ごとに、AI を使う前と後を比べた結果から</span>
+        </li>
+        <li>
+          <b>どの AI モデルが変更の数を増やしたかは、分けられなかった。</b>
+          <span class="why">新しいモデルが出た月は、会社全体で AI を使う量が急に増えた時期と重なっていました。モデルが出ていない月を、出た月とみなして試しても、同じくらいの効果が出ました。</span>
+          <span class="how">モデルの発表の月で区切った比較と、発表のない月での試しから</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#who">4</a>（人・コード・モデルによる違い）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>増えた変更を、組織はどう受け止めたか。レビューと品質にどんな負担がかかったか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>増えた分の負担はレビューにかかった。会社は人のレビューの一部を AI に回して追いつき、残った人のレビューも、承認するだけのものが増えた。短い期間の品質の目安は悪くならなかったが、長い目で見て大丈夫かは分からない。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>書く量が増えると、レビューが追いつかなくなる。</b>
+          <span class="why">会社全体の変更の数は 3.1 倍になったのに、レビューする人は 1.5 倍にしか増えず、1 人あたりのレビューの量は約 2 倍になりました。</span>
+          <span class="how">会社全体の、月ごとの記録の変化から</span>
+        </li>
+        <li>
+          <b>レビューは AI に移り、人のレビューは承認するだけのものが増えた。</b>
+          <span class="why">AI のレビューを受けた変更は約 19% から約 84% に増え、人のレビューを受けた変更は 89% から 68% に減りました。人がコメントを書いたレビューのある変更も約 39% から約 21% に減り、増えたレビューの大半は、何も書かずに承認するだけのものでした。人のレビューがなくなったわけではありません。</span>
+          <span class="how">会社全体の、月ごとの記録の変化から。原因を推定するモデルにはかけず、変化をそのまま示したものです</span>
+        </li>
+        <li>
+          <b>品質がすぐに落ちた様子はない。ただ、長い目で見て大丈夫かは分からない。</b>
+          <span class="why">取り消しや、取り込んだすぐあとの直しは増えませんでした。欠陥、障害、保守のしやすさは測れていません。</span>
+          <span class="how">短い期間の目安の変化から</span>
+        </li>
+        <li>
+          <b>変更の数だけを見ていると、人が見るコードが減ったことに気づかない。</b>
+          <span class="why">成功の物差し（取り込まれた変更の数）は伸びを記録しましたが、誰がレビューしているかの変化は映しませんでした。</span>
+          <span class="how">論文のまとめから</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#review">5</a>（レビュー）、<a href="#quality">6</a>（品質）、<a href="#advice">8</a>（提言）</p>
+    </div>
+  </div>
+
+  <h3>3 つの答えから、著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（論文の最後の節）</p>
+      <p class="claim">組織の AI 化は、号令だけでは進まない。一人ひとりが AI を使い込むことと、レビューのやり方が変わることを通して進む。そして、人の注意と判断が、新しいボトルネック（全体の速さを決めてしまう、いちばん詰まる所）になる。</p>
+      <p class="en">“organizational AI transformation unfolds through accumulated use and shifts in review practices rather than through the mandate alone. Human attention and judgment become the new bottleneck of the AI era.”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">だから著者は、次のことを勧めています</p>
+      <ul class="recs">
+        <li><b>指示は、組織を変える取り組みの始まりとして扱う。</b>効果は、一人ひとりが使い込むにつれて、時間をかけて出てきました。数四半期かけて計画し、目標を求める前に、使い込むことに投資する。</li>
+        <li><b>目標の数字には、ほかの指標も並べて見る。</b>数えるものが目標になると、測りたかったものを測らなくなる（グッドハートの法則）。</li>
+        <li><b>レビューできる人手も、書く力と同じように計画する。</b>レビューの範囲と深さにも目標を置き、人のレビューなしで承認してよい変更を前もって決め、人がもう見ていないコードを見張る。</li>
+      </ul>
+      <p class="conclusion-note">著者は、この結果を「条件が良く、十分に時間をかければ、2 倍近くに届く」ことの証拠と読むべきで、「どこでも、すぐに、ただで」起きることの証拠ではない、とも書いています。詳しくは <a href="#advice">8</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>「2 倍」の指示</li>
+    <li>一人ひとりが AI を使い始める</li>
+    <li>使い続けて、変更の数が増える</li>
+    <li>レビューが追いつかない</li>
+    <li>レビューの一部を AI に回す</li>
+    <li>短い期間の品質の目安は変わらない</li>
+  </ol>
+
+  <h3>論文が答えていないこと</h3>
+  <p>次のことは、著者自身が「測れていない」「分からない」と書いています。</p>
+  <ul>
+    <li><b>品質の損があるか：</b>測れたのは、短い期間の目安（取り込まれる割合、取り消し、すぐあとの直し）だけです。欠陥、障害、保守のしやすさは測っていません。</li>
+    <li><b>増えた変更が役に立ったか：</b>増えた変更の価値は測っていません。</li>
+    <li><b>この先も続くか：</b>伸びが頭打ちになるか、レビューの変化が続くかは、もっと長い期間と、ほかの会社での調査が要る、としています。</li>
+  </ul>
+</section>
+
+<section id="over-time">
+  <h2><span class="num">2</span>使い続けると、何が変わっていったか</h2>
+  <div class="key">
+    <p>論文は、変化を 2 つの見方で調べています。一人ひとりについて「AI を使い始めてからの月数」で見ると、使い続けるほど変更の数が伸びました。会社全体について「暦の月」で見ると、AI を使う人が広がるにつれて、レビューが AI に移っていきました。</p>
+  </div>
+  <p>2 つの見方では、分かることの強さが違います。一人ひとりで見た結果は、同じ月のほかの人と比べて、AI の効果を推定したものです。会社全体で見た変化は、記録をそのまま並べたもので、AI を使い続けたことが原因かどうかまでは推定していません。</p>
+
+  <h3>一人ひとりで見る：AI を使い始めてからの月数</h3>
+  <figure class="chart" aria-labelledby="ch-months">
+    <p class="chart-title" id="ch-months">AI を使い始めてからの月数と、1 人あたりの変更の数の伸び</p>
+    <p class="chart-sub">AI を使う前のその人を 1 倍としたときの値。点線は 1 倍（変わらない）。</p>
+    <ul class="bars" style="--max: 2.2; --at: 1">
+      <li title="3 か月：1.51 倍"><span class="bar-label">3 か月</span><span class="bar-track"><span class="bar" style="--to: 1.51"></span><span class="ref"></span></span><span class="bar-val">1.51 倍</span></li>
+      <li title="6 か月：1.55 倍"><span class="bar-label">6 か月</span><span class="bar-track"><span class="bar" style="--to: 1.55"></span><span class="ref"></span></span><span class="bar-val">1.55 倍</span></li>
+      <li class="main" title="9 か月：1.99 倍"><span class="bar-label">9 か月</span><span class="bar-track"><span class="bar" style="--to: 1.99"></span><span class="ref"></span></span><span class="bar-val">1.99 倍</span></li>
+    </ul>
+    <figcaption>論文の本文と付録の図 14（イベントスタディ：使い始めた月の前後を、月ごとに推定する方法）の数値から作った図です。使い始めた時点の伸び（約 12%）は別の推定なので、この図には入れていません。</figcaption>
+  </figure>
+  <ul>
+    <li>AI を使い始めた時点で、1 人あたりの変更の数は約 12% 増えました。そのあとも、使い続けるほど伸びました。</li>
+    <li>よく使う人（使う量が上位 4 分の 1 の人）ほど、大きく伸びました。ただし、よく使うから伸びたのか、伸びる人がよく使ったのかは分からない、と著者は書いています。</li>
+    <li>AI を使い始めたあとの伸びは、管理職がいちばん大きく、著者は「あまりコードを書いていなかった管理職が、AI で書くようになった」と読んでいます（<a href="#who">4</a>）。</li>
+  </ul>
+
+  <h3>会社全体で見る：暦の月</h3>
+  <p>会社の出来事と、レビューの変化を、時間の順に並べます。</p>
+  <ul class="tl-legend" aria-hidden="true">
+    <li><i class="sw mark"></i>記録の始まりと終わり、指示</li>
+    <li><i class="sw ev"></i>AI の道具とモデル</li>
+    <li><i class="sw ai"></i>レビューの変化</li>
+  </ul>
+  <ol class="timeline">
+    <li class="mark"><time datetime="2024-01">2024-01</time><span class="ev">記録の始まり</span></li>
+    <li><span class="when">2025-01〜04</span><span class="ev">比べる基準の時期（指示の前）<small>1 人あたりの変更の数は月 21.2 件</small></span></li>
+    <li><time datetime="2025-02">2025-02</time><span class="ev">AI の道具 Cursor の利用記録が始まる</span></li>
+    <li class="mark"><time datetime="2025-06">2025-06</time><span class="ev">CTO が「AI で、12 か月のうちに開発の生産性を 2 倍にする」と組織にメールで伝える<small>物差しは、1 人が 1 か月に取り込んだ変更の数</small></span></li>
+    <li><time datetime="2025-07">2025-07</time><span class="ev">Claude Code の利用記録が始まる<small>指示のころに入り、すぐに主に使われる道具になった。指示をきっかけに、使い始める人の波が来た</small></span></li>
+    <li class="rv"><span class="when">指示から数か月</span><span class="ev">AI のレビューを受けた変更の割合が、人のレビューを受けた変更の割合を上回る</span></li>
+    <li><time datetime="2025-09">2025-09</time><span class="ev">Sonnet 4.5（Claude Code 2.0 と一緒に）が出る</span></li>
+    <li><time datetime="2025-11">2025-11</time><span class="ev">Opus 4.5 が出る<small>このあと、AI が作った変更の割合がいちばん急に伸びた</small></span></li>
+    <li class="rv"><span class="when">2025 年を通して</span><span class="ev">変更が取り込まれるまでの時間が延びる<small>変更の数が、レビューできる量を上回ったため</small></span></li>
+    <li><time datetime="2026-02">2026-02</time><span class="ev">Opus 4.6 が出る。Cursor が廃止される</span></li>
+    <li class="rv"><span class="when">2026 年初め</span><span class="ev">取り込まれるまでの時間が縮む<small>レビューが速くなったのではなく、人がコメントを書くレビューを通る変更が減ったため（<a href="#review">5</a>）</small></span></li>
+    <li class="rv"><span class="when">期間の終わりごろ</span><span class="ev">会社が、変更を AI のレビューと自動の承認に回し始める<small>社内で作った AI のエージェントも、このころ入った</small></span></li>
+    <li class="mark"><time datetime="2026-04">2026-04</time><span class="ev">記録の終わり<small>1 人あたりの変更の数は月 44.3 件（2.09 倍）。AI が作った変更は約 90%。人のレビューを受けた変更は 68%、AI のレビューを受けた変更は約 84%（期間の終わりごろ）</small></span></li>
+  </ol>
+  <p class="t-note">「指示から数か月」「2025 年を通して」などの時期は、論文の書き方のままです。正確な月は書かれていません。</p>
+
+  <h3>指示の前と、期間の終わりで比べると</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>何を</th><th class="num">前</th><th class="num">後</th><th>読み取り方</th></tr></thead>
+      <tbody>
+        <tr><th>1 人あたりの月の変更の数</th><td class="num">21.2 件</td><td class="num"><b>44.3 件</b></td><td>2.09 倍。会社全体の時期の動きも入る</td></tr>
+        <tr><th>変更 1 件の大きさ（中央値）</th><td class="num">35 行</td><td class="num"><b>61 行</b></td><td>細かく分けて数を増やしたのではない</td></tr>
+        <tr><th>AI が作った変更の割合</th><td class="num">ほぼ 0</td><td class="num"><b>約 90%</b></td><td>会社が付けている印で数えたもの</td></tr>
+        <tr><th>人のレビューを 1 回以上受けた変更</th><td class="num">89%</td><td class="num"><b>68%</b></td><td>減ったが、なくなってはいない</td></tr>
+        <tr><th>AI のレビューを受けた変更</th><td class="num">約 19%</td><td class="num"><b>約 84%</b></td><td>指示から数か月で、人のレビューを上回った</td></tr>
+        <tr><th>人がコメントを書いたレビューのある変更</th><td class="num">約 39%</td><td class="num"><b>約 21%</b></td><td>中身について何か書いた人のレビューが減った</td></tr>
+        <tr><th>人のコメントなしの承認だけの変更</th><td class="num">約 50%</td><td class="num"><b>約 50%</b></td><td>割合は変わらず。変更の数が増えたので、件数は増えた</td></tr>
+        <tr><th>Claude Code の費用（1 人 1 か月）</th><td class="num">42 ドル</td><td class="num"><b>856 ドル</b></td><td>約 20 倍（2025-07 → 2026-04）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">「前」は指示の前の基準の時期（2025 年 1〜4 月）か期間のはじめごろ、「後」は 2026 年 4 月か期間の終わりごろです。レビューの割合の正確な月は、論文に書かれていません。</p>
+</section>
+
+<section id="throughput">
+  <h2><span class="num">3</span>変更の数は本当に増えたのか（Q1）</h2>
+  <div class="key">
+    <p>1 人あたりの変更の数は 2.09 倍になりました。ただし、この数字には会社全体の時期の動きも入っています。AI の効果として著者が主に使う推定は 1.46 倍です。伸びた分の大半は AI を使い続けたことによるもので、指示の日そのものの分はわずかでした。</p>
+  </div>
+
+  <h3>論文に出てくる「何倍」を並べると</h3>
+  <figure class="chart" aria-labelledby="ch-x">
+    <p class="chart-title" id="ch-x">1 人あたりの変更の数が何倍になったか：数え方による違い</p>
+    <p class="chart-sub">点線は 1 倍（変わらない）。濃い棒が、著者が主に使う推定。</p>
+    <ul class="bars" style="--max: 2.2; --at: 1">
+      <li title="1 人あたりの変更の数、そのまま：2.09 倍"><span class="bar-label">1 人あたりの変更の数、そのまま<small>指示の前 → 2026 年 4 月。会社全体の時期の動きも入る</small></span><span class="bar-track"><span class="bar" style="--to: 2.09"></span><span class="ref"></span></span><span class="bar-val">2.09 倍</span></li>
+      <li title="AI を使い始めて 9 か月たった時点の効果：1.99 倍"><span class="bar-label">AI を使い始めて 9 か月たった時点の効果</span><span class="bar-track"><span class="bar" style="--to: 1.99"></span><span class="ref"></span></span><span class="bar-val">1.99 倍</span></li>
+      <li class="main" title="AI の効果の主な推定：1.46 倍"><span class="bar-label">AI の効果の主な推定<small>2026 年 4 月の使い方で。会社全体の月ごとの動きを差し引く</small></span><span class="bar-track"><span class="bar" style="--to: 1.46"></span><span class="ref"></span></span><span class="bar-val">1.46 倍</span></li>
+      <li title="AI を使い始めた時点の伸び：約 1.12 倍"><span class="bar-label">AI を使い始めた時点の伸び</span><span class="bar-track"><span class="bar" style="--to: 1.12"></span><span class="ref"></span></span><span class="bar-val">約 1.12 倍</span></li>
+      <li title="指示の日の前後の変化：約 1.1 倍"><span class="bar-label">指示の日の前後の変化</span><span class="bar-track"><span class="bar" style="--to: 1.10"></span><span class="ref"></span></span><span class="bar-val">約 1.1 倍</span></li>
+    </ul>
+    <figcaption>論文の本文（IV-A）、表 I・II、付録の図 14 の数値から作った図です。倍は、論文の「対数での差」を論文と同じ換算で直したものです。</figcaption>
+  </figure>
+  <ul>
+    <li>「2 倍」は、2.09 倍のことです。これはいちばん素朴な数え方で、AI を使わなかった人にも起きた、会社全体の動きも入っています。</li>
+    <li>著者は、会社全体の月ごとの動きをすべて差し引いた 1.46 倍を、主な推定としています（原文 “We take this more conservative 1.46× as our main estimate.”）。</li>
+    <li>指示の物差しどおり、取り込まれた変更を、変更のない月も含めて数えると 2.31 倍です。期間中ずっといた 246 人だけでも 2.3 倍なので、人の入れ替わりのせいではありません。</li>
+  </ul>
+
+  <h3>伸びた分の内訳：使い続けた分がいちばん大きい</h3>
+  <figure class="chart" aria-labelledby="ch-dec">
+    <p class="chart-title" id="ch-dec">1 人あたりの変更の数の伸びを、3 つに分けると（2026 年 4 月の使い方での値）</p>
+    <p class="chart-sub">単位は論文の「対数での差」。点線が 0（変わらない）。合計 +0.54 は 1.72 倍にあたります。</p>
+    <ul class="bars" style="--min: -0.1; --max: 0.5; --at: 0">
+      <li title="AI を使い始めた時点の伸び：+0.14"><span class="bar-label">AI を使い始めた時点の伸び</span><span class="bar-track"><span class="bar" style="--to: 0.14"></span><span class="ref"></span></span><span class="bar-val">+0.14</span></li>
+      <li class="main" title="使い続けて増えた分：+0.45"><span class="bar-label">使い続けて増えた分</span><span class="bar-track"><span class="bar" style="--to: 0.45"></span><span class="ref"></span></span><span class="bar-val">+0.45</span></li>
+      <li title="指示のあとの、ほかの 2 つで説明できない変化：−0.05"><span class="bar-label">指示のあとの、残りの変化<small>ほかの 2 つで説明できない、指示のあとの会社全体の変化</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.05; --to: 0"></span><span class="ref"></span></span><span class="bar-val">−0.05</span></li>
+    </ul>
+    <figcaption>論文の表 II（基本のモデル）の数値から作った図です。</figcaption>
+  </figure>
+  <p>著者が主に使う、会社全体の月ごとの動きを差し引くモデルでは、合計は +0.38（1.46 倍）です。どちらのモデルでも、使い続けて増えた分がいちばん大きく、指示の分はわずかでした。ただし「使い続けるほど伸びる」は、生産的な人ほど早く使い込むこともあるので、因果ではなく関係として読む、と著者は書いています。</p>
+
+  <h3>実際に作業が増えたのか、目標の数字に合わせただけか</h3>
+  <p>目標の数字が公表されると、作業を増やさずに数字だけを上げることが起きえます。著者は 4 つの点で確かめ、どれも「実際に作業が増えた」ほうを支えた、としています。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>確かめたこと</th><th>数字に合わせただけなら</th><th>実際は</th></tr></thead>
+      <tbody>
+        <tr><th>時期</th><td>指示の直後に、全員で増えるはず</td><td>指示の日の変化は小さく、増えたのは本人が AI を使い始めてから。2 倍になるまで約 9 か月かかった</td></tr>
+        <tr><th>変更の大きさ</th><td>変更を細かく分けて、1 件が小さくなるはず</td><td>1 件の大きさ（中央値）は 35 行から 61 行に増えた。10 行以下の小さな変更は 31% から 22% に減った</td></tr>
+        <tr><th>変更の中身</th><td>決まりきった作業ばかり増えるはず</td><td>2026 年 4 月の使い方で、機能の追加は 2.1 倍、不具合の直しは 2.6 倍、部品の更新・テスト・文書などの手入れは 1.9 倍（全体は 1.8 倍）。決まりきった作業に偏っていない</td></tr>
+        <tr><th>働く時間</th><td>長く働いて増やしたはず</td><td>活動した日は月 14.1 日から 15.2 日に、決まった時間の外の活動は 7% から 11% に増えた。それでも、活動した日の増加で説明できるのは、増えた分の 5 分の 1 まで</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>変更の中身は題名などで分けたもので、33% は分類できませんでした。AI は題名を決まった形で書きやすいので、分類のしやすさの影響も残ります。</li>
+    <li>著者は、どれも「数字のごまかし（metric gaming）」への反証ではあるが、増えたコードがどれだけ役に立ったかは測っていない、と書いています。</li>
+  </ul>
+
+  <h3>AI の道具にかかったお金</h3>
+  <figure class="chart" aria-labelledby="ch-cost">
+    <p class="chart-title" id="ch-cost">2025 年 7 月から 2026 年 4 月までに、何倍になったか</p>
+    <p class="chart-sub">点線は 1 倍（変わらない）。</p>
+    <ul class="bars" style="--max: 21; --at: 1">
+      <li class="main" title="Claude Code の費用（1 人 1 か月）：約 20 倍"><span class="bar-label">Claude Code の費用（1 人 1 か月）<small>42 ドル → 856 ドル</small></span><span class="bar-track"><span class="bar" style="--to: 20"></span><span class="ref"></span></span><span class="bar-val">約 20 倍</span></li>
+      <li title="1 人あたりの変更の数：約 1.7 倍"><span class="bar-label">1 人あたりの変更の数</span><span class="bar-track"><span class="bar" style="--to: 1.7"></span><span class="ref"></span></span><span class="bar-val">約 1.7 倍</span></li>
+    </ul>
+    <figcaption>論文の本文（IV-A）の数値から作った図です。</figcaption>
+  </figure>
+  <p>変更 1 件あたりの道具の費用は、10 倍以上になりました。Cursor の費用と、人の作業とレビューの時間は入っていないので、これは下限です。</p>
+</section>
+
+<section id="who">
+  <h2><span class="num">4</span>人・コード・モデルによる違い（Q2）</h2>
+  <div class="key">
+    <p>技術者の段階の間では、伸び方の差ははっきりしませんでした。管理職だけが大きく伸びました。新しいリポジトリでは大きく伸び、古いリポジトリではほとんど伸びませんでした。AI モデルの世代ごとの効果は、分けられませんでした。</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-who">
+    <p class="chart-title" id="ch-who">AI を使い始めたときの、1 人あたりの変更の数の伸び</p>
+    <p class="chart-sub">しま模様の棒は、統計ではっきりしない値。</p>
+    <ul class="bars" style="--max: 90">
+      <li class="group">肩書きの段階（名前は論文の表記のまま）</li>
+      <li title="IC：+27%（163 人）"><span class="bar-label">IC（individual contributor）<small>163 人</small></span><span class="bar-track"><span class="bar" style="--to: 27"></span></span><span class="bar-val">+27%</span></li>
+      <li title="Senior：+42%（110 人）"><span class="bar-label">Senior<small>110 人</small></span><span class="bar-track"><span class="bar" style="--to: 42"></span></span><span class="bar-val">+42%</span></li>
+      <li title="Staff：+39%（55 人）"><span class="bar-label">Staff<small>55 人</small></span><span class="bar-track"><span class="bar" style="--to: 39"></span></span><span class="bar-val">+39%</span></li>
+      <li class="weak" title="Principal：+38%（16 人。人数が少なく不確か）"><span class="bar-label">Principal<small>16 人。人数が少なく不確か</small></span><span class="bar-track"><span class="bar" style="--to: 38"></span></span><span class="bar-val">+38%</span></li>
+      <li class="main" title="Management（管理職）：+86%（42 人）"><span class="bar-label">Management（管理職）<small>42 人</small></span><span class="bar-track"><span class="bar" style="--to: 86"></span></span><span class="bar-val">+86%</span></li>
+      <li class="group">リポジトリ（コードの置き場所）を作った時期</li>
+      <li title="2022 年以降に作ったリポジトリ：+44%"><span class="bar-label">2022 年以降</span><span class="bar-track"><span class="bar" style="--to: 44"></span></span><span class="bar-val">+44%</span></li>
+      <li class="weak" title="2022 年より前のリポジトリ：+12%（はっきりした差とは言えない）"><span class="bar-label">2022 年より前<small>はっきりした差とは言えない</small></span><span class="bar-track"><span class="bar" style="--to: 12"></span></span><span class="bar-val">+12%</span></li>
+    </ul>
+    <figcaption>論文の表 III の数値から作った図です。論文は、会社の人事記録にある肩書きを、この 5 つの段階（seniority）にまとめて比べています。それぞれの段階が何年目にあたるか、どんな仕事をするかは、論文に書かれていません。</figcaption>
+  </figure>
+  <ul>
+    <li><b>肩書きの段階：</b>IC から Principal までの、技術者の 4 つの段階の間では、伸び方の差は統計ではっきりしませんでした。Management（管理職）だけが大きく、著者は「あまりコードを書いていなかった管理職が、AI で書くようになった」と読んでいます。考察の節でも、新しい働き方の 1 つとして「管理職がまたコードを書くようになった」ことを挙げています。</li>
+    <li><b>コードの古さ：</b>新しいリポジトリで大きく伸び、古いリポジトリではほとんど伸びませんでした。この差そのものは、統計ではっきりしています。ただ、新しいリポジトリは使っている技術も新しいので、古さと技術の違いは分けられません。</li>
+    <li><b>AI モデルの世代：</b>どのモデルが変更の数を増やしたかは、分けられませんでした。新しいモデルが出た月は、会社全体で AI を使う量が急に増えた時期と重なっていました。新しいモデルが出ていない 2025 年 8 月を、出た月とみなして試すと、本物の発表と同じくらいの効果が出ました。モデルの効果に見えたものは、時期の効果と区別できない、ということです。</li>
+  </ul>
+</section>
+
+<section id="review">
+  <h2><span class="num">5</span>人のレビューは、どう AI のレビューに置き換わったか（Q3）</h2>
+  <div class="key">
+    <p>変更の数が増え、人のレビューが追いつかなくなりました。会社は、足りない分の一部を人のレビューを増やして、大半を AI のレビューに回して埋めました。その結果、人のレビューの一部が AI のレビューに置き換わり、残った人のレビューも、コメントを書かずに承認するだけのものが増えました。</p>
+  </div>
+
+  <h3>変更の数とレビューする人の数</h3>
+  <figure class="chart" aria-labelledby="ch-load">
+    <p class="chart-title" id="ch-load">指示の前（2025 年初め）と比べた、期間の終わりの値</p>
+    <p class="chart-sub">点線は 1 倍（変わらない）。</p>
+    <ul class="bars" style="--max: 3.4; --at: 1">
+      <li title="会社全体の変更の数：3.1 倍"><span class="bar-label">会社全体の変更の数</span><span class="bar-track"><span class="bar" style="--to: 3.1"></span><span class="ref"></span></span><span class="bar-val">3.1 倍</span></li>
+      <li title="レビューする人の数：1.5 倍"><span class="bar-label">レビューする人の数</span><span class="bar-track"><span class="bar" style="--to: 1.5"></span><span class="ref"></span></span><span class="bar-val">1.5 倍</span></li>
+      <li class="main" title="レビューする人 1 人あたりの量：約 2.0 倍"><span class="bar-label">レビューする人 1 人あたりの量</span><span class="bar-track"><span class="bar" style="--to: 2.0"></span><span class="ref"></span></span><span class="bar-val">約 2.0 倍</span></li>
+    </ul>
+    <figcaption>論文の本文（IV-C）の数値から作った図です。</figcaption>
+  </figure>
+
+  <h3>人と AI の、どちらがレビューしたか</h3>
+  <figure class="chart" aria-labelledby="db-cap">
+    <p class="chart-title" id="db-cap">変更（PR）のうち、人や AI のレビューを受けた割合</p>
+    <p class="chart-sub">期間のはじめのころと終わりのころ。正確な月は論文に書かれていません（論文の図 6 と図 10 の、期間のはじめと終わりのころの値）。</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw before"></i>前</li>
+      <li><i class="sw after"></i>後</li>
+      <li><i class="sw human"></i>人のレビュー</li>
+      <li><i class="sw ai"></i>AI のレビュー</li>
+    </ul>
+    <div class="db-row" title="人のレビューを 1 回以上受けた変更：89% → 68%">
+      <div class="db-head"><span>人のレビューを 1 回以上受けた</span><span class="db-vals">89% → 68%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:68%;width:21%"></span><span class="db-dot before" style="left:89%"></span><span class="db-dot after" style="left:68%"></span></div>
+    </div>
+    <div class="db-row ai" title="AI のレビューを受けた変更：約 19% → 約 84%">
+      <div class="db-head"><span>AI のレビューを受けた</span><span class="db-vals">約 19% → 約 84%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:19%;width:65%"></span><span class="db-dot before" style="left:19%"></span><span class="db-dot after" style="left:84%"></span></div>
+    </div>
+    <div class="db-row" title="人がコメントを書いたレビューのある変更：約 39% → 約 21%">
+      <div class="db-head"><span>人がコメントを書いたレビューがある</span><span class="db-vals">約 39% → 約 21%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:21%;width:18%"></span><span class="db-dot before" style="left:39%"></span><span class="db-dot after" style="left:21%"></span></div>
+    </div>
+    <div class="db-row" title="人のコメントなしの承認だけの変更：約 50% のまま">
+      <div class="db-head"><span>人のコメントなしの承認だけ</span><span class="db-vals">約 50% のまま</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-dot before" style="left:50%"></span><span class="db-dot after" style="left:50%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0%</span><span style="left:50%">50%</span><span style="left:100%">100%</span></div>
+    <figcaption>論文の本文と付録 C の数値から作り直した図です。論文の図そのものは写していません。</figcaption>
+  </figure>
+  <ul>
+    <li>AI のレビューを受けた変更の割合は、指示から数か月で、人のレビューを受けた変更の割合を上回りました。</li>
+    <li>論文は、AI のレビューが「人のレビューに足されただけでなく、その一部を置き換えた」と書いています（原文 “Automated review thus replaced part of human review rather than only adding to it.”）。人のレビューを受けた変更は、終わりごろも 68% あります。</li>
+    <li><b>残った人のレビューも、コメントを書かずに承認するだけのものが増えました。</b>レビューの量が真ん中くらいの人で見ると、コメントを書いたレビューは月 3 件ほどのままで、コメントなしの承認がおよそ 2 倍になりました。増えたレビューの大半は、コメントなしの承認でした。</li>
+    <li>期間の終わりごろ、会社は変更を AI のレビューと自動の承認に回し始めました。</li>
+  </ul>
+  <p class="t-note">コメントがないからといって、中身を見なかったとまでは言えません。論文も、コメントの有無で分けているだけです。</p>
+
+  <h3>AI が作った変更は、人のレビューで時間がかかった</h3>
+  <p>指示のあとの変更を、同じ人の同じ月のものどうしで、大きさをそろえて比べました。AI が作った変更は、ほかの変更と比べて次のとおりでした。</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>比べたもの</th><th>AI が作った変更</th></tr></thead>
+      <tbody>
+        <tr><th>人のコメントの数</th><td><b>約 9% 多い</b></td></tr>
+        <tr><th>最初の人のレビューから取り込みまでの時間</th><td><b>約 20% 長い</b></td></tr>
+        <tr><th>作り始めから取り込みまでの時間</th><td><b>約 22% 長い</b></td></tr>
+        <tr><th>レビューの往復の回数</th><td>変わらない</td></tr>
+        <tr><th>人のレビューを受ける割合</th><td>低くない</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>著者は、往復の回数が増えずにコメントが増えたので、作った人のやり直しが増えたのではなく、レビューする人がより多く関わった、と読んでいます。</li>
+    <li>そのうえで、「AI で書くのが速くなっても、人がレビューできる量が変わらなければ、仕事が後ろにたまる」と説明しています。</li>
+    <li>AI の印は会社が付けたもので、測れていない難しさを映しているかもしれません。そのため、この比較は「関係がある」までしか言えません。</li>
+    <li>期間の終わりごろ、AI のレビューと自動の承認に回した変更は、人のレビューの待ち時間が短くなりました。そのぶん、この差は小さめに出ている、と著者は書いています。</li>
+  </ul>
+
+  <h3>会社全体では、増えた変更のレビューにどう追いついたか</h3>
+  <div class="key">
+    <p>レビューが速くなったのではありません。人がコメントを書くレビューを通る変更を減らして、追いつきました。</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-lat">
+    <p class="chart-title" id="ch-lat">人がコメントを書くレビューを通った変更の、作り始めから取り込みまでの時間</p>
+    <p class="chart-sub">遅いほうから 1 割の所の時間（100 件並べて、遅いほうから 10 番目くらいの変更の時間）。</p>
+    <ul class="bars" style="--max: 120">
+      <li title="変更が増える前：約 63 時間"><span class="bar-label">変更が増える前</span><span class="bar-track"><span class="bar" style="--to: 63"></span></span><span class="bar-val">約 63 時間</span></li>
+      <li class="main" title="いちばん長いとき：約 114 時間"><span class="bar-label">いちばん長いとき</span><span class="bar-track"><span class="bar" style="--to: 114"></span></span><span class="bar-val">約 114 時間</span></li>
+      <li title="2026 年：約 73 時間"><span class="bar-label">2026 年</span><span class="bar-track"><span class="bar" style="--to: 73"></span></span><span class="bar-val">約 73 時間</span></li>
+    </ul>
+    <figcaption>論文の付録 C-D の数値から作った図です。「いちばん長いとき」の月は論文に書かれていません。</figcaption>
+  </figure>
+  <ul>
+    <li>変更全体の時間（同じく遅いほうから 1 割の所）は、2025 年を通して延び、約 66 時間でいちばん長くなったあと、2026 年初めに縮みました。</li>
+    <li>縮んだのは、人がコメントを書くレビューを通る変更の割合が、指示の前のいちばん多い時期の約 48% から約 21% に減ったからです。そのレビューを通った変更だけを見ると、上の図のとおり、元の速さに戻っていません。</li>
+  </ul>
+  <blockquote>
+    <p>会社は、レビューを速くしたのではなく、人のレビューを迂回させることで追いついた。</p>
+    <p class="en">“The company kept pace by routing work around human review rather than by reviewing faster.”</p>
+  </blockquote>
+</section>
+
+<section id="quality">
+  <h2><span class="num">6</span>品質は大丈夫だったのか（Q3）</h2>
+  <div class="key">
+    <p>短い期間の目安（取り込まれる割合、取り消し、すぐあとの直し）は、悪くなりませんでした。ただし著者は、欠陥、障害、保守のしやすさは測れていないので、品質の損がないとは言えない、と書いています。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>品質の目安</th><th>結果</th><th>注意</th></tr></thead>
+      <tbody>
+        <tr><th>変更が取り込まれる割合</th><td>91% から 85% に、少し下がった程度。AI が作った変更も、1 件あたり約 56% 大きいのに、ほかの変更と同じ割合で取り込まれた</td><td>レビューが甘くなったり自動になったりすると、関門そのものが変わる。品質のことはほとんど分からない</td></tr>
+        <tr><th>取り消し（リバート）</th><td>変更に占める割合は、会社全体でわずかに下がった。AI を使い始めても、その人の取り消しの割合は上がらなかった。取り消しの数は 1.4 倍に増えたが、変更全体（1.8 倍）より小さい</td><td>変更の数が増えると、取り消しの割合は小さく出やすい</td></tr>
+        <tr><th>すぐあとの直し</th><td>AI が作った変更が取り込まれてから 7 日以内に、同じ人が同じリポジトリで直しの変更を出すことは、ほかの変更のあとより 5.3 ポイント多かった。ただ、機能の追加の変更を出すことも 4.8 ポイント多かった。直しと機能の追加の差は 7 日で 0.3 ポイント、14 日で 0.6 ポイントで、はっきりした差ではない。忙しくなっただけで、直しに偏ってはいない</td><td>変更と、あとの直しの結びつけは粗いので、著者は「示唆」にとどめている</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>AI の印は会社が付けていて、安全な変更に付きやすいかもしれません。</li>
+    <li>著者のまとめは “evidence against a sudden drop in quality”（品質が急に落ちたことへの反証）です。一方で、次のようにも書いています。“we do not find any evidence of a sudden drop in quality, but we cannot rule out quality costs.”（品質が急に落ちた証拠は見つからないが、品質の損がないとは言い切れない）</li>
+  </ul>
+
+  <h3>見えないところでたまるかもしれない損</h3>
+  <p>著者は、人のレビューが減って AI のレビューに置き換わったこの変化が、ほかの研究が報告している品質の損が、見えないところでたまっていく仕組みになりうる、と書いています。挙げているのは次の損です。</p>
+  <ul>
+    <li>コードの複雑さや、書き直しが増えること</li>
+    <li>そのコードに責任を持つ人が、はっきりしなくなること（diluted ownership）</li>
+    <li>コードへの理解や、なぜそう書いたかという意図が失われること（cognitive and intent debt）</li>
+  </ul>
+  <p>理由は、人が見るコードが減り、代わりに入った AI のレビューの評価は始まったばかりだからです。</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>調べた会社と、AI の効果の確かめ方</h2>
+
+  <h3>会社</h3>
+  <ul>
+    <li>企業向けに、顧客対応を支えるソフトウェアをサービスとして売る、中くらいの規模の会社です（名前は伏せられています）。開発の組織は数百人です。</li>
+    <li>コードは、2012 年に書き始めた Ruby の中心部分と、TypeScript、Python、Go の新しい部分からなります。2024〜2026 年に、リポジトリは約 500 から 1,000 以上に、コードは約 400 万行から 650 万行に増えました。</li>
+    <li>AI に積極的な会社で、AI のコーディングの道具を、人数や使う量の上限なしで使わせていました。著者は、AI の効果が出やすい、とても恵まれた環境なので、結果は業界の平均ではなく上限として読むほうがよい、と書いています。</li>
+    <li>会社の役割はデータを出すことだけで、分析と執筆には関わっていない、と書かれています。</li>
+  </ul>
+
+  <h3>データ</h3>
+  <ul>
+    <li>2024 年 1 月〜2026 年 4 月（28 か月）の、開発者 802 人、変更 196,212 件（自動のアカウントの分を除く）、364 のリポジトリです。効果の推定には、3 か月以上活動した 564 人（AI を使った 451 人と、使わなかった 113 人）を使っています。</li>
+    <li>AI の道具の利用記録（Cursor と Claude Code）から、誰が、いつ、どれだけ AI を使ったかが分かります。誰がどのモデルを使ったかの記録はありません。</li>
+    <li>「AI が作った変更」は、会社が付けている印（created-by-ai）で数えました。期間全体では 30.2% の変更に付いています。印の付け方は研究者には分からないので、この印を使った比較は「関係がある」までしか言えない、としています。</li>
+  </ul>
+
+  <h3>この解説で使う言葉</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>言葉</th><th>この論文での意味</th></tr></thead>
+      <tbody>
+        <tr><th>変更（PR、プルリクエスト）</th><td>コードの変更を、本流に取り込む前に出す申し出。ここで人や AI がレビューする。この論文の「変更」は PR のこと</td></tr>
+        <tr><th>1 人あたりの変更の数</th><td>1 人が 1 か月に出した変更の数。指示の物差しは、そのうち取り込まれたものの数</td></tr>
+        <tr><th>取り込み（マージ）</th><td>レビューを通った変更を本流に入れること</td></tr>
+        <tr><th>取り消し（リバート）</th><td>入れた変更を元に戻すための変更。多いと、入れた変更に問題があったことの目安になる</td></tr>
+        <tr><th>AI のレビュー</th><td>AI のレビュー用のボットによるレビュー。論文では automated review</td></tr>
+        <tr><th>コメントを書いたレビュー</th><td>人が中身について何か書いたレビュー。論文では substantive review</td></tr>
+        <tr><th>コメントなしの承認</th><td>人が何も書かずに「承認」だけしたレビュー。論文では silent approval</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>AI の効果をどう確かめたか</h3>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>実際には、回帰分析のいくつもの式と推定の方法を使っています。</p>
+  </div>
+  <ul>
+    <li><b>AI を使う人と使わない人を、そのまま比べない。</b>早く使い始めた人は、使う前から変更の数がほかの人よりずっと多かった（標準偏差で 2 つ近く）。そのまま比べると、もともとの差を AI の効果と取り違えます。</li>
+    <li><b>1 人ひとりを、AI を使う前の自分と比べる。</b>そのうえで、同じ月に AI の使い方が変わらなかった人たちの変化を差し引きます。会社全体の動き（指示、モデルの発表、休みなど）を消すためです。これを「差の差」と呼び、使い始めの時期が人によってずれるので「時期がずれる差の差」と呼びます。</li>
+    <li><b>「2 倍」の指示の日ではなく、本人が AI を使い始めた月にそろえる。</b>指示の日にそろえると、使い始めの時期が違う人が混ざって、効果がぼやけます。</li>
+    <li><b>前提を確かめる。</b>この比べ方は「AI を使わなければ、使い始めた人も、ほかの人と同じように動いた」という前提に立ちます。使い始める前の月に差がないことを確かめて、前提を支えています（証明はできない）。</li>
+    <li><b>いくつもの方法で推定し直す。</b>AI を使い始めた効果の大きさは、推定の方法で +0.13 から +0.35 まで変わりました。まだ AI を使っていない人とだけ比べる 2 つの方法では小さく出て、そのうち 1 つは、はっきりした差とは言えない大きさでした。著者は、この 2 つの方法は 2026 年初めの会社全体の急な伸びを「AI ではなく時期のせい」に入れるので、使うほど伸びる効果を小さく見積もる、と説明しています。そのうえで「向きは確かだが、大きさは不確か」としています。</li>
+  </ul>
+  <p>例えるなら、ダイエットの効果を見るのに、始めた人と始めない人の体重を比べるのではなく、始めた人の前後の変化から、同じ時期にダイエットをしていない人の変化（季節の増減など）を引く、というやり方です。</p>
+  <p>数字の読み方：論文の多くの数字は「対数での差」で書かれています。+0.54 なら約 1.72 倍、+0.11 なら約 1.12 倍（約 12% 増）です。</p>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>著者の提言と、この研究の限界</h2>
+
+  <h3>著者の提言</h3>
+  <ul>
+    <li><b>指示は、組織を変える取り組みの始まりとして扱う。</b>効果が出るまでに時間がかかり、新しい働き方（管理職がまたコードを書く、AI のレビューと自動の承認を中心にしたレビューの作り直し）と一緒に来ました。著者は、1970〜1990 年代の IT 投資が、時間がたってから、仕事の進め方の作り直しや新しい技能と一緒に初めて効いた（IT の生産性のパラドックス）のと同じだ、と書いています。数四半期の計画を立て、目標を求める前に、使い込むことに投資する。</li>
+    <li><b>目標の数字には、ほかの指標も並べて見る。</b>数えるものが目標になると、測りたかったものを測らなくなる（グッドハートの法則）。</li>
+    <li><b>人の注意と判断がボトルネックになる。</b>この会社では、人のレビューが AI に移り、コメントを書いたレビューが減り、AI が作った変更は人のレビューで時間がかかりました。取り込まれた変更の数という物差しには、そのどれも映りませんでした。だから、レビューできる人手も、書く力と同じように計画する。変更の数と並べて、レビューの範囲と深さにも目標を置く。人のレビューなしで承認してよい変更を、前もって決める。人がもう見ていないコードがどれかを見張る。</li>
+    <li><b>まだ答えのない問い：</b>限られた人の注意を、AI が作ったものにどう割り振るか。コードを出す前に、人がどこまで理解していなければならないか。</li>
+  </ul>
+  <blockquote>
+    <p class="en">“Human attention and judgment become the new bottleneck of the AI era.”</p>
+  </blockquote>
+
+  <h3>この研究の限界（著者が書いているもの）</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>AI を使う人を、くじ引きで決めたのではない</th><td>いつ、どれだけ AI を使うかは本人が選んだ。因果として読むには、<a href="#study">7</a> の前提（AI を使わなければ、使い始めた人もほかの人と同じように動いた）が要る</td></tr>
+        <tr><th>AI の効果の大きさは不確か</th><td>推定の方法で +0.13 から +0.35 まで変わる。使い続けるほど伸びる、という関係は、生産的な人ほど早く使い込むので、関係までしか言えない</td></tr>
+        <tr><th>AI モデルの世代ごとの効果は分からない</th><td>新しいモデルの発表が、使う量の急増と重なっている</td></tr>
+        <tr><th>変更の数は、生産性の一面だけ</th><td>満足、やり取り、効率、リポジトリの外の仕事（設計、会議、育成）は入らない</td></tr>
+        <tr><th>品質の目安は短い期間のものだけ</th><td>欠陥、障害、保守のしやすさは入らない。品質の損がないとは言えない</td></tr>
+        <tr><th>調べたのは 1 社だけ</th><td>AI に積極的で、道具の費用に上限がなく、新しいリポジトリが多く、目標を公表した会社。業界の平均ではなく上限として読むほうがよい</td></tr>
+        <tr><th>この先のことは分からない</th><td>伸びが頭打ちになるか、レビューの変化が続くかは、もっと長い期間と、ほかの会社での調査が要る</td></tr>
+        <tr><th>会社のデータは公開されていない</th><td>分析のコードは公開されている（GitHub の CMUSTRUDEL/2x-mandate）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>信頼の形はどう変わったか（私の読み方）</h2>
+  <div class="note note-view">
+    <p><b>この節は、私の読み方です。</b>論文が言っていることではありません。論文の言葉は「レビュー」「人の注意と判断」までで、「信頼」という言葉で論じてはいません。</p>
+  </div>
+  <ul>
+    <li><b>このテーマの問い「人がコードを読むことで得ていた信頼を、別の根拠へ移せるか」に、直接かかわる、実際の会社の記録です。</b>AI を使い続ける人が広がるにつれて、コードを確かめる役目の一部は、人が読むことから、AI のレビューと、人のコメントなしの承認へ移りました。短い期間の品質の目安は悪くなりませんでした。長い期間のことは分かりません。</li>
+    <li><b>移ったきっかけは、変更の量に人のレビューが追いつかなくなったことです。</b>著者の言葉では「人のレビューを迂回させた」。著者が「人のレビューなしで承認してよい変更を前もって決める」「人が見ていないコードを見張る」よう勧めているのは、信頼をどこで確保するかを、あとからではなく先に決めよ、ということだと読めます。</li>
+    <li><b>成功の物差しには、信頼の移り変わりが映りませんでした。</b>「数が増えた」「取り込まれた」は、誰が確かめたかを語りません。「動いた」というだけでは、信頼してよい理由にならないのと同じです。</li>
+    <li><b>この論文がすっきりしないのは、危なそうな仕組みは示したが、害が出たことは示していないからです。</b>要旨は「AI は変更の数を増やす、という強い証拠」で締めくくり、題名と結論は「人のレビューが追いつかない」を強調しています。品質の損と、増えた変更の価値は、どちらも測れていません。論文の答えを突き詰めると「まだ分からない。だから、人が見ていない所を測れ」です。</li>
+    <li><b>1 人で AI と作る場合に当てはめるときの注意。</b>これは数百人の開発の組織の話で、1 人で AI と作る場合とは状況が違います。そのまま当てはめられるのは、「速く作れるようになると、確かめる側が追いつかなくなる」「確かめていないことは、数字には出ない」という点です。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2607.01904v3">He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu「AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate」</a>　arXiv:2607.01904v3、第 1 版 2026-07-02、第 2 版 10-27、第 3 版 11-10、未査読論文、ライセンスは <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">所属は Carnegie Mellon 大学（He、Agarwal、Vasilescu）、Stanford 大学（Denisov-Blanch、Koyejo）、独立の研究者（Azaletskiy）。He は現在 Microsoft。この解説は第 3 版の HTML 版の本文と付録 A〜F によります</span></li>
+    <li><a href="https://github.com/CMUSTRUDEL/2x-mandate">CMUSTRUDEL/2x-mandate</a><span class="use">論文に書かれた、分析のコードの置き場所。この解説を書くときには開いていません</span></li>
+    <li><a href="../data/2x-mandate.json">data/2x-mandate.json</a><span class="use">この解説の図と表に使った数値と、論文の中の出典の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>数字は、第 3 版の本文、表、図の説明、付録から拾いました。前の版とは数字が違うことがあります。</li>
+    <li>2026-11-16 に、本文と付録を読み直し、この解説の記述を 1 つずつ原文と照合しました。版の日付とライセンスは、arXiv の論文のページで確かめました。</li>
+    <li>1 人あたりの変更の数は、本文では 2026 年 4 月が 44.3 件、付録の表 VIII と付録 E-C の表では 43.4 件です。この解説は本文の 44.3 件を使いました。</li>
+    <li>AI の効果の大きさの幅「+0.13 から +0.35」は、本文の書き方のままです。付録 D-D の表には、AI を使わなかった人を除いた推定 +0.369 もあり、本文の幅と少し食い違っています。</li>
+    <li>図はすべて、数値から作り直したものです。論文の図そのものは写していません。レビューの割合の「前」と「後」の時点は、本文に月が書かれていないので、図の範囲としました。</li>
+    <li>倍とパーセントは、論文の「対数での差」を、論文と同じ換算で直したものです。</li>
+    <li>最初の確認日は 2026-11-13、照合し直した日は 2026-11-16 です。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。論文から引用した英文と数値は、上の論文（CC BY 4.0）によります。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>

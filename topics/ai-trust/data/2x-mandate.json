@@ -1,0 +1,121 @@
+{
+  "about": "解説「AI が書く速さに、人のレビューが追いつかない」の図と表に使った数値。すべて論文の第 3 版から拾い、出典の場所を where に書いた。倍率は、論文の「対数での差」を論文と同じ換算（e の b 乗）で直したもの。",
+  "paper": {
+    "title": "AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise \"2×\" Mandate",
+    "authors": ["Hao He", "Shyam Agarwal", "Yegor Denisov-Blanch", "Pavel Azaletskiy", "Sanmi Koyejo", "Bogdan Vasilescu"],
+    "url": "https://arxiv.org/abs/2607.01904v3",
+    "license": "CC BY 4.0"
+  },
+  "checked": "2026-11-16",
+  "before_after": {
+    "where": "本文 IV-A・IV-C、図 2・4・6・10、付録 E-A・C-B",
+    "note": "前は指示の前の基準の時期（2025 年 1〜4 月）または期間のはじめごろ、後は 2026 年 4 月または期間の終わりごろ。レビューの割合の正確な月は論文に書かれていない。",
+    "rows": [
+      { "name": "1 人あたりの月の変更の数", "before": 21.2, "after": 44.3, "unit": "件" },
+      { "name": "AI が作った変更の割合", "before": null, "after": 90, "unit": "%", "note": "前はほぼ 0。後は約 90%" },
+      { "name": "人のレビューを 1 回以上受けた変更", "before": 89, "after": 68, "unit": "%" },
+      { "name": "AI のレビューを受けた変更", "before": 19, "after": 84, "unit": "%", "approx": true },
+      { "name": "人がコメントを書いたレビューのある変更", "before": 39, "after": 21, "unit": "%", "approx": true },
+      { "name": "人のコメントなしの承認だけの変更", "before": 50, "after": 50, "unit": "%", "approx": true },
+      { "name": "変更 1 件の大きさ（中央値）", "before": 35, "after": 61, "unit": "行" },
+      { "name": "10 行以下の小さな変更", "before": 31, "after": 22, "unit": "%" }
+    ]
+  },
+  "multipliers": {
+    "where": "本文 IV-A、表 I・II、付録の図 14",
+    "rows": [
+      { "name": "1 人あたりの変更の数、そのまま（基準の時期 → 2026 年 4 月）", "value": 2.09, "note": "会社全体の時期の動きも入る" },
+      { "name": "AI を使い始めて 9 か月たった時点の効果", "value": 1.99 },
+      { "name": "AI の効果の主な推定（2026 年 4 月の使い方、会社全体の月ごとの動きを差し引く）", "value": 1.46, "main": true },
+      { "name": "AI を使い始めた時点の伸び", "value": 1.12, "approx": true, "note": "約 12%" },
+      { "name": "指示の日の前後の変化", "value": 1.10, "approx": true, "log_points": 0.093, "note": "+0.09" }
+    ]
+  },
+  "months_on_tool": {
+    "where": "本文 IV-A（付録の図 14、イベントスタディ）",
+    "rows": [
+      { "months": 3, "value": 1.51 },
+      { "months": 6, "value": 1.55 },
+      { "months": 9, "value": 1.99 }
+    ]
+  },
+  "decomposition_baseline": {
+    "where": "表 II（基本のモデル、2026 年 4 月の使い方での値。単位は対数での差）",
+    "rows": [
+      { "name": "AI を使い始めた時点の伸び", "log_points": 0.14 },
+      { "name": "使い続けて増えた分", "log_points": 0.45 },
+      { "name": "指示そのものの分（残り）", "log_points": -0.05 }
+    ],
+    "total_log_points": 0.54,
+    "total_multiplier": 1.72,
+    "preferred_model_total_log_points": 0.38,
+    "preferred_model_total_multiplier": 1.46
+  },
+  "review_load": {
+    "where": "本文 IV-C",
+    "rows": [
+      { "name": "会社全体の変更の数", "value": 3.1 },
+      { "name": "レビューする人の数", "value": 1.5 },
+      { "name": "レビューする人 1 人あたりの量", "value": 2.0 }
+    ]
+  },
+  "per_pr_ai_vs_other": {
+    "where": "本文 IV-C、表 IV（指示のあと、同じ人・同じ月・大きさをそろえた比較）",
+    "rows": [
+      { "name": "人のコメントの数", "change": "+9%" },
+      { "name": "最初の人のレビューから取り込みまでの時間", "change": "+20%" },
+      { "name": "作り始めから取り込みまでの時間", "change": "+22%" },
+      { "name": "レビューの往復の回数", "change": "変わらない" },
+      { "name": "人のレビューを受ける割合", "change": "低くない" }
+    ]
+  },
+  "substantive_review_latency_p90_hours": {
+    "where": "付録 C-D（人がコメントを書くレビューを通った、取り込まれた変更。遅いほうから 1 割の所）",
+    "rows": [
+      { "name": "変更が増える前", "hours": 63, "approx": true },
+      { "name": "いちばん長いとき", "hours": 114, "approx": true },
+      { "name": "2026 年", "hours": 73, "approx": true }
+    ],
+    "all_prs_peak_hours": 66,
+    "substantive_coverage_merged": { "before_peak": 48, "after": 21, "unit": "%", "approx": true }
+  },
+  "quality": {
+    "where": "本文 IV-A・IV-C、付録 E-B・E-D",
+    "merge_rate": { "before": 91, "after": 85, "unit": "%" },
+    "ai_pr_size_larger": "約 56%（中央値 66 行と 41 行）",
+    "revert_prs_per_developer": 1.4,
+    "all_prs_per_developer": 1.8,
+    "follow_up_fix_7d_pp": 5.3,
+    "follow_up_feature_7d_pp": 4.8,
+    "fix_minus_feature_pp": { "7d": 0.3, "14d": 0.6 }
+  },
+  "real_work_checks": {
+    "where": "本文 IV-A、付録 E-A・E-B・E-C",
+    "pr_types_multiplier_at_apr_2026": { "all": 1.8, "feature": 2.1, "bug_fix": 2.6, "maintenance": 1.9, "revert": 1.4, "other": 1.2 },
+    "unclassified_share": 33,
+    "active_days_per_month": { "before": 14.1, "after": 15.2 },
+    "off_hours_share": { "before": 7, "after": 11, "unit": "%" },
+    "share_of_gain_from_extra_days": "5 分の 1 まで"
+  },
+  "cost": {
+    "where": "本文 IV-A",
+    "claude_code_spend_per_developer_month_usd": { "2025-07": 42, "2026-04": 856 },
+    "spend_multiplier": 20,
+    "prs_per_developer_multiplier": 1.7,
+    "note": "Cursor の費用と、人の作業とレビューの時間は入っていない（下限）"
+  },
+  "heterogeneity": {
+    "where": "表 III",
+    "seniority": [
+      { "name": "IC（individual contributor）", "n": 163, "percent": 27 },
+      { "name": "Senior", "n": 110, "percent": 42 },
+      { "name": "Staff", "n": 55, "percent": 39 },
+      { "name": "Principal", "n": 16, "percent": 38, "note": "人数が少なく不確か" },
+      { "name": "Management（管理職）", "n": 42, "percent": 86 }
+    ],
+    "repository": [
+      { "name": "2022 年以降に作ったリポジトリ", "percent": 44 },
+      { "name": "2022 年より前のリポジトリ", "percent": 12, "note": "はっきりした差とは言えない" }
+    ]
+  }
+}

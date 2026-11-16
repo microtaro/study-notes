@@ -1,0 +1,9 @@
+# OS・エディタが作るファイル
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# 手元だけの Claude Code の設定と計画
+.claude/settings.local.json
+.claude/plans/

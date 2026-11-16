@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI と信頼｜学習ノート</title>
+<meta name="description" content="人がコードを読むことで得ていた信頼を、別の根拠へ移せるか。実際の調査や実験の論文を読みながら考えます。">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="alternate" hreflang="ja" href="index.html">
+<link rel="alternate" hreflang="en" href="../../en/topics/ai-trust/index.html">
+<style>
+  .lang { margin: 0 0 1rem; font-size: 0.9rem; }
+  .items { list-style: none; margin: 0; padding: 0; max-width: 40rem; }
+  .items li { margin: 0; padding: 1.1rem 0 1.2rem; border-top: 1px solid var(--rule); }
+  .items li:last-child { border-bottom: 1px solid var(--rule); }
+  .items .title { margin: 0; font-size: 1.2rem; line-height: 1.5; font-weight: 700; }
+  .items .desc { margin: 0.4rem 0 0; }
+  .items .meta { margin: 0.35rem 0 0; font-size: 0.9rem; color: var(--sub); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#question"><span class="n">&nbsp;</span>問い</a></li>
+    <li><a href="#papers"><span class="n">&nbsp;</span>論文の解説</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../en/topics/ai-trust/index.html" hreflang="en" lang="en">English</a></p>
+  <h1>AI と信頼</h1>
+  <p class="lead">人がコードを読むことで得ていた信頼を、別の根拠へ移せるか。</p>
+  <p class="stamp">2026-11-16 作成</p>
+</header>
+
+<section id="question">
+  <h2>問い</h2>
+  <p>AI がコードを書く量が増えると、人がすべてを読んで確かめることはできなくなります。それでも作ったものを信じるには、読むこと以外の根拠が要ります。</p>
+  <p>このテーマでは、実際の会社の記録や実験を調べた論文を読み、何がその根拠になりうるか、どこで足りなくなるかを見ていきます。</p>
+</section>
+
+<section id="papers">
+  <h2>論文の解説</h2>
+  <ul class="items">
+    <li>
+      <p class="title"><a href="papers/2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a></p>
+      <p class="desc">「AI で開発の生産性を 2 倍に」と決めた会社の 2 年あまりの記録を調べた論文です。AI は使い続けるほど変更の数を伸ばしましたが、レビューが追いつかなくなり、人のレビューの一部が AI のレビューに置き換わりました。</p>
+      <p class="meta">元の論文：<a href="https://arxiv.org/abs/2607.01904v3">arXiv:2607.01904v3</a>。2026-11-13 に作成、2026-11-16 に構成を組み替え</p>
+    </li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2>出典</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2607.01904v3">He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu「AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate」</a>　arXiv:2607.01904v3（2026-11-10）、未査読論文、ライセンスは <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">解説：<a href="papers/2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a></span></li>
+  </ul>
+</section>
+
+</main>
+</div>
+<script src="../../assets/nav.js"></script>
+</body>
+</html>
