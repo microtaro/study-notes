@@ -23,6 +23,8 @@
     ],
   };
   const MENU = { ja: '目次', en: 'Contents' };
+  const FOLD = { ja: 'たたむ', en: 'Collapse' };
+  const UNFOLD = { ja: '開く', en: 'Expand' };
 
   const script = document.currentScript;
   const toc = document.querySelector('nav.toc');
@@ -44,10 +46,13 @@
     .toc .tree, .toc .tree ol { list-style: none; margin: 0; padding: 0; }
     .toc .tree > li { margin: 0 0 0.25rem; }
     /* 項目ごとに行頭の印を付け、2 行以上に折り返しても印の後ろにそろえる（ぶら下げ） */
-    .toc .tree summary { display: flex; gap: 0.5em; cursor: pointer; padding: 0.4rem 0.6rem; border-left: 3px solid var(--rule); color: var(--ink); font-weight: 700; list-style: none; }
+    .toc .tree summary { display: flex; align-items: flex-start; gap: 0.3em; padding: 0.35rem 0.6rem 0.35rem 0.25rem; border-left: 3px solid var(--rule); color: var(--ink); font-weight: 700; list-style: none; }
     .toc .tree summary::-webkit-details-marker { display: none; }
-    .toc .tree summary::before { content: "▶"; flex: none; width: 1em; font-size: 0.8em; line-height: 1.9; color: var(--ink); }
-    .toc .tree details[open] > summary::before { content: "▼"; }
+    /* 開閉のボタン。テーマの名前はテーマのページへのリンクなので、開閉はこのボタンで行う */
+    .toc .tree .caret { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 1.7em; height: 1.7em; border-radius: 5px; cursor: pointer; font-size: 0.8em; color: var(--ink); }
+    .toc .tree .caret:hover { background: var(--rule); }
+    .toc .tree .caret::before { content: "▶"; }
+    .toc .tree details[open] > summary .caret::before { content: "▼"; }
     .toc .tree li.here > details > summary { border-left-color: var(--ink); }
     .toc .tree summary a { display: inline; padding: 0; border: 0; color: inherit; font-weight: 700; text-decoration: none; }
     .toc .tree summary a:hover { text-decoration: underline; }
@@ -55,6 +60,9 @@
     .toc .tree .papers > li > a { padding-left: 1.3rem; }
     .toc .tree .papers > li > a::before { content: ""; flex: none; width: 6px; height: 6px; margin-top: 0.6em; background: currentColor; border-radius: 1px; }
     .toc .tree .page-toc a { padding-left: 2.5rem; font-size: 0.85rem; }
+    /* 今読んでいる論文の行：▼ のボタンと名前。色付きの帯で今のページだと示す */
+    .toc .tree .paper-here > summary { padding: 0.35rem 0.6rem 0.35rem 0.9rem; border-left-color: var(--b); background: var(--b-tint); }
+    .toc .tree .paper-here > summary a { font-weight: 700; background: none; }
     .nav-wrap > summary:focus-visible, .toc .tree summary:focus-visible { outline: 3px solid var(--b); outline-offset: 2px; }
   `;
   document.head.append(style);
@@ -69,65 +77,104 @@
     return [a, current];
   };
 
-  const pageList = toc.querySelector(':scope > ol'); // ページに書いてある目次
+  // ▼▶ のボタンに、マウスを乗せたときの説明（たたむ／開く）を、開いているかどうかに合わせて付ける
+  const hintOn = (box, caret) => {
+    const hint = () => { caret.title = box.open ? FOLD[lang] : UNFOLD[lang]; };
+    box.addEventListener('toggle', hint);
+    hint();
+  };
+  // 今いるページの名前をもう一度押したときは、読み込み直さずに、たたむ・開く
+  const togglesInPlace = (link, box, caret) => {
+    link.addEventListener('click', (e) => { e.preventDefault(); box.open = !box.open; });
+    hintOn(box, caret);
+    link.title = FOLD[lang] + ' / ' + UNFOLD[lang];
+  };
 
-  const wrap = document.createElement('details');
-  wrap.className = 'nav-wrap';
-  const menu = document.createElement('summary');
-  menu.textContent = MENU[lang];
-  wrap.append(menu);
+  // ページに書いてある目次の項目。今読んでいる論文の下へ移す
+  const pageList = toc.querySelector(':scope > ol');
+  const pageItems = pageList ? [...pageList.children] : [];
+  pageItems.forEach((li) => {
+    // 番号のない項目（出典と照合など）にも、行頭の印を付ける
+    const n = li.querySelector('.n');
+    if (n && !n.textContent.trim()) n.textContent = '•';
+  });
+  toc.querySelectorAll(':scope > .toc-title, :scope > ol').forEach((el) => el.remove());
 
-  const title = document.createElement('p');
-  title.className = 'tree-title';
-  title.append(anchor(SITE.title[lang], 'index.html')[0]);
-  wrap.append(title);
+  const wide = window.matchMedia('(min-width: 1080px)');
+  let wrap = null;
 
-  const tree = document.createElement('ol');
-  tree.className = 'tree';
-  for (const t of SITE.themes) {
-    const li = document.createElement('li');
-    const theme = document.createElement('details');
-    const head = document.createElement('summary');
-    const [themeLink, themeHere] = anchor(t.name[lang], t.path);
-    head.append(themeLink);
-    theme.append(head);
+  const render = (site) => {
+    const next = document.createElement('details');
+    next.className = 'nav-wrap';
+    const menu = document.createElement('summary');
+    menu.textContent = MENU[lang];
+    next.append(menu);
 
-    let inside = themeHere;
-    const papers = document.createElement('ol');
-    papers.className = 'papers';
-    for (const p of t.papers) {
-      const pli = document.createElement('li');
-      const [paperLink, paperHere] = anchor(p.name[lang], p.path);
-      pli.append(paperLink);
-      if (paperHere) {
-        inside = true;
-        if (pageList) {
+    const title = document.createElement('p');
+    title.className = 'tree-title';
+    title.append(anchor(site.title[lang], 'index.html')[0]);
+    next.append(title);
+
+    const tree = document.createElement('ol');
+    tree.className = 'tree';
+    for (const t of site.themes) {
+      const li = document.createElement('li');
+      const theme = document.createElement('details');
+      const head = document.createElement('summary');
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      caret.setAttribute('aria-hidden', 'true');
+      const [themeLink, themeHere] = anchor(t.name[lang], t.path);
+      head.append(caret, themeLink);
+      theme.append(head);
+      if (themeHere) togglesInPlace(themeLink, theme, caret);
+      else hintOn(theme, caret);
+
+      let inside = themeHere;
+      const papers = document.createElement('ol');
+      papers.className = 'papers';
+      for (const p of t.papers) {
+        const pli = document.createElement('li');
+        const [paperLink, paperHere] = anchor(p.name[lang], p.path);
+        if (paperHere && pageItems.length) {
+          // 今読んでいる論文：節の一覧を入れ子で出し、▼ か名前を押すと、たたむ・開く
+          inside = true;
+          const box = document.createElement('details');
+          box.className = 'paper-here';
+          box.open = true;
+          const ps = document.createElement('summary');
+          const pc = document.createElement('span');
+          pc.className = 'caret';
+          pc.setAttribute('aria-hidden', 'true');
+          ps.append(pc, paperLink);
           const sub = document.createElement('ol');
           sub.className = 'page-toc';
-          sub.append(...pageList.children); // ページの目次の項目を、この論文の下へ移す
-          // 番号のない項目（出典と照合など）にも、行頭の印を付ける
-          sub.querySelectorAll('.n').forEach((n) => { if (!n.textContent.trim()) n.textContent = '•'; });
-          pli.append(sub);
+          sub.append(...pageItems);
+          box.append(ps, sub);
+          togglesInPlace(paperLink, box, pc);
+          pli.append(box);
+        } else {
+          if (paperHere) inside = true;
+          pli.append(paperLink);
         }
+        papers.append(pli);
       }
-      papers.append(pli);
+      theme.append(papers);
+      if (inside) {
+        theme.open = true;
+        li.className = 'here';
+      }
+      li.append(theme);
+      tree.append(li);
     }
-    theme.append(papers);
-    if (inside) {
-      theme.open = true;
-      li.className = 'here';
-    }
-    li.append(theme);
-    tree.append(li);
-  }
-  wrap.append(tree);
+    next.append(tree);
+    next.open = wide.matches;
+    if (wrap) wrap.replaceWith(next); else toc.prepend(next);
+    wrap = next;
+  };
 
-  toc.querySelectorAll(':scope > .toc-title, :scope > ol').forEach((el) => el.remove());
-  toc.prepend(wrap);
+  render(SITE);
 
   // 幅が決まったときや、ウィンドウの幅を変えたときにも、開閉をそろえる
-  const wide = window.matchMedia('(min-width: 1080px)');
-  const fit = () => { wrap.open = wide.matches; };
-  fit();
-  wide.addEventListener('change', fit);
+  wide.addEventListener('change', () => { if (wrap) wrap.open = wide.matches; });
 })();

@@ -23,7 +23,7 @@
     <li><a href="#quality"><span class="n">6</span>Did quality hold up? (Q3)</a></li>
     <li><a href="#study"><span class="n">7</span>The company, and how the effect of AI was measured</a></li>
     <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the study's limits</a></li>
-    <li><a href="#reading"><span class="n">9</span>How the shape of trust changed (my reading)</a></li>
+    <li><a href="#reading"><span class="n">9</span>How the shape of trust changed (microtaro's reading)</a></li>
     <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
   </ol>
 </nav>
@@ -37,7 +37,7 @@
   <p class="src"><b>Original paper</b>He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu, “AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate,” arXiv:2607.01904 version 3 (2026-11-10), not peer reviewed, CC BY 4.0
     <span class="links"><a href="https://arxiv.org/abs/2607.01904v3">arXiv page</a><a href="https://arxiv.org/html/2607.01904v3">Read the HTML version</a><a href="https://arxiv.org/pdf/2607.01904v3">PDF</a></span></p>
   <p class="lead">A company's CTO set a goal to double engineering productivity with AI within twelve months, measured as merged pull requests (PRs) per engineer per month. Researchers from Carnegie Mellon University, Stanford University, and elsewhere studied the company's records over more than two years. This page explains their paper.</p>
-  <p class="stamp">English version of the Japanese page, written 2026-11-16. Based on the full text and appendices of arXiv version 3 (2026-11-10); all numbers are from version 3. What the paper says is kept separate from my own reading.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-16 by microtaro and AI. Based on the full text and appendices of arXiv version 3 (2026-11-10); all numbers are from version 3. What the paper says is kept separate from microtaro's reading.</p>
 </header>
 
 <section id="qa">
@@ -543,13 +543,13 @@
 </section>
 
 <section id="reading">
-  <h2><span class="num">9</span>How the shape of trust changed (my reading)</h2>
+  <h2><span class="num">9</span>How the shape of trust changed (microtaro's reading)</h2>
   <div class="note note-view">
-    <p><b>This section is my reading, not the paper's claim.</b> The paper talks about review and about human attention and judgment; it does not frame its findings in terms of trust.</p>
+    <p><b>This section is microtaro's reading, not the paper's claim.</b> The paper talks about review and about human attention and judgment; it does not frame its findings in terms of trust.</p>
   </div>
   <ul>
     <li><b>This is real company data that bears directly on this theme's question: can the trust that came from people reading code move to another basis?</b> As continued AI use spread, part of the job of checking code moved from people reading it to AI review and silent human approval. Short-horizon quality proxies did not get worse. The long run is unknown.</li>
-    <li><b>The move was triggered by review falling behind the volume of PRs.</b> In the authors' words, the company routed work “around human review.” Their advice to decide in advance which PRs may be approved without a human review, and to monitor code that humans no longer review, reads to me as: decide where trust is secured before the fact, not after.</li>
+    <li><b>The move was triggered by review falling behind the volume of PRs.</b> In the authors' words, the company routed work “around human review.” Their advice to decide in advance which PRs may be approved without a human review, and to monitor code that humans no longer review, reads to microtaro as: decide where trust is secured before the fact, not after.</li>
     <li><b>The success metric did not show the change in trust.</b> “More PRs” and “merged” say nothing about who checked the code. It is the same as saying that “it runs” is not, by itself, a reason to trust code.</li>
     <li><b>The paper feels unresolved because it shows a risky mechanism but not harm.</b> The abstract ends on “strong evidence” that AI raises PR throughput, while the title and conclusion stress that human review cannot keep up. Neither quality costs nor the value of the added code was measured. Pushed to its core, the paper's answer is: it is not known yet, so measure where humans are no longer looking.</li>
     <li><b>A caution for people building alone with AI.</b> This is about an R&amp;D organization of several hundred engineers, which is a different situation. What carries over directly is: when you can build faster, checking falls behind; and what is not checked does not show up in the numbers.</li>
@@ -560,13 +560,13 @@
   <h2><span class="num">&nbsp;</span>Sources and checks</h2>
   <ul class="sources">
     <li><a href="https://arxiv.org/abs/2607.01904v3">He, Agarwal, Denisov-Blanch, Azaletskiy, Koyejo, Vasilescu, “AI Writes Faster Than Humans Can Review: A Longitudinal Study of an Enterprise “2×” Mandate”</a> arXiv:2607.01904v3; v1 2026-07-02, v2 2026-10-27, v3 2026-11-10; not peer reviewed; license <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">Affiliations: Carnegie Mellon University (He, Agarwal, Vasilescu), Stanford University (Denisov-Blanch, Koyejo), independent researcher (Azaletskiy). He is now at Microsoft. This page is based on the HTML version of v3, main text and Appendices A–F</span></li>
-    <li><a href="https://github.com/CMUSTRUDEL/2x-mandate">CMUSTRUDEL/2x-mandate</a><span class="use">The analysis code, as given in the paper. I did not open it when writing this page</span></li>
+    <li><a href="https://github.com/CMUSTRUDEL/2x-mandate">CMUSTRUDEL/2x-mandate</a><span class="use">The analysis code, as given in the paper. microtaro did not open it when writing this page</span></li>
     <li><a href="../../../../topics/ai-trust/data/2x-mandate.json">topics/ai-trust/data/2x-mandate.json</a><span class="use">The numbers used in this page's charts and tables, with where each appears in the paper (labels in Japanese)</span></li>
   </ul>
   <h3>Notes on checking</h3>
   <ul>
     <li>Numbers are taken from the main text, tables, figure captions, and appendices of v3. Earlier versions may differ.</li>
-    <li>On 2026-11-16, I re-read the main text and appendices and checked every statement on the Japanese page against the paper. This English page follows that checked Japanese page. Version dates and the license were checked on the paper's arXiv page.</li>
+    <li>On 2026-11-16, microtaro re-read the main text and appendices and checked every statement on the Japanese page against the paper. This English page follows that checked Japanese page. Version dates and the license were checked on the paper's arXiv page.</li>
     <li>PRs per developer in April 2026 are 44.3 in the main text and 43.4 in Supplementary Table VIII and the table in Appendix E-C. This page uses the main text's 44.3.</li>
     <li>The effect range “+0.13 to +0.35” is the main text's wording. The table in Appendix D-D also shows +0.369 (the estimate without never-adopters), which falls slightly outside that range.</li>
     <li>All charts are redrawn from the numbers; none of the paper's figures are copied. The “before” and “after” points for review shares are the ends of the paper's figures, since the text does not give months.</li>
