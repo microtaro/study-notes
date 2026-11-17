@@ -18,6 +18,10 @@
             name: { ja: 'AI が書く速さに、人のレビューが追いつかない', en: 'AI Writes Faster Than Humans Can Review' },
             path: 'topics/ai-trust/papers/2x-mandate.html',
           },
+          {
+            name: { ja: '自動化にどこまで頼るかは、信頼が導く', en: 'Trust in Automation' },
+            path: 'topics/ai-trust/papers/trust-in-automation.html',
+          },
         ],
       },
     ],

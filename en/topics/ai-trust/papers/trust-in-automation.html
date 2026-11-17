@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trust in Automation (paper explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/papers/trust-in-automation.html">
+<link rel="alternate" hreflang="en" href="trust-in-automation.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#model"><span class="n">2</span>Trust and reliance form a loop</a></li>
+    <li><a href="#why"><span class="n">3</span>Why does trust guide reliance? (Q1)</a></li>
+    <li><a href="#appropriate"><span class="n">4</span>What is appropriate trust? (Q2)</a></li>
+    <li><a href="#basis"><span class="n">5</span>What is trust built from, and how does it change over time? (Q3)</a></li>
+    <li><a href="#design"><span class="n">6</span>What design makes trust match capability? (Q4)</a></li>
+    <li><a href="#study"><span class="n">7</span>What this review brings together</a></li>
+    <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the paper's limits</a></li>
+    <li><a href="#reading"><span class="n">9</span>Why results grew only with continued use, read through the trust loop (microtaro's reading)</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/papers/trust-in-automation.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Paper explainer</p>
+  <h1>Trust in Automation</h1>
+  <p class="src"><b>Original paper</b>Lee, See, “Trust in Automation: Designing for Appropriate Reliance,” Human Factors 46(1), 2004, pp. 50–80 (peer reviewed). This page is based on the pre-publication manuscript (the in-press version, 38 pages) posted by a lab at Ohio State University. The license is not CC.
+    <span class="links"><a href="https://csel.eng.ohio-state.edu/productions/intel/research/trust/Lee%20%26%20See%20Trust%20Review.pdf">In-press PDF</a><a href="https://journals.sagepub.com/doi/10.1518/hfes.46.1.50_30392">Published version (Sage page)</a></span></p>
+  <p class="lead">A 2004 review that organizes how far people rely on automation in terms of “trust.” When automation is too complex to understand completely, the authors say, trust is what guides reliance. The goal is not to raise trust but to match it to the automation's true capabilities.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-17 by microtaro and AI. The Japanese page was drafted on 2026-11-16 by microtaro and AI; on the same day, microtaro and AI re-read the full main text of the in-press version, checked the draft against it, and shortened it. Page numbers are those of the in-press version. What the paper says is kept separate from microtaro's reading.<br>Updated 2026-11-17: the link to the published version now goes to the publisher Sage's page instead of the DOI address (doi.org), which had stopped opening. The reading section (9) was rewritten to focus on the link to the first paper.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>This is a review, not a paper reporting a new experiment. It brings together research from organizational, sociological, interpersonal, psychological, and neurological perspectives. Its central questions are grouped here into four. The small grey text says where in the paper each point comes from.</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>Why does trust matter for whether people rely on automation?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Automation has become complex, and unexpected situations arise, so people cannot understand it completely before relying on it. In that situation, trust guides reliance. But trust only guides reliance; it does not determine it.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li><b>Trust stands in for supervision when direct observation is not possible.</b><span class="why">In organizational research, trust takes the place of supervision when people cannot observe directly, and lets fixed procedures be replaced by expectations about the other party's capability.</span><span class="how">From p.4</span></li>
+        <li><b>Trust is an attitude; reliance is a behavior.</b><span class="why">Other factors come between the two, such as workload, time constraints, and self-confidence.</span><span class="how">From pp.5, 20, and 29</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#why">3</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>What is “appropriate trust”?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Trust that matches the automation's true capabilities. How well it matches is judged along three lines: calibration, resolution, and specificity (by function and over time). Trust that exceeds capability leads to misuse; trust that falls short of it leads to disuse.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li><b>Higher trust is not necessarily better trust.</b><span class="why">Failures happen in both directions: accidents in which pilots trusted the autopilot and did not intervene (misuse), and a plant where operators rejected the automatic controls (disuse).</span><span class="how">From pp.2 and 7, and Figure 2</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#appropriate">4</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>What is trust built from, and how does it change over time?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>It is built from information about the automation's performance (what it does), process (how it works), and purpose (why it was built). Trust and reliance form a loop: relying on the automation lets people see how it works, so trust grows; not relying on it keeps that hidden, so trust does not grow. First experiences, the worst behavior, and unpredictable faults weigh heavily.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li><b>Trust has inertia.</b><span class="why">The effect of a fault is largest right after it happens, and the rest carries on over time. The equation describing this change over time explained 60% to 86% of the variance in operators' overall patterns of reliance.</span><span class="how">From pp.22–23</span></li>
+        <li><b>Like trust in people, it develops according to the information available.</b><span class="why">It does not move through stages in a fixed order.</span><span class="how">From p.19</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#basis">5</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>How should automation be designed so that trust matches its capabilities?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Design not to raise trust but to match it to capability. Show past performance, intermediate results, and the purpose and range of use, and also show how capability changes with the situation.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li><b>Appearance moves trust too.</b><span class="why">Trust rises even with display features or humanlike touches that have nothing to do with capability, so these need careful evaluation.</span><span class="how">From pp.26–27</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#design">6</a></p>
+    </div>
+  </div>
+
+  <h3>What the authors want to say</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (the paper's design and conclusion sections)</p>
+      <p class="claim">Complex automation cannot be understood completely before people rely on it, so people rely on it with trust as their guide. The aim, therefore, is not to raise trust but to match it to the automation's true capabilities. To do that, show performance, process, and purpose in a form that fits how trust is formed.</p>
+      <p class="en">“Design for appropriate trust not greater trust.” (p.27)</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">So the authors recommend</p>
+      <ul class="recs">
+        <li><b>Make automation trustable.</b>Show past performance, intermediate results, and the purpose and range of use. Make the mechanism easy to understand.</li>
+        <li><b>Relate context to capability.</b>Show how performance changes from one situation to another. Evaluate how well trust matches capability by calibration, resolution, and specificity.</li>
+        <li><b>Consider organization and culture.</b>Reputation and gossip, individual differences, and cultural differences also change trust and reliance.</li>
+      </ul>
+      <p class="conclusion-note">The authors present these as tentative guidance. More in <a href="#advice">8</a>.</p>
+    </div>
+  </div>
+
+  <h3>The story in one line</h3>
+  <ol class="cycle" aria-label="The story in one line">
+    <li>Automation is complex and cannot be understood completely</li>
+    <li>Trust guides reliance</li>
+    <li>When trust does not match capability: misuse or disuse</li>
+    <li>Trust changes over time with information and experience</li>
+    <li>Design how things are shown so that trust matches capability</li>
+  </ol>
+
+  <h3>What the paper does not answer</h3>
+  <p>Points the authors themselves say need more research:</p>
+  <ul>
+    <li><b>Displays and emotion:</b> how interface design affects the emotional side of trust.</li>
+    <li><b>Trading performance for understandability:</b> which is better — automation that works well but is hard to understand, or automation that works less well but is easy to understand.</li>
+    <li><b>Several people:</b> when several people manage automation together, trust that the others' trust is appropriate (meta trust).</li>
+  </ul>
+</section>
+
+<section id="model">
+  <h2><span class="num">2</span>Trust and reliance form a loop</h2>
+  <div class="key">
+    <p>The authors' conceptual model (Figure 4) draws trust and reliance not as a single decision but as a loop. At every stage of the loop, factors other than trust come in.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Stage</th><th>What happens</th><th>Other factors that act here</th></tr></thead>
+      <tbody>
+        <tr><th>Information</th><td>Through the display, the automation's behavior becomes information about its performance, process, and purpose</td><td>Reputation, gossip, interface design</td></tr>
+        <tr><th>Trust</th><td>Trust changes with the information</td><td>Individual differences in the tendency to trust, organization, culture</td></tr>
+        <tr><th>Intention to rely</th><td>Trust shapes the intention to rely</td><td>Workload, effort, perceived risk, self-confidence</td></tr>
+        <tr><th>Reliance</th><td>Whether people actually rely on it</td><td>Time constraints, configuration errors</td></tr>
+        <tr><th>Next information</th><td>How people rely on the automation changes what they see of its behavior next</td><td>Conditions that change the automation's capability itself, such as weather or maintenance</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">microtaro's restatement, as a table, of the paper's Figure 4 and p.20. The figure itself is not copied.</p>
+</section>
+
+<section id="why">
+  <h2><span class="num">3</span>Why does trust guide reliance? (Q1)</h2>
+  <div class="key">
+    <p>When it is not realistic to understand automation completely before relying on it, trust guides reliance. Trust is an attitude; reliance is a behavior.</p>
+  </div>
+  <ul>
+    <li><b>Definition:</b> trust is an attitude — the expectation that the other party (automation or a person) will help the person who trusts it reach their goals, in a situation that is uncertain and in which that person can be harmed (p.6).</li>
+    <li><b>Separating attitude from behavior:</b> if trust were defined as a behavior, its effect could not be told apart from that of other factors such as workload and self-confidence. Trust stands between beliefs about the automation and the intention to rely on it (p.5).</li>
+    <li><b>People respond to technology as they respond to people:</b> that is why research on trust between people is a foundation for thinking about trust in automation (p.2).</li>
+  </ul>
+</section>
+
+<section id="appropriate">
+  <h2><span class="num">4</span>What is appropriate trust? (Q2)</h2>
+  <div class="key">
+    <p>Trust that matches the automation's capabilities. How well it matches is seen through three measures.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Measure</th><th>What it means</th><th>When it goes wrong</th></tr></thead>
+      <tbody>
+        <tr><th>Calibration</th><td>Whether the level of trust corresponds to the level of capability</td><td>Overtrust (above capability) leads to misuse; distrust (below capability) leads to disuse</td></tr>
+        <tr><th>Resolution</th><td>Whether differences in capability show up as differences in trust</td><td>Trust barely changes even when capability differs a lot</td></tr>
+        <tr><th>Functional specificity</th><td>Whether trust is held separately for each function or mode, not for the automation as a whole</td><td>The record of some functions makes people trust, or doubt, the whole</td></tr>
+        <tr><th>Temporal specificity</th><td>Whether trust keeps up with changes in capability across situations and over time</td><td>When capability changes, trust follows only after a delay</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">microtaro's table, from pp.7–8 and Figure 2 of the paper. The paper treats specificity as one measure and divides it into functional and temporal specificity.</p>
+</section>
+
+<section id="basis">
+  <h2><span class="num">5</span>What is trust built from, and how does it change over time? (Q3)</h2>
+  <div class="key">
+    <p>Trust is built from information on three levels — performance, process, and purpose — and changes as the automation is used. First experiences, the worst behavior, and unpredictable faults have strong and lasting effects.</p>
+  </div>
+
+  <h3>Three levels of information</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Level</th><th>What the information is about</th><th>Closest counterpart between people</th></tr></thead>
+      <tbody>
+        <tr><th>Performance</th><td>What it does: its current and past behavior, reliability, and predictability</td><td>Ability</td></tr>
+        <tr><th>Process</th><td>How it works: whether its mechanism suits the current situation and is likely to reach the goal</td><td>Integrity, consistency</td></tr>
+        <tr><th>Purpose</th><td>Why it was built: whether it is being used within the designers' intent</td><td>Benevolence</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">From pp.11–12 and Table 1 of the paper. When inferences across the levels conflict, trust falls (p.13).</p>
+
+  <h3>How it changes over time</h3>
+  <ul>
+    <li><b>Without reliance, it does not grow:</b> trust grows mainly from seeing how the automation behaves, so in many cases trust does not grow unless people rely on it. Conversely, highly trusted automation is monitored less, and trust can keep growing even when there are occasional faults (p.21).</li>
+    <li><b>It has inertia:</b> the effect of a fault is largest right after it happens, the rest continues over time, and recovery also takes time. The equation describing this change explained 60% to 86% of the variance in operators' overall patterns of reliance (pp.22–23).</li>
+    <li><b>Bad experiences weigh heavily:</b> trust is pulled toward the worst behavior, and first experiences last. Small unpredictable faults lowered trust more than large constant ones. When people knew about the faults in advance, they relied even on faulty automation (p.25).</li>
+    <li><b>A point where trust drops sharply:</b> when reliability falls below a certain level, trust drops sharply, but that level was 90%, 70%, or 60% depending on the system and the situation (p.25).</li>
+  </ul>
+
+  <h3>How it differs from trust in people</h3>
+  <ul>
+    <li>Automation has no intentions, though it embodies the intentions of the people who designed it (p.18).</li>
+    <li>The relationship lacks mutual awareness (symmetry). Final responsibility tends to be felt as lying with the person who delegates (pp.18–19).</li>
+    <li>The order in which trust develops may differ, but this is not a fundamental difference. Trust in both develops according to the information available (p.19).</li>
+  </ul>
+</section>
+
+<section id="design">
+  <h2><span class="num">6</span>What design makes trust match capability? (Q4)</h2>
+  <div class="key">
+    <p>Automation often cannot be observed directly, so how well trust matches its capability depends on what is displayed and how. The authors recommend design that matches trust to capability rather than design that raises trust.</p>
+  </div>
+  <ul>
+    <li><b>What to show:</b> past performance, intermediate results (in a form that makes the mechanism understandable), and the purpose and range of use; and how performance changes with the situation (pp.27–28).</li>
+    <li><b>Take care with presentation:</b> appearance unrelated to capability (photos, color, and so on) also raises trust. Concrete, well-organized displays tend to be trusted more. Making automation humanlike, such as having it talk, can create false expectations (pp.26–27).</li>
+    <li><b>Do not leave people only to monitor:</b> people who monitor highly reliable automation while handling other tasks tend to miss its failures. Inserting a period of manual control improved failure detection afterward (p.24).</li>
+  </ul>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>What this review brings together</h2>
+  <ul>
+    <li><b>Type:</b> a review. It reports no new experiments; it brings earlier research together and presents a conceptual model. All numbers come from the earlier studies it cites.</li>
+    <li><b>Fields covered:</b> research on trust between people from organizational, sociological, interpersonal, psychological, and neurological perspectives, and research on trust in automation.</li>
+    <li><b>Evidence on trust in automation:</b> mostly experiments in microworlds — simplified simulations of real systems. There are also field observations in aviation, ships, process control, and cars (p.18).</li>
+    <li><b>Automation, as used here:</b> technology that actively selects data, transforms information, makes decisions, or controls processes (p.2).</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>This part is left out for teaching purposes.</b> The paper divides how information is taken into trust into three processes — analytic, analogical, and affective — and holds that what finally shapes trust is the affective response (pp.14–17). This page leaves out the detailed discussion of these processes.</p>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>The authors' recommendations and the paper's limits</h2>
+  <p>The recommendations are the three listed under “What the authors want to say” in <a href="#qa">1</a>. The authors present them as tentative guidance.</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>Many areas have little research</th><td>Individual and cultural differences, organizations, and trust among several people have hardly been studied for automation</td></tr>
+        <tr><th>Much of the evidence comes from simulated environments</th><td>Analogical trust arises from long experience, so laboratory results need care when applied to real work settings</td></tr>
+        <tr><th>Carried over from research on trust between people</th><td>Because of differences in intention, symmetry, and how trust develops, the findings need to be applied with care</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>Why results grew only with continued use, read through the trust loop (microtaro's reading)</h2>
+  <div class="note note-view">
+    <p><b>This section is microtaro's reading, not the paper's claim.</b></p>
+  </div>
+  <ul>
+    <li><b>What happened in the first paper.</b> In “<a href="2x-mandate.html">AI Writes Faster Than Humans Can Review</a>”, PRs per person rose only about 12% when people started using AI. Nine months after they started, the count had roughly doubled. Most of the growth came from continued use.</li>
+    <li><b>Read through this paper's framework.</b> Trust grows by relying on the automation and seeing the results; without reliance, it does not grow (<a href="#basis">5</a>). At first, people delegate only a little. As they keep using it, they learn which work they can hand over, and they delegate more. That results grew in step with continued use can be read as this loop at work.</li>
+    <li><b>What cannot be said.</b> The first paper did not measure trust. Its authors ask readers to treat “the longer people use AI, the more output grows” as an association, not as cause and effect, because more productive people may have taken to the tools faster. So it cannot be said that output grew because trust grew.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://journals.sagepub.com/doi/10.1518/hfes.46.1.50_30392">Lee, See, “Trust in Automation: Designing for Appropriate Reliance”</a> Human Factors 46(1), pp. 50–80 (2004); DOI 10.1518/hfes.46.1.50_30392; the license is not CC<span class="use">Both authors were at the University of Iowa. This page is based on the main text of the <a href="https://csel.eng.ohio-state.edu/productions/intel/research/trust/Lee%20%26%20See%20Trust%20Review.pdf">in-press version (38 pages) posted by a lab at Ohio State University</a>. The bibliographic details were checked on PubMed (PMID 15151155)</span></li>
+    <li><a href="../../../../topics/ai-trust/data/trust-in-automation.json">topics/ai-trust/data/trust-in-automation.json</a><span class="use">The definitions, measures, and numbers used on this page, with where each appears in the in-press version (labels in Japanese)</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>The version read is the in-press version. Its wording and page numbers may differ from the published version. Page numbers on this page are those of the in-press version.</li>
+    <li>The numbers (60% to 86%; 90%, 70%, and 60%) are values from earlier studies that the review cites. The original studies were not read.</li>
+    <li>A sentence on p.24 about ratings on the three levels is not used, because the names of the levels in it (product and process) do not match and its meaning is unclear.</li>
+    <li>This paper is not CC, so only one sentence (p.27) is quoted, and the figures and tables are restated in microtaro's own words.</li>
+    <li>On 2026-11-16, microtaro and AI re-read the full main text (pp.1–29) of the in-press version and checked the first draft (written by AI) against it. The description of how a fault's effect plays out over time was corrected to match the paper, and the page was shortened. This English page follows the Japanese page.</li>
+  </ul>
+  <p class="stamp">The text and figures on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Quotations and numbers from the paper belong to the paper's copyright holders.</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

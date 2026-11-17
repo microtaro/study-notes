@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自動化にどこまで頼るかは、信頼が導く（論文の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="trust-in-automation.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/papers/trust-in-automation.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#model"><span class="n">2</span>信頼と頼ることは、輪になっている</a></li>
+    <li><a href="#why"><span class="n">3</span>なぜ、信頼が頼り方を導くのか（Q1）</a></li>
+    <li><a href="#appropriate"><span class="n">4</span>適切な信頼とは何か（Q2）</a></li>
+    <li><a href="#basis"><span class="n">5</span>信頼は、何から作られ、時間とともにどう変わるか（Q3）</a></li>
+    <li><a href="#design"><span class="n">6</span>どう設計すれば、信頼が能力に合うか（Q4）</a></li>
+    <li><a href="#study"><span class="n">7</span>この総説がまとめたもの</a></li>
+    <li><a href="#advice"><span class="n">8</span>著者の提言と、この論文の限界</a></li>
+    <li><a href="#reading"><span class="n">9</span>使い続けないと成果が伸びないことを、信頼の輪で読む（microtaro の読み方）</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/papers/trust-in-automation.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">論文の解説</p>
+  <h1>自動化にどこまで頼るかは、信頼が導く</h1>
+  <p class="src"><b>元の論文</b>Lee, See「Trust in Automation: Designing for Appropriate Reliance」Human Factors 46 巻 1 号（2004）50〜80 ページ（査読あり）。この解説は、Ohio State 大学の研究室が公開している掲載前の原稿（in-press 版、38 ページ）によります。ライセンスは CC ではありません。
+    <span class="links"><a href="https://csel.eng.ohio-state.edu/productions/intel/research/trust/Lee%20%26%20See%20Trust%20Review.pdf">in-press 版の PDF</a><a href="https://journals.sagepub.com/doi/10.1518/hfes.46.1.50_30392">掲載版（Sage のページ）</a></span></p>
+  <p class="lead">人が自動化にどこまで頼るかを、「信頼」で整理した 2004 年の総説です。自動化が複雑で全部を理解できないとき、頼り方を導くのは信頼だ、と著者は言います。目指すのは信頼を高めることではなく、自動化の本当の能力に合わせることです。</p>
+  <p class="stamp">2026-11-16 に下書きを作成（microtaro と AI）。同日、microtaro と AI が in-press 版の本文を全部読み直して見直し、短く書き直しました。ページの番号は in-press 版のものです。論文が言っていることと、microtaro の読み方は分けて書いています。<br>2026-11-17 更新：掲載版へのリンクを、開けなくなっていた DOI のアドレス（doi.org）から、出版社 Sage のページに替えました。読み方の節（9）を、1 本目の論文との関係に絞って書き直しました。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>新しい実験の論文ではなく、組織、社会、対人、心理、神経の研究をまとめた総説です。中心の問いを 4 つにまとめます。灰色の小さな字は、論文のどこから読み取ったかです。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>なぜ、自動化に頼るかどうかに、信頼が効くのか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>自動化が複雑になり、思いがけない場面も起きるので、全部を理解してから頼ることはできない。そのとき信頼が頼り方を導く。ただし信頼は導くだけで、頼り方を決めはしない。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li><b>信頼は、直接見張れないときの監督の代わりになる。</b><span class="why">組織の研究では、信頼は、直接の観察ができないときに監督の代わりをし、決まった手順を、相手の能力への期待で置き換えられるようにする。</span><span class="how">論文の p.4 から</span></li>
+        <li><b>信頼は態度で、頼ることは行動。</b><span class="why">その間には、作業負荷、時間の制約、自信など、ほかの要因が入る。</span><span class="how">論文の p.5、p.20、p.29 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#why">3</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>「適切な信頼」とは何か。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>信頼が、自動化の本当の能力に合っていること。合い方は、較正、分解能、特定性（機能ごと、時間ごと）の 3 つで見る。信頼が能力を上回ると誤用、下回ると不使用になる。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li><b>高い信頼が、良い信頼とは限らない。</b><span class="why">自動操縦を信頼して介入しなかった事故（誤用）と、自動の制御を退けた工場（不使用）の、両方の失敗がある。</span><span class="how">論文の p.2、p.7 と図 2 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#appropriate">4</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>信頼は、何から作られ、時間とともにどう変わるか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>自動化の実績（何をするか）、過程（どう動くか）、目的（なぜ作られたか）の情報から作られる。信頼と頼ることは輪になっていて、頼ると働きが見えて信頼が育ち、頼らないと見えず育たない。最初の経験、最悪の振る舞い、予測できない故障が強く効く。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li><b>信頼には慣性がある。</b><span class="why">故障の影響は直後がいちばん大きく、残りが時間をかけて続く。この時間の変化の式は、頼り方の全体の傾向のばらつきの 60%〜86% を説明した。</span><span class="how">論文の p.22〜23 から</span></li>
+        <li><b>人への信頼と同じく、手に入る情報に応じて育つ。</b><span class="why">決まった順の段階を踏むのではない。</span><span class="how">論文の p.19 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#basis">5</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>どう設計すれば、信頼が自動化の能力に合うか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>信頼を高めるのではなく、能力に合うように設計する。過去の実績、途中の結果、目的と使える範囲を見せ、状況によって能力がどう変わるかも見せる。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li><b>見た目でも信頼は動く。</b><span class="why">能力と関係のない表示の工夫や人らしさでも信頼は上がるので、慎重に評価する。</span><span class="how">論文の p.26〜27 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#design">6</a></p>
+    </div>
+  </div>
+
+  <h3>著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（論文の設計の節と結論の節）</p>
+      <p class="claim">複雑な自動化には、全部を理解してから頼ることはできず、人は信頼を手がかりに頼る。だから、信頼を高めるのではなく、自動化の本当の能力に合わせる。そのために、実績、過程、目的を、信頼が作られる仕組みに合う形で見せる。</p>
+      <p class="en">“Design for appropriate trust not greater trust.”（p.27）</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">だから著者は、次のことを勧めています</p>
+      <ul class="recs">
+        <li><b>自動化を、信頼を合わせやすくする。</b>過去の実績、途中の結果、目的と使える範囲を見せる。仕組みを分かりやすくする。</li>
+        <li><b>状況と能力を結びつける。</b>どんな状況で実績がどう変わるかを見せる。信頼の合い方を、較正、分解能、特定性で評価する。</li>
+        <li><b>組織と文化を考える。</b>評判やうわさ、個人差と文化の違いも、信頼と頼り方を変える。</li>
+      </ul>
+      <p class="conclusion-note">著者は、これらを「仮の指針」としています。詳しくは <a href="#advice">8</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>自動化は複雑で、全部は理解できない</li>
+    <li>信頼が頼り方を導く</li>
+    <li>信頼が能力に合わないと、誤用か不使用</li>
+    <li>信頼は情報と経験で、時間をかけて変わる</li>
+    <li>能力に合う信頼になるよう、見せ方を設計する</li>
+  </ol>
+
+  <h3>論文が答えていないこと</h3>
+  <p>著者自身が、研究が足りないと書いていること：</p>
+  <ul>
+    <li><b>表示と感情：</b>画面の作りが、信頼の感情の面にどう効くか。</li>
+    <li><b>性能と分かりやすさの交換：</b>よく働くが分かりにくい自動化と、劣るが分かりやすい自動化の、どちらがよいか。</li>
+    <li><b>複数の人：</b>複数の人で自動化を扱うとき、ほかの人の信頼が適切かどうかへの信頼（メタ信頼）。</li>
+  </ul>
+</section>
+
+<section id="model">
+  <h2><span class="num">2</span>信頼と頼ることは、輪になっている</h2>
+  <div class="key">
+    <p>著者の概念モデル（図 4）は、信頼と頼ることを 1 回の判断ではなく、輪として描いています。輪のどの段階にも、信頼以外の要因が入ります。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>段階</th><th>中身</th><th>ほかに効く要因</th></tr></thead>
+      <tbody>
+        <tr><th>情報</th><td>自動化の働きが、表示を通して、実績・過程・目的の情報になる</td><td>評判、うわさ、表示の作り</td></tr>
+        <tr><th>信頼</th><td>情報から信頼が変わる</td><td>信頼しやすさの個人差、組織、文化</td></tr>
+        <tr><th>頼るつもり</th><td>信頼が、頼るつもりを形づくる</td><td>作業負荷、手間、危険の感じ方、自信</td></tr>
+        <tr><th>頼る</th><td>実際に頼るかどうか</td><td>時間の制約、設定の誤り</td></tr>
+        <tr><th>次の情報</th><td>頼り方しだいで、次に見える自動化の働きが変わる</td><td>天候や整備など、自動化の能力そのものを変える状況</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の図 4 と p.20 を、microtaro の言葉で表に言い直したものです。図そのものは写していません。</p>
+</section>
+
+<section id="why">
+  <h2><span class="num">3</span>なぜ、信頼が頼り方を導くのか（Q1）</h2>
+  <div class="key">
+    <p>全部を理解してから頼ることが現実的でないとき、信頼が頼り方を導きます。信頼は態度で、頼ることは行動です。</p>
+  </div>
+  <ul>
+    <li><b>定義：</b>信頼とは、不確かで、傷つきうる状況で、相手（自動化か人）が、信頼する人の目標の達成を助けてくれるだろう、という態度（p.6）。</li>
+    <li><b>態度と行動を分ける：</b>信頼を行動として定義すると、作業負荷や自信など、ほかの要因の効果と区別できなくなる。信頼は、自動化についての思い込み（信念）と、頼るつもりの間に立つ（p.5）。</li>
+    <li><b>人は技術にも、人に対するように反応する：</b>だから人どうしの信頼の研究が、自動化への信頼を考える土台になる（p.2）。</li>
+  </ul>
+</section>
+
+<section id="appropriate">
+  <h2><span class="num">4</span>適切な信頼とは何か（Q2）</h2>
+  <div class="key">
+    <p>信頼が自動化の能力に合っていることです。合い方を 3 つの物差しで見ます。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>物差し</th><th>意味</th><th>悪いとき</th></tr></thead>
+      <tbody>
+        <tr><th>較正（calibration）</th><td>信頼の高さが、能力の高さに対応しているか</td><td>過信（能力より高い）は誤用に、不信（能力より低い）は不使用につながる</td></tr>
+        <tr><th>分解能（resolution）</th><td>能力の違いを、信頼の違いとして見分けられるか</td><td>能力が大きく違っても、信頼はほとんど変わらない</td></tr>
+        <tr><th>機能の特定性</th><td>信頼が、自動化全体ではなく、働きやモードごとに分かれているか</td><td>一部の働きの実績で、全体を信頼したり疑ったりする</td></tr>
+        <tr><th>時間の特定性</th><td>信頼が、状況や時間による能力の変化についていくか</td><td>能力が変わっても、信頼が遅れてしかついていかない</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の p.7〜8 と図 2 を、microtaro の言葉で表にしたものです。論文は特定性を 1 つの物差しとし、その中を機能と時間に分けています。</p>
+</section>
+
+<section id="basis">
+  <h2><span class="num">5</span>信頼は、何から作られ、時間とともにどう変わるか（Q3）</h2>
+  <div class="key">
+    <p>信頼は、実績・過程・目的の 3 つの層の情報から作られ、使うほどに変わります。最初の経験、最悪の振る舞い、予測できない故障が、強く長く効きます。</p>
+  </div>
+
+  <h3>3 つの層の情報</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>層</th><th>何についての情報か</th><th>人どうしで近いもの</th></tr></thead>
+      <tbody>
+        <tr><th>実績（performance）</th><td>何をするか。今と過去の働き、信頼性、予測のしやすさ</td><td>能力</td></tr>
+        <tr><th>過程（process）</th><td>どう動くか。仕組みが今の状況に合っていて、目標を達成できそうか</td><td>誠実さ、一貫性</td></tr>
+        <tr><th>目的（purpose）</th><td>なぜ作られたか。設計した人の意図の範囲で使われているか</td><td>善意</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の p.11〜12 と表 1 から。層どうしの推論が食い違うと、信頼は下がります（p.13）。</p>
+
+  <h3>時間とともにどう変わるか</h3>
+  <ul>
+    <li><b>頼らないと育たない：</b>信頼は主に働きを見て育つので、多くの場合、頼らないと信頼は育たない。逆に、強く信頼された自動化は見張られにくく、たまの故障があっても信頼が育ち続けることがある（p.21）。</li>
+    <li><b>慣性がある：</b>故障の影響は直後がいちばん大きく、残りが時間をかけて続き、戻るのも時間がかかる。この変化を表す式は、頼り方の全体の傾向のばらつきの 60%〜86% を説明した（p.22〜23）。</li>
+    <li><b>悪い経験が強く効く：</b>信頼は最悪の振る舞いに引っぱられ、最初の経験が長く残る。予測できない小さな故障は、一定の大きな故障より信頼を下げた。故障を前もって知っていれば、人は故障のある自動化にも頼った（p.25）。</li>
+    <li><b>急に落ちる境目：</b>信頼性がある水準を下回ると信頼は急に下がるが、その水準は 90%、70%、60% と、システムと状況しだいだった（p.25）。</li>
+  </ul>
+
+  <h3>人への信頼との違い</h3>
+  <ul>
+    <li>自動化には意図がない。ただし設計した人の意図を宿している（p.18）。</li>
+    <li>互いを意識し合う関係（対称性）がない。最終の責任は、任せる人の側にあると感じられやすい（p.18〜19）。</li>
+    <li>育つ順が違いうるが、根本の違いではない。どちらの信頼も、手に入る情報に応じて育つ（p.19）。</li>
+  </ul>
+</section>
+
+<section id="design">
+  <h2><span class="num">6</span>どう設計すれば、信頼が能力に合うか（Q4）</h2>
+  <div class="key">
+    <p>自動化を直接見られないことが多いので、信頼の合い方は、何をどう表示するかで決まります。著者は、信頼を高めるのではなく、能力に合わせる設計を勧めました。</p>
+  </div>
+  <ul>
+    <li><b>見せるもの：</b>過去の実績、途中の結果（仕組みを分かる形で）、目的と使える範囲。状況によって実績がどう変わるか（p.27〜28）。</li>
+    <li><b>見せ方に注意：</b>能力と関係のない見た目（写真、配色など）でも信頼は上がる。具体的でまとまった表示ほど信頼されやすい。話しかけるなど人らしくすると、誤った期待を生みうる（p.26〜27）。</li>
+    <li><b>見張りだけにしない：</b>信頼性の高い自動化を、ほかの仕事を抱えながら見張ると、故障を見落としやすい。いったん手動に戻す時間を挟むと、その後の故障の発見が良くなった（p.24）。</li>
+  </ul>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>この総説がまとめたもの</h2>
+  <ul>
+    <li><b>種類：</b>総説。新しい実験はなく、先行研究をまとめて概念モデルを示した。数値はすべて、引用した先行研究のもの。</li>
+    <li><b>まとめた分野：</b>組織、社会、対人、心理、神経の研究での人どうしの信頼と、自動化への信頼の研究。</li>
+    <li><b>自動化への信頼の証拠：</b>多くは、実際のシステムを簡単にした模擬環境（microworld）での実験。航空、船、工程制御、自動車の現場の観察もある（p.18）。</li>
+    <li><b>ここでの自動化：</b>データを選ぶ、情報を変換する、決める、工程を制御する、のどれかを能動的に行う技術（p.2）。</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>論文は、情報が信頼に取り込まれる過程を、分析、類推、感情の 3 つに分け、最後に信頼を形づくるのは感情の反応だ、としています（p.14〜17）。この解説では、この部分の細かい議論を省きました。</p>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>著者の提言と、この論文の限界</h2>
+  <p>提言は、<a href="#qa">1</a> の「著者が言いたいこと」の 3 つです。著者はこれを「仮の指針」としています。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>研究が少ない領域が多い</th><td>個人差と文化、組織、複数の人での信頼は、自動化についての研究がほとんどない</td></tr>
+        <tr><th>証拠の多くは模擬環境</th><td>類推による信頼は長い経験から生まれるので、実験室の結果を現場に当てはめるには注意がいる</td></tr>
+        <tr><th>人どうしの研究からの当てはめ</th><td>意図、対称性、育ち方の違いがあるので、慎重に当てはめる必要がある</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>使い続けないと成果が伸びないことを、信頼の輪で読む（microtaro の読み方）</h2>
+  <div class="note note-view">
+    <p><b>この節は、microtaro の読み方です。</b>論文が言っていることではありません。</p>
+  </div>
+  <ul>
+    <li><b>1 本目の論文で起きたこと。</b>「<a href="2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a>」では、1 人あたりの変更の数が、AI を使い始めた時点では約 12% 増えただけでした。使い始めて 9 か月で、約 2 倍になりました。伸びた分の大半は、使い続けたことによるものでした。</li>
+    <li><b>この論文の枠組みで読むと。</b>信頼は、頼ってみて結果を見ることで育ちます。頼らないと育ちません（<a href="#basis">5</a>）。使い始めは、任せる範囲が小さい。使い続けるうちに、どの仕事なら任せられるかが分かり、任せる範囲が広がる。成果が使い続けた分だけ伸びたのは、この輪が回った結果と読めます。</li>
+    <li><b>言えないこと。</b>1 本目の論文は、信頼を測っていません。著者は、使い続けるほど伸びることを、原因と結果ではなく、関係として読むよう書いています。生産的な人ほど早く使い込んだのかもしれないからです。だから、「信頼が育ったから伸びた」とまでは言えません。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://journals.sagepub.com/doi/10.1518/hfes.46.1.50_30392">Lee, See「Trust in Automation: Designing for Appropriate Reliance」</a>　Human Factors 46 巻 1 号 50〜80 ページ（2004）、DOI 10.1518/hfes.46.1.50_30392、ライセンスは CC ではない<span class="use">所属は 2 人とも Iowa 大学。この解説は、<a href="https://csel.eng.ohio-state.edu/productions/intel/research/trust/Lee%20%26%20See%20Trust%20Review.pdf">Ohio State 大学の研究室が公開している in-press 版（38 ページ）</a>の本文によります。書誌は PubMed（PMID 15151155）で確かめました</span></li>
+    <li><a href="../data/trust-in-automation.json">data/trust-in-automation.json</a><span class="use">この解説で使った定義、物差し、数値と、in-press 版の中の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>読んだのは in-press 版です。掲載版とは、言い回しやページが違う可能性があります。ページの番号は in-press 版のものです。</li>
+    <li>数値（60%〜86%、90%・70%・60%）は、総説が引用した先行研究の値です。元の研究は読んでいません。</li>
+    <li>p.24 の、3 つの層の評定についての文は、層の名前（product と process）が食い違っていて意味が通らないので、使っていません。</li>
+    <li>この論文は CC ではないので、引用は 1 文（p.27）だけにし、図と表は microtaro の言葉で言い直しました。</li>
+    <li>2026-11-16、最初の下書き（AI が作成）を、microtaro と AI が in-press 版の本文（p.1〜29）を全部読み直して見直しました。故障の影響の時間の書き方を原文どおりに直し、全体を短くしました。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。論文から引用した英文と数値は、論文の著作権者に属します。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>
