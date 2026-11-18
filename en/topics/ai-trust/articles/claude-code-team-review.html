@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the Claude Code team does code review (article explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/articles/claude-code-team-review.html">
+<link rel="alternate" hreflang="en" href="claude-code-team-review.html">
+<style>
+  /* This page only: mark the row in the layers table where people are involved */
+  .t-layers td.who { white-space: nowrap; }
+  .t-layers tr.hum th, .t-layers tr.hum td { background: var(--b-tint); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#numbers"><span class="n">2</span>What the article's numbers compare</a></li>
+    <li><a href="#goal"><span class="n">3</span>What the team aims for, and how it measures it (Q1)</a></li>
+    <li><a href="#layers"><span class="n">4</span>The layers of checks a change passes through (Q2)</a></li>
+    <li><a href="#approval"><span class="n">5</span>Human approval is set by the change's risk (Q3)</a></li>
+    <li><a href="#rounds"><span class="n">6</span>Improving the AI reviewer and ending the back-and-forth (Q4)</a></li>
+    <li><a href="#humans"><span class="n">7</span>The work that stays with people when machines do the reading (Q5)</a></li>
+    <li><a href="#scope"><span class="n">8</span>What the article covers</a></li>
+    <li><a href="#advice"><span class="n">9</span>The authors' advice and the limits the article admits</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/articles/claude-code-team-review.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Article explainer</p>
+  <h1>How the Claude Code team does code review</h1>
+  <p class="src"><b>Original article</b>Addy Osmani, Morgan Westlee Lunt, Qing Wang, “How the Claude Code team does code review,” claude.dev Blog (Engineering), 2026-10-15. An article in which Anthropic's Claude Code team describes its own practice. It is not a peer-reviewed paper. The article page shows no license.
+    <span class="links"><a href="https://claude.dev/blog/solving-code-review-at-anthropic/">Original article (claude.dev)</a></span></p>
+  <p class="lead">About 90% of Claude Code's code is written by Claude. That is more than people can review by reading every line. The article describes how the Claude Code team kept review but moved most of the reading to machines, and limited human approval to the changes that carry risk.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-18 by microtaro and AI. The Japanese page was drafted on 2026-11-18 by microtaro and AI, and its numbers and facts were checked against the original article the same day. What the article says is arranged in the order of the questions set on this page, not in the order of the article's sections.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>This is not a research paper. It is one team's account of how it works. The questions the article answers are grouped here into five. The small grey text says which section of the article each point comes from (section names as in the original).</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>What does the Claude Code team aim for in code review, and how does it measure it?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>To cut the time people spend on review without more reverts or incidents. The target is for nearly every PR (a request to merge a change) to be merged with at most one person involved, and that person may be the author.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">What in the article the answer rests on</p>
+      <ul class="points">
+        <li><b>Human time comes in two kinds.</b><span class="why">Time spent reviewing, and time spent fixing what bad changes broke. Cutting the first while the second grows only moves human time elsewhere. So the revert rate and the incident rate serve as guardrails.</span><span class="how">From the article's “The scarce resource: human time and attention”</span></li>
+        <li><b>The question changed.</b><span class="why">Not “did a person read the code?” but “what could this change break, and which check, automated or human, is best placed to catch it?”</span><span class="how">From the article's “Rethinking the purpose of code review”</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#goal">3</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>What checks does a change pass through before it is merged and reaches users?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Not a single gate but stacked layers of checks. Before the PR is opened, Claude checks its own work. Every PR then goes through required CI, AI review, security review, and human approval scaled to risk. After merge, flags and a gradual release keep each change easy to roll back.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">What in the article the answer rests on</p>
+      <ul class="points">
+        <li><b>Other agents vote to filter the AI review's findings.</b><span class="why">Several agents look for bugs in parallel, and a separate set of agents votes on whether each finding is real. Only findings with enough votes appear on the PR.</span><span class="how">From item 2 of the article's “Layer by layer”</span></li>
+        <li><b>An unresolved finding blocks the merge.</b><span class="why">Each finding from the bug review or the security review has to be either fixed or closed with a reason.</span><span class="how">From items 2 and 3 of the article's “Layer by layer”</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#layers">4</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>When is human approval needed, and from how many people?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>It depends on the change's risk. Low risk needs nobody, provided the automated checks pass; an ordinary change needs one person; the most dangerous areas need two. The tier is set by what the change contains, not by who wrote it, and an AI approval does not count as a human one.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">What in the article the answer rests on</p>
+      <ul class="points">
+        <li><b>A classifier reads the change and sets the tier.</b><span class="why">A second classifier decides whether a change needs a person regardless of its tier. Paths that owners mark as sensitive, and CI workflow files, always need a person.</span><span class="how">From item 5 of the article's “Layer by layer”</span></li>
+        <li><b>An approval applies to one specific commit.</b><span class="why">If a commit the system cannot vouch for arrives later, such as an agent's push or a merge resolved by hand, the change must be approved again.</span><span class="how">From item 5 of the article's “Layer by layer”</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#approval">5</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>When AI writes the code and AI reviews it, the back-and-forth can go on without end. What did the team do about that?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>It added a cap: after three rounds, the reviewer asks the author to rethink the approach. After the first few rounds, only the new diff is reviewed again. On internal PRs, the share that passed after a single round of review and fixes rose from 65% to 78%.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">What in the article the answer rests on</p>
+      <ul class="points">
+        <li><b>One PR went past 50 rounds.</b><span class="why">A CLI PR went back and forth between review and fixes more than 50 times in one night, until its author stopped it. About 59% of the code flagged again and again had already been there at the first review.</span><span class="how">From the article's “How we make the reviewer better”</span></li>
+        <li><b>Minor findings cost more when the author is an agent.</b><span class="why">A person can wave off a minor comment in seconds, but an agent fixes it. That adds a commit, and the review needs another round.</span><span class="how">From the article's “How we make the reviewer better”</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#rounds">6</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q5</span><p>Once machines do most of the reading, what is left for people?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Deciding whether to build something at all, reviewing risky code and designs that others will copy, reading the evidence from the checks, and owning every change that ships.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">What in the article the answer rests on</p>
+      <ul class="points">
+        <li><b>Read the evidence, and ask for a review when it is not enough.</b><span class="why">Read the test output, the screenshots, and the reviewer's findings. If you cannot say what the checks might miss, do not approve quickly; ask for a proper review.</span><span class="how">From the article's “Where humans stay in the loop”</span></li>
+        <li><b>Someone owns each change, whoever typed it.</b><span class="why">On a PR written by an agent, the person who directed the agent counts as one of the required approvers.</span><span class="how">From the article's “Where humans stay in the loop” and item 5 of “Layer by layer”</span></li>
+      </ul>
+      <p class="qa-more">More in <a href="#humans">7</a></p>
+    </div>
+  </div>
+
+  <h3>What the authors want to say</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (the article's opening and its last section, “Where this is going”)</p>
+      <p class="claim">Review was not dropped. Most of the reading moved to machines, human time and attention went to where the risk is, and mistakes became quick to find and undo. The goal stays the same: less human time per change, and no more reverts than now.</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">So, for teams that want to adopt this, the authors recommend the following</p>
+      <ul class="recs">
+        <li><b>Before the PR: give the agent checks it can run itself.</b>Write how to check the work in a short CLAUDE.md, and run formatting and lint through hooks. Run a review locally as well. Move review comments you keep writing into REVIEW.md.</li>
+        <li><b>On every PR: stack checks that can block the merge.</b>Make CI required, add AI review and automated security review, and resolve every finding before merging. Match the review effort to the risk, and cap the number of rounds. Start the AI reviewer on one repository and tune REVIEW.md for a few weeks before expanding.</li>
+        <li><b>Approval: write down the risk tiers.</b>Set the tier by the change, start strict, and relax as evidence comes in. Make sure authentication, billing, CI and release workflows, and installers always need a person. Do not let bot approvals stand in for human ones, and withdraw approvals when new commits arrive.</li>
+        <li><b>After merge: keep changes easy to undo, and measure.</b>Use a merge queue, flags, internal use first, a gradual release, and rollback in one step. Turn incidents and reverts into a set of test cases, and re-score the reviewer whenever it changes. Measure human time, with the revert and incident rates as guardrails.</li>
+      </ul>
+      <p class="conclusion-note">The list in the article's “How you can adopt this process,” regrouped into four points. More in <a href="#advice">9</a>.</p>
+    </div>
+  </div>
+
+  <h3>How the argument runs</h3>
+  <ol class="cycle" aria-label="How the argument runs">
+    <li>Changes surge; people cannot read every line</li>
+    <li>Ask what the change could break</li>
+    <li>Stack the checks; machines do the reading</li>
+    <li>Scale human approval to risk</li>
+    <li>Find mistakes fast and undo them</li>
+  </ol>
+
+  <h3>What the article does not answer</h3>
+  <p>What the authors themselves say is not built or not settled yet:</p>
+  <ul>
+    <li><b>Automatic tightening:</b> there is no mechanism yet (a circuit breaker) that tightens approval automatically when the revert or incident numbers move.</li>
+    <li><b>Noticing bad merges:</b> this still depends on the author, the on-call engineer, and dashboards.</li>
+    <li><b>How far merging without people can go:</b> code owners decide which low-risk changes may merge on automated checks alone, and that line is still moving.</li>
+  </ul>
+</section>
+
+<section id="numbers">
+  <h2><span class="num">2</span>What the article's numbers compare</h2>
+  <div class="key">
+    <p>Every number in the article sets internal records from before a point in time against records from after it. The article does not give the number of PRs, or say how other factors were handled. The numbers show that things changed; the article itself does not claim the process caused the change.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Number</th><th>What was counted</th><th>How it was compared</th><th>Not stated</th></tr></thead>
+      <tbody>
+        <tr><th>Merged PRs more than doubled; the revert share fell by more than 40%</th><td>The Claude Code repository</td><td>Two points in time, June and September. The two numbers are given side by side</td><td>The number of PRs, how the revert share was counted, and why reverts fell</td></tr>
+        <tr><th>PRs with substantive findings, 16% to 54%</th><td>Internal PRs (the repository is not named)</td><td>Before and after the start of the AI review's research preview</td><td>Dates and the number of PRs</td></tr>
+        <tr><th>PRs passing in one round, 65% to 78%, and two other numbers</th><td>Internal PRs (the repository is not named)</td><td>Before and after the changes that cut review rounds</td><td>The period and the number of PRs</td></tr>
+        <tr><th>More than 50 rounds; about 59%</th><td>One CLI PR, and the code flagged repeatedly in it</td><td>An examination of a single case</td><td>Whether other PRs looked the same</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">A table compiled by microtaro and AI from how the article's text and figures present the numbers. “Not stated” means it was not found in the article's text.</p>
+</section>
+
+<section id="goal">
+  <h2><span class="num">3</span>What the team aims for, and how it measures it (Q1)</h2>
+  <div class="key">
+    <p>The aim is for nearly every PR to be merged with at most one person involved. Whether human time was really saved is checked by watching that the revert and incident rates do not rise.</p>
+  </div>
+  <ul>
+    <li><b>What set it off was volume:</b> in Anthropic's monorepo (one repository holding much of the company's code), changes per day went from about 2,500 in May to more than 30,000 in September. The Claude Code repository is separate, but it grew in the same way.</li>
+    <li><b>Scope:</b> the Claude Code repository, which holds the CLI, the desktop and web apps, and the mobile apps.</li>
+    <li><b>What is measured:</b> human approvals per PR (the median and the 95th percentile), human comments, and how long PRs wait for people.</li>
+    <li><b>Guardrails:</b> the revert rate (a revert undoes a change that was merged) and the incident rate. If review time falls but time spent fixing breakage rises, human time has only moved.</li>
+  </ul>
+</section>
+
+<section id="layers">
+  <h2><span class="num">4</span>The layers of checks a change passes through (Q2)</h2>
+  <div class="key">
+    <p>Every layer catches some problems and lets others through. Stacking layers leaves fewer problems that get through all of them, and whatever still gets through is found and rolled back quickly. People are involved only in the approval layer, which is scaled to risk.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide t-layers">
+      <thead><tr><th>When</th><th>Check</th><th>What it does</th><th class="who">Who</th></tr></thead>
+      <tbody>
+        <tr><th>Before the PR</th><td>Checking the work</td><td>Claude runs the tests, the build, and the linters, and shows the results. A subagent with a fresh context reads the diff</td><td class="who">Automated</td></tr>
+        <tr><th rowspan="4">On every PR</th><td>Required CI</td><td>Lint, types, tests on every platform, the build. If it fails, the change cannot merge</td><td class="who">Automated</td></tr>
+        <tr><td>AI review</td><td>Several agents look for bugs; findings are filtered by a vote among other agents</td><td class="who">Automated</td></tr>
+        <tr><td>Security review</td><td>A separate automated review. An unresolved finding blocks the merge</td><td class="who">Automated</td></tr>
+        <tr class="hum"><td>Approval scaled to risk</td><td>Depending on the change's risk tier, zero, one, or two people must approve (<a href="#approval">5</a>)</td><td class="who">People (by tier)</td></tr>
+        <tr><th>At merge</th><td>Merge queue</td><td>Re-runs the checks with the change applied to the latest main. This stops two PRs that each pass alone from breaking main together</td><td class="who">Automated</td></tr>
+        <tr><th>After merge</th><td>Flags, internal use, gradual release</td><td>New behavior goes behind a flag and is used first by Anthropic employees. Releases reach the latest channel first and the stable channel later</td><td class="who">Automated</td></tr>
+        <tr><th>When something breaks</th><td>Find it fast and undo it</td><td>Flags can be switched off without a deploy. There is a weekly on-call rotation. Incident reviews ask which layer should have caught the problem</td><td class="who">People and automation</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">A table in which microtaro and AI regrouped the article's “The life of a change” and items 1–7 of “Layer by layer.” The article's figures are not copied. The shaded row is the layer where people are involved.</p>
+
+  <h3>Inside the AI review</h3>
+  <ul>
+    <li><b>What it looks at:</b> the diff, read against the whole repository and the intent stated in the PR.</li>
+    <li><b>How findings are filtered:</b> several agents look for bugs in parallel, and a separate set of agents votes on each finding. Only findings with enough votes are posted. Findings about style, diagnostics, or cleanup alone are dropped. The team adopted this filter after A/B testing it on its own PRs.</li>
+    <li><b>Labels:</b> each finding carries one of Important, Nit, or Pre-existing. Pre-existing marks a bug the PR did not introduce, so that it does not look like the author's fault.</li>
+    <li><b>Responding to findings:</b> fix it, or close it with a reason. While it stays open, the change cannot merge.</li>
+    <li><b>Depth:</b> administrators choose Quick, Standard, or Deep for each repository.</li>
+    <li><b>Existing code too:</b> the review agents also go through existing code every night.</li>
+  </ul>
+  <p>When the AI review's research preview started, the share of internal PRs with substantive findings rose from 16% to 54%. PRs over 1,000 lines usually get findings; small PRs usually get none. The public product is Code Review for Claude Code (on the Team and Enterprise plans), and <code>/code-review</code> runs a lighter version of it locally.</p>
+</section>
+
+<section id="approval">
+  <h2><span class="num">5</span>Human approval is set by the change's risk (Q3)</h2>
+  <div class="key">
+    <p>A documentation fix and a change to the auto-update mechanism carry very different risks. So the number of human approvals changes with the change's risk tier. What sets the tier is the content of the change, not the person who wrote it.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Tier</th><th>What kind of change</th><th>Human approval</th></tr></thead>
+      <tbody>
+        <tr><th>Low</th><td>Documentation, wording, internal-only features, changes that only add something behind a flag</td><td>Not needed (if the automated review and security checks pass)</td></tr>
+        <tr><th>Medium</th><td>Ordinary product changes, including changes to sensitive areas such as caching, auto-update, and system prompts</td><td>1 person</td></tr>
+        <tr><th>High</th><td>The most dangerous code: a small set of paths that always need two people</td><td>2 people</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">The table in item 5 of the article's “Layer by layer,” restated in microtaro and AI's own words.</p>
+  <ul>
+    <li><b>A classifier sets the tier:</b> one classifier reads the change and picks a tier, and another decides whether the change needs a person regardless of tier. Paths that owners mark as sensitive, and CI workflow files, always need a person.</li>
+    <li><b>The light path is for trusted authors only:</b> anyone outside the repository's trusted authors (mainly the team that owns the code) needs a second approval.</li>
+    <li><b>AI approvals do not count:</b> an agent's approval does not count as a human approval. Automated review can pass a low-risk change, but it cannot fill a slot that requires a person.</li>
+    <li><b>The person who directed the work is accountable:</b> on a PR written by an agent, the person who directed the agent counts as one of the required approvers.</li>
+    <li><b>Approval is per commit:</b> an approval applies to one specific commit. If a new commit arrives that the system cannot vouch for (an agent's push, a merge resolved by hand), the change must be approved again.</li>
+  </ul>
+</section>
+
+<section id="rounds">
+  <h2><span class="num">6</span>Improving the AI reviewer and ending the back-and-forth (Q4)</h2>
+  <div class="key">
+    <p>The reviewer is tested every day on a set of cases built from past incidents, and the team also measures how many unhelpful findings it produces. For back-and-forth between AIs that never ends, the team added a cap on rounds and other changes, and more PRs now pass after a single round of fixes.</p>
+  </div>
+
+  <h3>How the reviewer's quality is measured</h3>
+  <ul>
+    <li><b>Incidents become test cases:</b> the team gathered PRs that had caused incidents or reverts, together with the fixes that followed, and engineers who know the code confirmed each bug and where it was. The reviewer is tested on this set (an eval) every day.</li>
+    <li><b>Unhelpful findings are measured too:</b> catching many bugs is easy if you may also report lots of things that are not bugs. So the team sorts findings by how people responded: fixed it, said it was wrong, said it was deliberate, or found it did not matter. It also runs the reviewer on PRs known to be clean and counts reports that could lead to harmful fixes.</li>
+    <li><b>Order of priority:</b> first, catching real bugs; second, reducing the number of review rounds.</li>
+  </ul>
+
+  <h3>When review rounds do not end</h3>
+  <ul>
+    <li><b>What happened:</b> a CLI PR went back and forth between review and fixes more than 50 times in one night, until its author stopped it.</li>
+    <li><b>What the team found:</b> running git blame (a command that shows when and by whom each line was written) on the repeatedly flagged code showed that about 59% of it had been there since the first review. The reviewer was not finding new bugs from that PR; it was finding old bugs, a few more each time.</li>
+    <li><b>What changed:</b> after three rounds, the reviewer asks the author to step back and rethink the approach. After the first few rounds, only the new diff is reviewed again. The reviewer names the kind of bug rather than one spot, so that every instance gets fixed. Findings already raised are not repeated.</li>
+    <li><b>What is tracked:</b> the number of rounds until a PR passes, alongside recall (the share of real bugs the reviewer catches).</li>
+  </ul>
+
+  <figure class="chart" aria-labelledby="ch-rounds">
+    <p class="chart-title" id="ch-rounds">Before and after the changes that cut rounds: review rounds on internal PRs</p>
+    <p class="chart-sub">Hollow dots are before; filled dots are after. The top two are shares and the bottom one is a count, on different scales.</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw before"></i>Before</li>
+      <li><i class="sw after"></i>After</li>
+    </ul>
+    <p class="db-group">Shares</p>
+    <div class="db-row plain" title="PRs passing after one round of review and fixes: 65% → 78%">
+      <div class="db-head"><span>Pass after one round of review and fixes</span><span class="db-vals">65% → 78%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:65%;width:13%"></span><span class="db-dot before" style="left:65%"></span><span class="db-dot after" style="left:78%"></span></div>
+    </div>
+    <div class="db-row plain" title="PRs needing five or more rounds: 8.9% → 1.5%">
+      <div class="db-head"><span>Need five or more rounds</span><span class="db-vals">8.9% → 1.5%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:1.5%;width:7.4%"></span><span class="db-dot before" style="left:8.9%"></span><span class="db-dot after" style="left:1.5%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0%</span><span style="left:50%">50%</span><span style="left:100%">100%</span></div>
+    <p class="db-group">Count</p>
+    <div class="db-row plain" title="Reviews until a PR passes (mean): 2.08 → 1.32">
+      <div class="db-head"><span>Reviews until a PR passes (mean)</span><span class="db-vals">2.08 → 1.32</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:44%;width:25.33%"></span><span class="db-dot before" style="left:69.33%"></span><span class="db-dot after" style="left:44%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0</span><span style="left:33.33%">1</span><span style="left:66.67%">2</span><span style="left:100%">3</span></div>
+    <figcaption>Rebuilt from the numbers in the text and figure of the article's “How we make the reviewer better.” The article's figure itself is not copied. The article does not give the period or the number of PRs (<a href="#numbers">2</a>). The numbers are in <a href="../../../../topics/ai-trust/data/claude-code-team-review.json">data/claude-code-team-review.json</a>.</figcaption>
+  </figure>
+
+  <h3>Instructions for the reviewer: CLAUDE.md and REVIEW.md</h3>
+  <ul>
+    <li><b>CLAUDE.md:</b> describes what the project is (its technology, conventions, goals, and what it does not do). It is loaded on every review, so it is kept short and points to other documents for detail. The reviewer also flags code that breaks its rules, and changes that would make it out of date.</li>
+    <li><b>REVIEW.md:</b> written by code owners to tell the reviewer what matters in their area. The article says a good REVIEW.md is short and defines what “failure” means in that repository. Its examples: for documentation, failure means stating something untrue; for configuration, sending things to the wrong place. It caps the number of minor comments (nits), lists paths that need no review, asks for file-and-line evidence instead of guesses from names, and has the summary start with counts and state plainly when there is nothing to fix.</li>
+    <li><b>Fix repeats at the source:</b> if the same finding keeps coming up, change a skill, a lint rule, or an instruction file. When a review misses something, ask what the model did not have in front of it, and put the fix into CLAUDE.md, a skill, or a new check.</li>
+  </ul>
+</section>
+
+<section id="humans">
+  <h2><span class="num">7</span>The work that stays with people when machines do the reading (Q5)</h2>
+  <div class="key">
+    <p>What stays with people is judgment and accountability. They decide whether to build something, look at the risky areas and at designs others will copy, read the evidence from the checks, and own the changes that ship.</p>
+  </div>
+  <ul>
+    <li><b>Deciding whether to build it:</b> direction, taste, and scope.</li>
+    <li><b>Reviewing risky code:</b> billing, auto-update, CI workflows, and the like.</li>
+    <li><b>Reviewing designs others will copy:</b> designs that other people will take as a template.</li>
+    <li><b>Reading the evidence:</b> test output, the commands run and their results, screenshots, and the reviewer's findings. If you cannot say what the checks might miss, do not approve quickly; ask for a proper review.</li>
+    <li><b>Owning the outcome:</b> whoever typed it, every change that ships has someone accountable for it.</li>
+  </ul>
+
+  <h3>The person who merged it fixes it</h3>
+  <p>When a small or medium change causes a problem, the team's rule is that the person who merged it usually fixes it (in the article's words, “You land it, you own it”). This is not about blame: the person fixing it knows the most about it. The article gives four reasons the rule works.</p>
+  <ul>
+    <li>Changes are small, so they are easy to review, to trace, and to revert.</li>
+    <li>Flags, reverts, and gradual releases make most mistakes undoable.</li>
+    <li>The bar depends on how far the damage could spread: code with a wider impact gets more people and more checks.</li>
+    <li>Regressions (things that used to work and stopped) show up quickly through telemetry (data sent back about usage and faults) and internal use.</li>
+  </ul>
+
+  <h3>How understanding of the code is shared</h3>
+  <ul>
+    <li>Besides finding problems, review used to have a second job: spreading understanding of the code across the team. Once machines do most of the reading, the question of how to keep that job done remains.</li>
+    <li>There is no formal mechanism. No one on the team holds all of Claude Code in their head, and no one thinks anyone needs to.</li>
+    <li>To understand a part, people have Claude write an explanation of it, and some have it build a small page with diagrams. Because the team works in Slack channels anyone can see, people can watch what others are building while it is being built.</li>
+  </ul>
+
+  <h3>When the direction changes</h3>
+  <p>Agents make starting work cheap, so some work gets started that should not have been. Usually someone in the channel asks why, points to an earlier decision, or suggests a simpler route, and the author closes or reworks the PR. Because the code was quick to write, the article says, closing the PR does not feel like a loss. Its advice is to raise a different direction early in the thread, not as a blocking comment on a finished PR.</p>
+</section>
+
+<section id="scope">
+  <h2><span class="num">8</span>What the article covers</h2>
+  <ul>
+    <li><b>Type:</b> an article in which one team describes its own practice and internal numbers. Not a research paper, and not peer reviewed.</li>
+    <li><b>Authors:</b> three people at Anthropic (Addy Osmani, Morgan Westlee Lunt, Qing Wang).</li>
+    <li><b>Scope:</b> the Claude Code repository (the CLI, the desktop and web apps, the mobile apps). Some numbers are described only as “internal PRs,” so which repository they come from is unclear (<a href="#numbers">2</a>).</li>
+    <li><b>Point in time:</b> October 2026. The authors say how far merging without people can go is still moving.</li>
+  </ul>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Term</th><th>Meaning on this page</th></tr></thead>
+      <tbody>
+        <tr><th>PR (pull request)</th><td>A request to merge a change. The unit of review and approval</td></tr>
+        <tr><th>Merge</th><td>Taking a PR's change into the main line (main)</td></tr>
+        <tr><th>Revert</th><td>Undoing a change that was merged</td></tr>
+        <tr><th>CI</th><td>A system that runs checks automatically on every change</td></tr>
+        <tr><th>Lint, linter</th><td>Finding mistakes or risky patterns in code by machine; the tool is a linter</td></tr>
+        <tr><th>Merge queue</th><td>A system that lines merges up and checks each against the latest main before it goes in</td></tr>
+        <tr><th>Flag (feature flag)</th><td>A setting that switches new behavior on or off</td></tr>
+        <tr><th>On-call</th><td>A rotation in which people take turns responding to incidents</td></tr>
+        <tr><th>Classifier</th><td>A system that reads a change and decides its kind or risk tier</td></tr>
+        <tr><th>Eval</th><td>A set of problems and correct answers used to measure how well an AI does</td></tr>
+        <tr><th>Nit</th><td>A minor comment that can be left unfixed without harm</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note note-omit">
+    <p><b>This section notes what was left out for teaching purposes.</b>The article also covers how the team uses internal skills, how CI was scaled to the volume of changes (a separate article), remarks by the person who created Claude Code, and what the PR template asks for. This explainer leaves out topics that do not bear on how review works or on the role of people. Links from the article to other articles were not opened.</p>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">9</span>The authors' advice and the limits the article admits</h2>
+  <p>The advice is the four points under “What the authors want to say” in <a href="#qa">1</a>. The article says most of the pieces of this process are available today.</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>No automatic tightening</th><td>Even when the revert or incident numbers move, approval does not tighten on its own. The engineers want this mechanism before they expand merging without people</td></tr>
+        <tr><th>Noticing bad merges depends on people</th><td>It relies on the author, the on-call engineer, and the revert and incident dashboards</td></tr>
+        <tr><th>The scope of merging without people is still moving</th><td>Code owners decide which low-risk changes may merge on automated checks alone, and that is still changing</td></tr>
+        <tr><th>The numbers are one team's internal numbers</th><td>The details of the comparisons and the number of PRs are not given, so whether they carry over to other teams is unknown (<a href="#numbers">2</a>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">The first three are limits the article itself states. The last one was compiled by microtaro and AI from how the article presents its numbers.</p>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://claude.dev/blog/solving-code-review-at-anthropic/">Addy Osmani, Morgan Westlee Lunt, Qing Wang, “How the Claude Code team does code review”</a>　claude.dev Blog (Engineering), 2026-10-15, no license shown<span class="use">The original article for this explainer. It is on claude.dev, not claude.com</span></li>
+    <li><a href="../../../../topics/ai-trust/data/claude-code-team-review.json">data/claude-code-team-review.json</a><span class="use">The numbers used in this explainer, and where they appear in the article</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>On 2026-11-18, the full text of the original article was read and each number and fact in this explainer was checked against it.</li>
+    <li>The numbers (about 90%, more than double, more than 40%, about 2,500 to more than 30,000, 16% to 54%, 1,000 lines, three rounds, more than 50 rounds, about 59%, 65% to 78%, 8.9% to 1.5%, 2.08 to 1.32) and the risk-tier table were checked against the article's text and figures.</li>
+    <li>Where the article says “June to September,” it does not give the year. The article was published in October 2026.</li>
+    <li>The article shows no license, so none of its sentences are copied. The only quotation is the name of a rule (“You land it, you own it”). The figures and tables were rebuilt in microtaro and AI's own words and arrangement.</li>
+    <li>The content is arranged in the order of the questions set on this page, not in the order of the article's sections, and not everything in the article is included (<a href="#scope">8</a>).</li>
+  </ul>
+  <p class="stamp">The text and figures on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Copyright in the original article belongs to its copyright holders.</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

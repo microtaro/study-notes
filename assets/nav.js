@@ -22,6 +22,10 @@
             name: { ja: '自動化にどこまで頼るかは、信頼が導く', en: 'Trust in Automation' },
             path: 'topics/ai-trust/papers/trust-in-automation.html',
           },
+          {
+            name: { ja: 'Claude Code のチームは、AI が書くコードをどうレビューしているか', en: 'How the Claude Code team does code review' },
+            path: 'topics/ai-trust/articles/claude-code-team-review.html',
+          },
         ],
       },
     ],

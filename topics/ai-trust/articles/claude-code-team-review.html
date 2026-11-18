@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code のチームは、AI が書くコードをどうレビューしているか（記事の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="claude-code-team-review.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/articles/claude-code-team-review.html">
+<style>
+  /* このページだけ：確かめの層の表で、人が関わる行に印を付ける */
+  .t-layers td.who { white-space: nowrap; }
+  .t-layers tr.hum th, .t-layers tr.hum td { background: var(--b-tint); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#numbers"><span class="n">2</span>記事の数字は、何と何を比べたものか</a></li>
+    <li><a href="#goal"><span class="n">3</span>何を目指し、何で測っているか（Q1）</a></li>
+    <li><a href="#layers"><span class="n">4</span>1 つの変更が通る確かめの層（Q2）</a></li>
+    <li><a href="#approval"><span class="n">5</span>人の承認は、変更のリスクで決める（Q3）</a></li>
+    <li><a href="#rounds"><span class="n">6</span>AI のレビュー役を良くし、往復を終わらせる（Q4）</a></li>
+    <li><a href="#humans"><span class="n">7</span>機械が読むようになっても、人に残る仕事（Q5）</a></li>
+    <li><a href="#scope"><span class="n">8</span>この記事が書いている対象</a></li>
+    <li><a href="#advice"><span class="n">9</span>著者の勧めと、記事が認めている限界</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/articles/claude-code-team-review.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">記事の解説</p>
+  <h1>Claude Code のチームは、AI が書くコードをどうレビューしているか</h1>
+  <p class="src"><b>元の記事</b>Addy Osmani、Morgan Westlee Lunt、Qing Wang「How the Claude Code team does code review」claude.dev Blog（Engineering）、2026-10-15。Anthropic の Claude Code のチームが、自分たちのやり方を書いた記事です。査読のある論文ではありません。記事のページには、ライセンスの表示がありません。
+    <span class="links"><a href="https://claude.dev/blog/solving-code-review-at-anthropic/">元の記事（claude.dev）</a></span></p>
+  <p class="lead">Claude Code のコードは、約 9 割を Claude が書いています。人が 1 行ずつ読むレビューでは追いつかない量です。この記事は、Claude Code のチームがレビューをやめずに、読む仕事の大半を機械に移し、人の承認をリスクのある変更に絞ったやり方を書いています。</p>
+  <p class="stamp">2026-11-18 に下書きを作成（microtaro と AI）。数字と事実は、同日に元の記事と照らし合わせました。記事が言っていることを、この解説で立てた問いの順に並べ直しています。記事の節の順ではありません。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>新しい研究の論文ではなく、1 つのチームが自分たちのやり方を書いた記事です。記事から読み取れる問いを 5 つにまとめます。灰色の小さな字は、記事のどの節から読み取ったかです（節の名前は原文のまま）。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>Claude Code のチームは、レビューで何を目指し、何で測っているか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>差し戻しと障害を増やさずに、人がレビューに使う時間を減らすこと。ほとんどの PR（変更を取り込んでもらう申し出）を、人が最大 1 人（書いた本人でもよい）関わるだけでマージできるようにする。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった記事の内容</p>
+      <ul class="points">
+        <li><b>人の時間は 2 つある。</b><span class="why">レビューにかける時間と、悪い変更が壊したものを直す時間。前の時間を減らしても後の時間が増えれば、人の時間を別の所へ移しただけになる。だから、差し戻しと障害の率を歯止めにする。</span><span class="how">記事の「The scarce resource: human time and attention」から</span></li>
+        <li><b>問いを変えた。</b><span class="why">「人がコードを読んだか」ではなく、「この変更で何がまずくなりうるか。それを捕まえるのに向いた確かめは、自動か、人か」を問う。</span><span class="how">記事の「Rethinking the purpose of code review」から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#goal">3</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>1 つの変更は、マージされて利用者に届くまでに、どんな確かめを通るか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>関門を 1 つにせず、確かめを層に重ねる。PR を出す前に Claude が自分の作業を確かめ、PR ごとに必須の CI、AI のレビュー、セキュリティのレビュー、リスクに応じた人の承認を通る。マージのあとも、フラグと少しずつの公開で、すぐ戻せるようにしておく。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった記事の内容</p>
+      <ul class="points">
+        <li><b>AI のレビューの指摘は、別のエージェントが投票して絞る。</b><span class="why">複数のエージェントが並行してバグを探し、別のエージェントたちが、指摘ごとに本物かどうかを投票する。十分な票を得た指摘だけが PR に出る。</span><span class="how">記事の「Layer by layer」の 2 から</span></li>
+        <li><b>開いたままの指摘があると、マージできない。</b><span class="why">バグのレビューとセキュリティのレビューの指摘は、直すか、理由を書いて閉じるかのどちらかが要る。</span><span class="how">記事の「Layer by layer」の 2 と 3 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#layers">4</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>人の承認は、いつ、何人要るか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>変更のリスクで決める。リスクが低ければ 0 人（自動の確かめが通れば）、ふつうの変更は 1 人、いちばん危ない所は 2 人。段階は書いた人ではなく変更の中身で決め、AI の承認は人の承認に数えない。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった記事の内容</p>
+      <ul class="points">
+        <li><b>段階は、分類器が変更を読んで決める。</b><span class="why">もう 1 つの分類器が、段階によらず人が要る変更かどうかも見る。持ち主が敏感だと指定したパスと、CI のワークフローのファイルは、いつも人が要る。</span><span class="how">記事の「Layer by layer」の 5 から</span></li>
+        <li><b>承認は、特定の commit に対するもの。</b><span class="why">エージェントの push や、人が手で解いたマージのように、仕組みが中身を保証できない commit があとから入ると、承認し直しになる。</span><span class="how">記事の「Layer by layer」の 5 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#approval">5</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>AI が書き、AI がレビューすると、往復が終わらなくなることがある。どう対処したか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>3 往復したら、やり方を考え直すよう書き手に求める上限を入れ、何回か往復したあとは新しい差分だけを見直すようにした。社内の PR で、1 回の直しで通る割合が 65% から 78% に増えた。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった記事の内容</p>
+      <ul class="points">
+        <li><b>50 往復を超えた PR があった。</b><span class="why">ある CLI の PR が、一晩でレビューと直しを 50 回を超えて往復し、書いた人が止めた。何度も指摘された所の約 59% は、最初のレビューの時点からあったコードだった。</span><span class="how">記事の「How we make the reviewer better」から</span></li>
+        <li><b>書き手がエージェントだと、細かい指摘が高くつく。</b><span class="why">人なら数秒で流せる細かい指摘も、エージェントは直してしまう。そのぶん commit が増え、レビューがもう 1 往復増える。</span><span class="how">記事の「How we make the reviewer better」から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#rounds">6</a></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q5</span><p>機械が読む仕事の大半を引き受けたあと、人に残るのは何か。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>作るかどうかを決めること、危ないコードと人がまねる設計をレビューすること、確かめの証拠を読むこと、出した変更に責任を持つこと。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった記事の内容</p>
+      <ul class="points">
+        <li><b>証拠を読んで、足りなければレビューを頼む。</b><span class="why">テストの出力やスクリーンショット、レビュー役の指摘を読む。確かめが何を見逃しうるかを言えないなら、さっと承認せず、ちゃんとしたレビューを頼む。</span><span class="how">記事の「Where humans stay in the loop」から</span></li>
+        <li><b>誰が打ったかによらず、責任を持つ人がいる。</b><span class="why">エージェントが書いた PR では、エージェントに指示した人が、必要な承認者の 1 人に数えられる。</span><span class="how">記事の「Where humans stay in the loop」と「Layer by layer」の 5 から</span></li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#humans">7</a></p>
+    </div>
+  </div>
+
+  <h3>著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（記事の冒頭と、最後の節「Where this is going」）</p>
+      <p class="claim">レビューをやめたのではない。読む仕事の大半を機械に移し、人の時間と注意はリスクのある所に使い、間違いはすぐ見つけて戻せるようにした。目標は変わらず、変更 1 つあたりの人の時間を減らし、差し戻しは今より増やさないこと。</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">だから著者は、自分のチームで取り入れるときに、次のことを勧めています</p>
+      <ul class="recs">
+        <li><b>PR の前：エージェントが自分で走らせられる確かめを渡す。</b>確かめ方を短い CLAUDE.md に書き、整形と lint は hooks で走らせる。手元でもレビューを走らせる。くり返し書くレビューのコメントは、REVIEW.md に移す。</li>
+        <li><b>PR ごと：マージを止められる確かめを重ねる。</b>CI を必須にし、AI のレビューと自動のセキュリティのレビューを入れ、すべての指摘を片付けてからマージする。レビューの手間はリスクに合わせ、往復には上限を付ける。AI のレビュー役は 1 つのリポジトリで始め、数週間 REVIEW.md を調整してから広げる。</li>
+        <li><b>承認：リスクの段階を書き出す。</b>段階は変更で決め、厳しく始めて、証拠を見ながら緩める。認証、課金、CI とリリースのワークフロー、インストーラーには、いつも人が要るようにする。bot の承認で人の承認を置き換えず、新しい commit が入ったら承認を外す。</li>
+        <li><b>マージのあと：すぐ戻せるようにして、測る。</b>マージキュー、フラグ、まず社内で使うこと、少しずつの公開、1 回の操作で戻せること。障害と差し戻しを評価の問題集にして、レビュー役を変えるたびに採点し直す。人の時間を測り、差し戻しと障害の率を歯止めにする。</li>
+      </ul>
+      <p class="conclusion-note">記事の「How you can adopt this process」の一覧を、4 つにまとめ直したものです。詳しくは <a href="#advice">9</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>変更が急に増え、人が 1 行ずつ読めない</li>
+    <li>「何がまずくなりうるか」を問う</li>
+    <li>確かめを層に重ね、読む仕事は機械に</li>
+    <li>人の承認は、リスクに合わせる</li>
+    <li>間違いは、すぐ見つけて戻す</li>
+  </ol>
+
+  <h3>記事が答えていないこと</h3>
+  <p>著者自身が、まだできていない、まだ決まっていないと書いていること：</p>
+  <ul>
+    <li><b>自動で厳しくする仕組み：</b>差し戻しや障害の数字が動いたときに、承認を自動で厳しくする仕組み（circuit breaker）は、まだない。</li>
+    <li><b>悪いマージに気づくこと：</b>いまも、書いた人、当番、ダッシュボードに頼っている。</li>
+    <li><b>人なしでマージしてよい範囲：</b>どの低リスクの変更を自動の確かめだけでマージしてよいかは、持ち主が決めていて、その線はまだ動いている。</li>
+  </ul>
+</section>
+
+<section id="numbers">
+  <h2><span class="num">2</span>記事の数字は、何と何を比べたものか</h2>
+  <div class="key">
+    <p>記事の数字は、どれも社内の記録を、ある時点の前と後で並べたものです。PR の件数や、ほかの要因をどう扱ったかは書かれていません。数字が示すのは「こう変わった」までで、「この仕組みのおかげで変わった」とは、記事も書いていません。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>数字</th><th>何を数えたか</th><th>比べ方</th><th>書かれていないこと</th></tr></thead>
+      <tbody>
+        <tr><th>マージされた PR が 2 倍超、差し戻しの割合が 4 割超の減少</th><td>Claude Code のリポジトリ</td><td>6 月と 9 月の 2 つの時点。2 つの数字を並べて書いている</td><td>PR の件数。差し戻しの割合の数え方。差し戻しが減った理由</td></tr>
+        <tr><th>中身のある指摘が付く PR が 16% から 54%</th><td>社内の PR（どのリポジトリかは書かれていない）</td><td>AI のレビューの研究プレビューを始めた前と後</td><td>日付と PR の件数</td></tr>
+        <tr><th>1 回で通る PR が 65% から 78% など 3 つ</th><td>社内の PR（どのリポジトリかは書かれていない）</td><td>往復を減らす変更の前と後</td><td>期間と PR の件数</td></tr>
+        <tr><th>50 往復超、約 59%</th><td>1 つの CLI の PR と、そこで何度も指摘された所</td><td>1 つの事例を調べたもの</td><td>ほかの PR でも同じかどうか</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">記事の本文と図の書き方から、microtaro と AI がまとめた表です。「書かれていないこと」は、記事の本文に見つからなかったことです。</p>
+</section>
+
+<section id="goal">
+  <h2><span class="num">3</span>何を目指し、何で測っているか（Q1）</h2>
+  <div class="key">
+    <p>目指すのは、ほとんどの PR を、人が最大 1 人関わるだけでマージすることです。人の時間を減らせたかどうかは、差し戻しと障害の率が上がっていないかで確かめます。</p>
+  </div>
+  <ul>
+    <li><b>きっかけは変更の量：</b>Anthropic の monorepo（会社の多くのコードを 1 か所にまとめたリポジトリ）では、1 日に入る変更が、5 月の約 2,500 から 9 月の 30,000 以上になった。Claude Code のリポジトリは別だが、同じように増えている。</li>
+    <li><b>対象：</b>Claude Code のリポジトリ。CLI、デスクトップと Web のアプリ、モバイルのアプリが入っている。</li>
+    <li><b>測るもの：</b>PR あたりの人の承認の数（中央値と、95 パーセンタイル）、人のコメント、PR が人を待つ時間。</li>
+    <li><b>歯止め：</b>差し戻し（revert。入れた変更を取り消すこと）の率と、障害（incident）の率。レビューの時間が減っても、壊れたものを直す時間が増えれば、人の時間を移しただけになるから。</li>
+  </ul>
+</section>
+
+<section id="layers">
+  <h2><span class="num">4</span>1 つの変更が通る確かめの層（Q2）</h2>
+  <div class="key">
+    <p>どの層にも、捕まえる問題と通してしまう問題があります。層を重ねて、全部を通り抜ける問題を減らし、それでも通ったものは、すぐ見つけて戻します。人が関わるのは、リスクに応じた承認の層だけです。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide t-layers">
+      <thead><tr><th>いつ</th><th>確かめ</th><th>何をするか</th><th class="who">誰が</th></tr></thead>
+      <tbody>
+        <tr><th>PR を出す前</th><td>作業の確かめ</td><td>Claude がテスト、ビルド、linter を走らせ、結果を見せる。新しいコンテキストのサブエージェントが差分を読む</td><td class="who">自動</td></tr>
+        <tr><th rowspan="4">PR ごと</th><td>必須の CI</td><td>lint、型、全プラットフォームでのテスト、ビルド。通らなければマージできない</td><td class="who">自動</td></tr>
+        <tr><td>AI のレビュー</td><td>複数のエージェントがバグを探し、別のエージェントたちの投票で絞った指摘を出す</td><td class="who">自動</td></tr>
+        <tr><td>セキュリティのレビュー</td><td>別の自動のレビュー。開いたままの指摘があるとマージできない</td><td class="who">自動</td></tr>
+        <tr class="hum"><td>リスクに応じた承認</td><td>変更のリスクの段階で、人の承認が 0 人、1 人、2 人になる（<a href="#approval">5</a>）</td><td class="who">人（段階による）</td></tr>
+        <tr><th>マージするとき</th><td>マージキュー</td><td>最新の main に変更を当てた状態で、確かめをやり直す。別々なら通る 2 つの PR が、合わさって main を壊すのを防ぐ</td><td class="who">自動</td></tr>
+        <tr><th>マージのあと</th><td>フラグ、社内での利用、少しずつの公開</td><td>新しい動きはフラグの裏に入れ、まず Anthropic の社員が使う。公開は latest のチャンネルが先で、stable のチャンネルが後</td><td class="who">自動</td></tr>
+        <tr><th>壊れたら</th><td>すぐ見つけて戻す</td><td>フラグはデプロイなしで切れる。週替わりの当番がいる。障害の振り返りでは、どの層で捕まえるべきだったかを問う</td><td class="who">人と自動</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">記事の「The life of a change」と「Layer by layer」の 1〜7 を、microtaro と AI が表にまとめ直したものです。記事の図そのものは写していません。色の付いた行が、人が関わる層です。</p>
+
+  <h3>AI のレビューの中身</h3>
+  <ul>
+    <li><b>何を見るか：</b>差分を、リポジトリ全体と PR に書かれた意図に照らして読む。</li>
+    <li><b>指摘の絞り方：</b>複数のエージェントが並行してバグを探し、別のエージェントたちが指摘ごとに投票する。十分な票を得た指摘だけを出す。書き方、診断、片付けだけの指摘は落とす。この絞り込みは、自分たちの PR で A/B テストしてから入れた。</li>
+    <li><b>指摘の札：</b>指摘には、Important、Nit、Pre-existing のどれかが付く。Pre-existing は、その PR が入れたのではないバグで、書いた人のせいに見えないようにするための札。</li>
+    <li><b>指摘への応じ方：</b>直すか、理由を書いて閉じる。開いたままだとマージできない。</li>
+    <li><b>深さ：</b>管理者が、リポジトリごとに Quick、Standard、Deep から選ぶ。</li>
+    <li><b>既にあるコードも：</b>レビューのエージェントは、毎晩、既にあるコードも見て回る。</li>
+  </ul>
+  <p>AI のレビューの研究プレビューを始めたとき、中身のある指摘が付く社内の PR は 16% から 54% に増えました。1,000 行を超える PR にはたいてい指摘が出て、小さい PR にはたいてい何も出ません。公開されている製品は Code Review for Claude Code（Team と Enterprise のプラン）で、<code>/code-review</code> は、その軽い版を手元で走らせます。</p>
+</section>
+
+<section id="approval">
+  <h2><span class="num">5</span>人の承認は、変更のリスクで決める（Q3）</h2>
+  <div class="key">
+    <p>文書の直しと、自動更新の仕組みの変更では、危なさが違います。だから人の承認の数を、変更のリスクの段階で変えます。段階を決めるのは書いた人ではなく、変更の中身です。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>段階</th><th>どんな変更か</th><th>人の承認</th></tr></thead>
+      <tbody>
+        <tr><th>低い</th><td>文書、文言、社内だけの機能、フラグの裏に足すだけの変更</td><td>要らない（自動のレビューとセキュリティの確かめが通れば）</td></tr>
+        <tr><th>ふつう</th><td>ふつうの製品の変更。キャッシュ、自動更新、システムプロンプトのような敏感な所の変更も</td><td>1 人</td></tr>
+        <tr><th>高い</th><td>いちばん危ないコード。いつも 2 人が要る少数のパス</td><td>2 人</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">記事の「Layer by layer」の 5 の表を、microtaro と AI の言葉で言い直したものです。</p>
+  <ul>
+    <li><b>段階は分類器が決める：</b>変更を読んで段階を選ぶ分類器と、段階によらず人が要るかどうかを判断する分類器がある。持ち主が敏感だと指定したパスと、CI のワークフローのファイルは、いつも人が要る。</li>
+    <li><b>軽い道は、信頼された書き手だけ：</b>リポジトリの信頼された書き手（主に、そのコードを持つチーム）でなければ、2 人目の承認が要る。</li>
+    <li><b>AI の承認は数えない：</b>エージェントの承認は、人の承認として数えない。自動のレビューは低リスクの変更を通せるが、人が要る枠は埋められない。</li>
+    <li><b>指示した人が責任を持つ：</b>エージェントが書いた PR では、エージェントに指示した人が、必要な承認者の 1 人に数えられる。</li>
+    <li><b>承認は commit ごと：</b>承認は特定の commit に対するもの。仕組みが保証できない新しい commit（エージェントの push、人が手で解いたマージ）が入ったら、承認し直しになる。</li>
+  </ul>
+</section>
+
+<section id="rounds">
+  <h2><span class="num">6</span>AI のレビュー役を良くし、往復を終わらせる（Q4）</h2>
+  <div class="key">
+    <p>レビュー役は、過去の障害から作った問題集で毎日試し、役に立たない指摘の多さも測っています。AI どうしの往復が終わらなくなる問題には、往復の上限などを入れ、1 回の直しで通る PR が増えました。</p>
+  </div>
+
+  <h3>レビュー役の良さを、どう測るか</h3>
+  <ul>
+    <li><b>障害を問題集にする：</b>過去に障害や差し戻しを起こした PR を、その後の直しと一緒に集め、そのコードを知るエンジニアが、バグとその場所を 1 つずつ確かめた。この問題集（eval）で、レビュー役を毎日試す。</li>
+    <li><b>役に立たない指摘も測る：</b>バグでないものも大量に出してよいなら、バグを多く捕まえるのは簡単。だから、人が指摘にどう応じたか（直した、間違いだと言った、わざとだと言った、問題にならなかった）で分ける。問題がないと分かっている PR にもレビュー役をかけ、有害な直しにつながりかねない報告の数を数える。</li>
+    <li><b>優先の順：</b>1 番目は本物のバグを捕まえること、2 番目はレビューの往復を減らすこと。</li>
+  </ul>
+
+  <h3>往復が終わらなくなる問題</h3>
+  <ul>
+    <li><b>起きたこと：</b>ある CLI の PR が、一晩でレビューと直しを 50 回を超えて往復し、書いた人が止めた。</li>
+    <li><b>調べて分かったこと：</b>何度も指摘された所に git blame（その行をいつ誰が書いたかを調べる命令）をかけると、約 59% は、最初のレビューのときからあったコードだった。その PR の新しいバグではなく、もとからあったバグを、毎回少しずつ見つけていた。</li>
+    <li><b>入れた変更：</b>3 往復したら、レビュー役が書き手に、一歩引いてやり方を考え直すよう求める。何回か往復したあとは、新しい差分だけを見直す。1 か所ではなく、バグの種類を指摘して、同じ種類の所を全部直させる。一度出した指摘はくり返さない。</li>
+    <li><b>追う数字：</b>通るまでの往復の数を、見逃しの少なさ（recall、本物のバグのうち捕まえた割合）と並べて追う。</li>
+  </ul>
+
+  <figure class="chart" aria-labelledby="ch-rounds">
+    <p class="chart-title" id="ch-rounds">往復を減らす変更の前と後：社内の PR のレビューの往復</p>
+    <p class="chart-sub">白抜きの点が前、塗った点が後。上の 2 つは割合、いちばん下は回数で、目盛りが違います。</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw before"></i>前</li>
+      <li><i class="sw after"></i>後</li>
+    </ul>
+    <p class="db-group">割合</p>
+    <div class="db-row plain" title="1 回のレビューと直しで通る PR：65% → 78%">
+      <div class="db-head"><span>1 回のレビューと直しで通る</span><span class="db-vals">65% → 78%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:65%;width:13%"></span><span class="db-dot before" style="left:65%"></span><span class="db-dot after" style="left:78%"></span></div>
+    </div>
+    <div class="db-row plain" title="5 往復以上かかる PR：8.9% → 1.5%">
+      <div class="db-head"><span>5 往復以上かかる</span><span class="db-vals">8.9% → 1.5%</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:1.5%;width:7.4%"></span><span class="db-dot before" style="left:8.9%"></span><span class="db-dot after" style="left:1.5%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0%</span><span style="left:50%">50%</span><span style="left:100%">100%</span></div>
+    <p class="db-group">回数</p>
+    <div class="db-row plain" title="通るまでのレビューの回数（平均）：2.08 回 → 1.32 回">
+      <div class="db-head"><span>通るまでのレビューの回数（平均）</span><span class="db-vals">2.08 回 → 1.32 回</span></div>
+      <div class="db-track" aria-hidden="true"><span class="db-line" style="left:44%;width:25.33%"></span><span class="db-dot before" style="left:69.33%"></span><span class="db-dot after" style="left:44%"></span></div>
+    </div>
+    <div class="db-axis" aria-hidden="true"><span style="left:0">0 回</span><span style="left:33.33%">1 回</span><span style="left:66.67%">2 回</span><span style="left:100%">3 回</span></div>
+    <figcaption>記事の「How we make the reviewer better」の本文と図の数値から作り直した図です。記事の図そのものは写していません。期間と PR の件数は、記事に書かれていません（<a href="#numbers">2</a>）。数値は <a href="../data/claude-code-team-review.json">data/claude-code-team-review.json</a> にあります。</figcaption>
+  </figure>
+
+  <h3>レビュー役に渡す指示：CLAUDE.md と REVIEW.md</h3>
+  <ul>
+    <li><b>CLAUDE.md：</b>プロジェクトが何か（使っている技術、決まり、目標、やらないこと）を書く。レビューのたびに読み込まれるので短くし、詳しいことはほかの文書を指す。レビュー役は、ここの決まりを破るコードや、ここの記述を古くする変更も指摘する。</li>
+    <li><b>REVIEW.md：</b>コードの持ち主が、自分の持ち場で何が大事かを、レビュー役に伝える。記事が良いとする REVIEW.md は、短く、そのリポジトリでの「失敗」を定義する。例は、文書なら嘘を書くこと、設定なら行き先を間違えること。細かい指摘（nit）の数に上限を付け、見なくてよいパスを挙げ、名前からの推測ではなく、ファイルと行を根拠として求める。まとめは件数から始め、直すものがないときはそうはっきり書かせる。</li>
+    <li><b>くり返しは、もとを直す：</b>同じ指摘が何度も出るなら、skill、lint の規則、指示のファイルのどれかを直す。レビューが何かを見逃したら、モデルの前に何がなかったかを問い、直しを CLAUDE.md、skill、新しい確かめに入れる。</li>
+  </ul>
+</section>
+
+<section id="humans">
+  <h2><span class="num">7</span>機械が読むようになっても、人に残る仕事（Q5）</h2>
+  <div class="key">
+    <p>人に残るのは、判断と責任です。作るかどうかを決め、危ない所と人がまねる設計を見て、確かめの証拠を読み、出した変更に責任を持ちます。</p>
+  </div>
+  <ul>
+    <li><b>作るかどうかを決める：</b>方向、好み、範囲。</li>
+    <li><b>危ないコードをレビューする：</b>課金、自動更新、CI のワークフローなど。</li>
+    <li><b>人がまねる設計をレビューする：</b>ほかの人が型として写す設計。</li>
+    <li><b>証拠を読む：</b>テストの出力、走らせたコマンドと結果、スクリーンショット、レビュー役の指摘。確かめが何を見逃しうるかを言えないなら、さっと承認せず、ちゃんとしたレビューを頼む。</li>
+    <li><b>結果に責任を持つ：</b>誰が打ったかによらず、出ていく変更のすべてに、責任を持つ人がいる。</li>
+  </ul>
+
+  <h3>入れた人が直す</h3>
+  <p>小さい変更や中くらいの変更を入れて何かがまずくなったら、たいてい入れた本人が直す、というのがチームの決まりです（記事の言い方では “You land it, you own it”）。責めるためではなく、直す本人がいちばん事情を知っているからです。記事は、これが回る理由を 4 つ挙げています。</p>
+  <ul>
+    <li>変更が小さいので、レビューも、原因探しも、差し戻しもしやすい。</li>
+    <li>フラグ、差し戻し、少しずつの公開で、たいていの間違いを戻せる。</li>
+    <li>影響の広さで基準を決める。影響の大きいコードほど、人も確かめも多くする。</li>
+    <li>後退（以前は動いていたものが動かなくなること）が、テレメトリ（使われ方や不具合を送る仕組み）と社内での利用で、すぐ表に出る。</li>
+  </ul>
+
+  <h3>コードの理解をどう分け合うか</h3>
+  <ul>
+    <li>レビューには、問題を見つけるほかに、チームでコードの理解を分け合う役目もあった。機械が読む仕事の大半を引き受けると、その役目をどうするかが残る。</li>
+    <li>正式な仕組みはない。チームの誰も Claude Code の全体を頭に入れておらず、誰もそれが必要だとは考えていない。</li>
+    <li>ある部分を知りたいときは、その部分の解説を Claude に書かせる。図にした小さなページを作らせる人もいる。誰でも見られる Slack のチャンネルで働くので、ほかの人が作っているものを、作っている最中に見られる。</li>
+  </ul>
+
+  <h3>方向を変えるとき</h3>
+  <p>エージェントのおかげで作業を始めるのが安いので、始めるべきでなかった作業も出てきます。たいていは、チャンネルの誰かが理由を聞いたり、前の決定を示したり、もっと簡単な道を出したりして、書いた人が PR を閉じるか作り直します。コードをすぐ書けたので、PR を閉じても損をした気にならない、と記事は書いています。勧めているのは、別の方向を、できあがった PR を止めるコメントとしてではなく、早いうちにスレッドで出すことです。</p>
+</section>
+
+<section id="scope">
+  <h2><span class="num">8</span>この記事が書いている対象</h2>
+  <ul>
+    <li><b>種類：</b>1 つのチームが、自分たちのやり方と社内の数字を書いた記事。研究の論文ではなく、査読もない。</li>
+    <li><b>書いた人：</b>Anthropic の 3 人（Addy Osmani、Morgan Westlee Lunt、Qing Wang）。</li>
+    <li><b>対象：</b>Claude Code のリポジトリ（CLI、デスクトップと Web のアプリ、モバイルのアプリ）。一部の数字は「社内の PR」とだけ書かれ、どのリポジトリのものかは分からない（<a href="#numbers">2</a>）。</li>
+    <li><b>書いている時点：</b>2026 年 10 月。著者は、人なしでマージしてよい範囲は、まだ動いていると書いている。</li>
+  </ul>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>言葉</th><th>この解説での意味</th></tr></thead>
+      <tbody>
+        <tr><th>PR（pull request）</th><td>変更を取り込んでもらう申し出。レビューと承認の単位</td></tr>
+        <tr><th>マージ</th><td>PR の変更を、本流（main）に取り込むこと</td></tr>
+        <tr><th>差し戻し（revert）</th><td>入れた変更を取り消すこと</td></tr>
+        <tr><th>CI</th><td>変更のたびに、自動で検査を走らせる仕組み</td></tr>
+        <tr><th>lint、linter</th><td>書き方の誤りや危ない書き方を、機械で見つけること。その道具が linter</td></tr>
+        <tr><th>マージキュー</th><td>マージを順番待ちにして、最新の main に当てた状態で確かめてから入れる仕組み</td></tr>
+        <tr><th>フラグ（feature flag）</th><td>新しい動きを、設定 1 つで入り切りできるようにしておく仕組み</td></tr>
+        <tr><th>当番（on-call）</th><td>障害に対応する担当を、交代で持つこと</td></tr>
+        <tr><th>分類器</th><td>変更を読んで、種類やリスクの段階を決める仕組み</td></tr>
+        <tr><th>eval</th><td>AI の出来を測るための、問題と正解の組</td></tr>
+        <tr><th>nit</th><td>直さなくても困らない、細かい指摘</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>記事には、ほかにも、社内の skills の使い方、CI を変更の量に合わせた話（別の記事）、Claude Code を作った人の発言、PR のひな形の中身などが出てきます。この解説では、レビューの仕組みと人の役目に関わらない話を省きました。記事の中のほかの記事へのリンクは開いていません。</p>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">9</span>著者の勧めと、記事が認めている限界</h2>
+  <p>勧めは、<a href="#qa">1</a> の「著者が言いたいこと」の 4 つです。記事は、この進め方の部品のほとんどは、いま手に入るものだとしています。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>自動で厳しくする仕組みがない</th><td>差し戻しや障害の数字が動いても、承認は自動では厳しくならない。人なしのマージを広げる前に、エンジニアたちはこの仕組みを欲しがっている</td></tr>
+        <tr><th>悪いマージに気づくのは人頼み</th><td>書いた人、当番、差し戻しと障害のダッシュボードに頼っている</td></tr>
+        <tr><th>人なしでマージする範囲は動いている</th><td>どの低リスクの変更を自動の確かめだけでマージしてよいかは、持ち主が決めていて、まだ動いている</td></tr>
+        <tr><th>数字は 1 つのチームの社内のもの</th><td>比べ方の詳しいことや PR の件数は書かれておらず、ほかのチームにそのまま当てはまるかは分からない（<a href="#numbers">2</a>）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">上の 3 つは、記事自身が書いている限界です。いちばん下は、記事の数字の書き方から、microtaro と AI がまとめたものです。</p>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://claude.dev/blog/solving-code-review-at-anthropic/">Addy Osmani、Morgan Westlee Lunt、Qing Wang「How the Claude Code team does code review」</a>　claude.dev Blog（Engineering）、2026-10-15、ライセンスの表示なし<span class="use">この解説の元の記事。claude.com ではなく claude.dev にあります</span></li>
+    <li><a href="../data/claude-code-team-review.json">data/claude-code-team-review.json</a><span class="use">この解説で使った数値と、記事の中の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>2026-11-18 に、元の記事の本文を全部読み、この解説の数字と事実を 1 つずつ照らし合わせました。</li>
+    <li>数字（約 9 割、2 倍超、4 割超、約 2,500 から 30,000 以上、16% から 54%、1,000 行、3 往復、50 回超、約 59%、65% から 78%、8.9% から 1.5%、2.08 から 1.32）と、リスクの段階の表は、記事の本文と図の数値に照らしました。</li>
+    <li>記事が「6 月から 9 月」と書く時期に、年は書かれていません。記事は 2026 年 10 月に出たものです。</li>
+    <li>記事にはライセンスの表示がないので、原文の文は写していません。引用は、決まりの名前（“You land it, you own it”）だけです。図と表は、microtaro と AI の言葉と組み立てで作り直しました。</li>
+    <li>記事の節の順ではなく、この解説で立てた問いの順に並べ直しています。記事のすべての話を載せてはいません（<a href="#scope">8</a>）。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。元の記事の著作権は、記事の著作権者にあります。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>
