@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>(When) Should a Software Factory be Lights-off? (paper explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/papers/review-agents-bugs.html">
+<link rel="alternate" hreflang="en" href="review-agents-bugs.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#model-change"><span class="n">2</span>What changes when models change</a></li>
+    <li><a href="#detect"><span class="n">3</span>How many bugs did the agents catch? (Q1)</a></li>
+    <li><a href="#conditions"><span class="n">4</span>When are agents strong, and when do they miss bugs? (Q2)</a></li>
+    <li><a href="#trajectories"><span class="n">5</span>Where agents spend time, and why they fail (Q3)</a></li>
+    <li><a href="#design"><span class="n">6</span>How much do settings and prompts help? (Q4)</a></li>
+    <li><a href="#benchmark"><span class="n">7</span>How the benchmark was built and scored</a></li>
+    <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the study's limits</a></li>
+    <li><a href="#reading"><span class="n">9</span>How far can AI review be trusted? (microtaro's reading)</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/papers/review-agents-bugs.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Paper explainer</p>
+  <h1>(When) Should a Software Factory be Lights-off?</h1>
+  <p class="src"><b>Original paper</b>Yang, He, Cheng, Butler, Murphy-Hill, Badea, Bird, “(When) Should a Software Factory be Lights-off? Benchmarking Code Review Agents on Bug Detection,” arXiv:2610.13668 version 1 (2026-10-09), not peer reviewed, CC BY 4.0
+    <span class="links"><a href="https://arxiv.org/abs/2610.13668v1">arXiv page</a><a href="https://arxiv.org/html/2610.13668v1">Read the HTML version</a><a href="https://arxiv.org/pdf/2610.13668v1">PDF</a></span></p>
+  <p class="lead">Researchers turned real bugs that people had found and fixed into review tasks, and measured how many of them AI review agents catch. The best agent caught 70% overall, including more than 60% of the bugs that had slipped through human review. With human review unable to keep up with AI-written code, the paper shows with data how to build AI review in. The authors are from Carnegie Mellon University and Microsoft. This page explains their paper.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-16 by microtaro and AI. Based on the main text and tables of arXiv version 1 (2026-10-09; the only version); all numbers are from version 1. What the paper says is kept separate from microtaro's reading, and its results and limits are given the weight the paper gives them.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>The paper asks four questions. For each one, here is the answer and the findings behind it. Reading this section alone gives you the main points. The small grey text says where each finding comes from.</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>How well do review agents detect bugs in pull requests (PRs)?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Well. The best agent caught 71.9% of human-verified bugs within its top-5 findings, including 64.2% of bugs that slipped through human review. It rose from 47.7% in under six months. Performance was lower on a large company's internal code, where more bugs cannot be seen from the diff alone.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>The best agent (claude-opus-5) caught 71.9%.</b>
+          <span class="why">79.6% of the bugs humans had caught in review, at $2.97 and 9.8 minutes per task on average.</span>
+          <span class="how">From Table 1 and the main text</span>
+        </li>
+        <li>
+          <b>It caught 64.2% of bugs that slipped through human review.</b>
+          <span class="why">Bugs found after merge are ones that passed human review and got in. The best agent caught 64.2% of them at PR time.</span>
+          <span class="how">From Table 1</span>
+        </li>
+        <li>
+          <b>A big jump in under six months.</b>
+          <span class="why">From 47.7% with the February 2026 model (claude-opus-4.6) to 71.9% with the July model (claude-opus-5).</span>
+          <span class="how">From the main text</span>
+        </li>
+        <li>
+          <b>Humans and the agent together caught 82.1%.</b>
+          <span class="why">By the way the benchmark is built, human review caught half (50%). The best agent alone caught 71.9%; combining human and agent findings caught 82.1%.</span>
+          <span class="how">From the main text and the caption of Figure 5</span>
+        </li>
+        <li>
+          <b>Performance was lower on internal industry code.</b>
+          <span class="why">Down by up to 25.5%. Fewer of the internal bugs were visible in the diff (22.8%, versus 46.1% on GitHub); more needed project knowledge. The trend of improvement across model generations was the same.</span>
+          <span class="how">From the main text</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#detect">3</a> (how many bugs the agents caught)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>Under which conditions are agents strong, and when are they more likely to miss bugs?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Strong on severe bugs and on bugs visible in the diff, and better than humans at severe bugs and reliability issues. More likely to miss bugs in large changes, mixed changes, and bug-fixing PRs, and bugs that need reasoning beyond the diff. Humans are stronger on maintainability, so combining them widens coverage.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Severe bugs and bugs visible in the diff are easier.</b>
+          <span class="why">Holding other conditions fixed, severe bugs were 1.906× and diff-visible bugs 2.621× as easy to detect (odds ratios).</span>
+          <span class="how">From a regression that holds other conditions fixed</span>
+        </li>
+        <li>
+          <b>Agents beat humans on severe bugs and reliability issues.</b>
+          <span class="why">Humans catch more maintainability issues. Because their strengths differ, combining them widens coverage.</span>
+          <span class="how">From a comparison that adds bugs caught in human review</span>
+        </li>
+        <li>
+          <b>Large, mixed, and bug-fixing PRs are harder.</b>
+          <span class="why">Bugs that need reasoning beyond the diff, and non-functional bugs such as usability, were also harder.</span>
+          <span class="how">From the same regression</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#conditions">4</a> (when agents are strong, and when they miss bugs)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>Where do review agents spend their time, and why do they fail?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>They almost always reach the buggy file. The difference is whether they then diagnose the bug correctly, and agents that ran code to check found bugs others missed. Today they mostly read and search; only 8% of turns run code. Sometimes they believe a misleading description or comment.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>They almost always reach the bug's location.</b>
+          <span class="why">95.6% of runs inspected the file with the defect, 80.2% produced a finding for it, and 56.2% hit the bug. The best, claude-opus-5, produced a finding for the file 91.9% of the time and a correct diagnosis 75% of the time.</span>
+          <span class="how">From matching trajectories against the ground truth</span>
+        </li>
+        <li>
+          <b>Agents that ran code found bugs others missed.</b>
+          <span class="why">Overall, only 8% of turns executed code. claude-opus-5, which ran code more often (9.7%), found bugs other models missed by doing so.</span>
+          <span class="how">From instrumented trajectories and a qualitative analysis</span>
+        </li>
+        <li>
+          <b>They can believe what they are told.</b>
+          <span class="why">In one task, the code comment and PR description both asserted the intended behavior; the code did not do it, yet every model endorsed the buggy condition.</span>
+          <span class="how">From a qualitative analysis of 20 sampled tasks</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#trajectories">5</a> (where agents spend time, and why they fail)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>How much do agent design choices improve bug detection?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>One prompt change helps: asking for comprehensive findings ranked by severity gains up to +5.8% at about the same cost (1.1×), far more cost-effective than multi-agent setups. More reasoning effort helps too. On the newest model, the prompt change made no real difference.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Prompt change: up to +5.8%, at about 1.1× the cost.</b>
+          <span class="why">Multi-agent setups gained +2.8% on average, at 3.68× the cost on average.</span>
+          <span class="how">From Tables 2 and 3 and the main text</span>
+        </li>
+        <li>
+          <b>More reasoning effort: from about 36% to about 57%.</b>
+          <span class="why">For a small model (gpt-5.6-luna), from the lowest to the highest effort, at 23.22× the cost.</span>
+          <span class="how">From the main text</span>
+        </li>
+        <li>
+          <b>On the newest model, the prompt change made no real difference.</b>
+          <span class="why">The authors read this as encouraged behaviors being gradually trained into models.</span>
+          <span class="how">From Table 2 and the main text</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#design">6</a> (how much settings and prompts help)</p>
+    </div>
+  </div>
+
+  <h3>What the authors take from the four answers</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (discussion and conclusion sections)</p>
+      <p class="claim">Review agents help developers catch many bugs they would otherwise miss, so they are well worth building into the review pipeline, and they are improving rapidly. For consequential changes, an accountable human keeps the final decision, and fully unsupervised operation is limited to narrowly scoped, low-consequence PRs.</p>
+      <p class="en">“they are still quite valuable to be incorporated into the review pipeline to help developers catch many bugs they would otherwise miss”</p>
+      <p class="en">“For consequential changes, review agents are better treated as scalable peers that broaden coverage while an accountable human retains the final decision.”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">To adopt them well, the authors recommend</p>
+      <ul class="recs">
+        <li><b>Scale review effort to PR complexity.</b> Review small, homogeneous changes with a cheaper configuration; give large, mixed PRs stronger models, higher reasoning effort, comprehensive prompts, and careful human review. Split unrelated changes into smaller PRs. Humans keep responsibility for project values and long-term maintainability.</li>
+        <li><b>Steer what the agent looks at.</b> By default, agents focus on severe, functional bugs. If usability, portability, backward compatibility, or maintainability matter, say so.</li>
+        <li><b>Give the agent repository knowledge.</b> Agents are weak on bugs that need project-specific knowledge, so supply repository-specific instructions and knowledge bases to improve review quality.</li>
+        <li><b>Monitor review quality as models change.</b> Build your own benchmark from your repository's past bugs with the paper's method. If cost matters, dispatch models and configurations by PR characteristics.</li>
+      </ul>
+      <p class="conclusion-note">The boundary for fully unsupervised operation can move as models improve, but the authors say to calibrate on repository-specific, continuously monitored evidence rather than aggregate benchmark scores alone. More in <a href="#advice">8</a>.</p>
+    </div>
+  </div>
+
+  <h3>The story in one line</h3>
+  <ol class="cycle" aria-label="The story in one line">
+    <li>Human review falls behind</li>
+    <li>Test whether AI can review, using real bugs</li>
+    <li>Agents catch over 60% of bugs that slipped past humans</li>
+    <li>Humans plus agents exceed 80%</li>
+    <li>Strongest on small, focused changes</li>
+    <li>Humans keep the final decision on important changes</li>
+  </ol>
+
+  <h3>What the paper does not answer</h3>
+  <p>The authors themselves say the following are not measured or may not generalize.</p>
+  <ul>
+    <li><b>Overall review usefulness:</b> the benchmark measures only recovery of known bugs. Design suggestions, maintainability advice, and other roles of review are not covered.</li>
+    <li><b>Causes:</b> the analysis of which changes are harder estimates adjusted associations, not causal effects.</li>
+    <li><b>Other projects:</b> the repositories are mature, active, and popular. Results may differ for smaller or younger projects, uncommon languages, or generated or configuration-heavy code.</li>
+  </ul>
+</section>
+
+<section id="model-change">
+  <h2><span class="num">2</span>What changes when models change</h2>
+  <div class="key">
+    <p>Each newer model scored higher: from 47.7% to 71.9% in under six months. To keep that benefit, check again every time you switch. A switch can lose bugs the old model caught, earlier prompt tricks can become outdated, and costs can change.</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-evolve">
+    <p class="chart-title" id="ch-evolve">Gain across model generations (2026)</p>
+    <p class="chart-sub">Share of tasks where the true bug was among the top-5 findings, averaged over bugs humans caught in review and bugs that slipped past review.</p>
+    <ul class="bars" style="--max: 100">
+      <li title="February 2026 (claude-opus-4.6): 47.7%"><span class="bar-label">February 2026<small>claude-opus-4.6</small></span><span class="bar-track"><span class="bar" style="--to: 47.7"></span></span><span class="bar-val">47.7%</span></li>
+      <li class="main" title="July 2026 (claude-opus-5): 71.9%"><span class="bar-label">July 2026<small>claude-opus-5</small></span><span class="bar-track"><span class="bar" style="--to: 71.9"></span></span><span class="bar-val">71.9%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's main text.</figcaption>
+  </figure>
+
+  <ul>
+    <li><b>Switching can regress.</b> A newer model can be better overall yet miss bugs the old one caught; some net gains came with 8.9% regressions. claude-opus-5 was the exception, with few regressions (up to 1.2%).</li>
+    <li><b>Gains differ by PR type.</b> claude-opus-5's edge over other models was concentrated on feature and bug-fixing PRs, and narrowed on refactors and other PR types.</li>
+    <li><b>Earlier tricks stop working.</b> Asking for comprehensive findings helped older models but barely helped claude-opus-5 (<a href="#design">6</a>). The authors' reading: many encouraged behaviors are gradually incorporated into model training.</li>
+    <li><b>Costs can jump.</b> Run in Claude Code, claude-opus-5 used 9.0 sub-agents per run and its cost rose sharply, versus 0.1 for claude-opus-4.8 in Claude Code and 0 in Copilot CLI.</li>
+  </ul>
+  <p class="t-note">The models tested date from February to July 2026. Repositories were collected on 2026-06-26, and the paper appeared in October. Later models are not included.</p>
+</section>
+
+<section id="detect">
+  <h2><span class="num">3</span>How many bugs did the agents catch? (Q1)</h2>
+  <div class="key">
+    <p>The best agent caught 71.9% of human-verified bugs within its top-5 findings, and 64.2% of the bugs that slipped through human review and got merged, at about $3 and 10 minutes per task. Performance was lower on large internal code, where more bugs cannot be seen from the diff alone.</p>
+  </div>
+
+  <h3>How the test works (briefly)</h3>
+  <ul>
+    <li>Each task pairs a real, human-verified bug with the PR that introduced it. Details in <a href="#benchmark">7</a>.</li>
+    <li>The agent reviews the change without being told a bug exists, and writes findings ranked by severity.</li>
+    <li>The score is the share of tasks where the true bug is among the top-5 findings (recall@5).</li>
+    <li>All models ran in the same harness (Copilot CLI, pinned version), with the same prompt (its official /review prompt), at the highest available reasoning effort.</li>
+  </ul>
+
+  <h3>Results by model</h3>
+  <figure class="chart" aria-labelledby="ch-models">
+    <p class="chart-title" id="ch-models">How many bugs that slipped past human review did the AI catch?</p>
+    <p class="chart-sub">The best AI caught 64.2%. Of 500 bugs that passed human review and got merged, the share each AI caught at PR time (within its top-5 findings). Each row is an AI model.</p>
+    <ul class="bars" style="--max: 100">
+      <li class="main" title="claude-opus-5: 64.2%"><span class="bar-label">claude-opus-5</span><span class="bar-track"><span class="bar" style="--to: 64.2"></span></span><span class="bar-val">64.2%</span></li>
+      <li title="gpt-5.6-sol: 49.0%"><span class="bar-label">gpt-5.6-sol</span><span class="bar-track"><span class="bar" style="--to: 49.0"></span></span><span class="bar-val">49.0%</span></li>
+      <li title="gpt-5.5: 47.8%"><span class="bar-label">gpt-5.5</span><span class="bar-track"><span class="bar" style="--to: 47.8"></span></span><span class="bar-val">47.8%</span></li>
+      <li title="gpt-5.6-luna: 47.8%"><span class="bar-label">gpt-5.6-luna</span><span class="bar-track"><span class="bar" style="--to: 47.8"></span></span><span class="bar-val">47.8%</span></li>
+      <li title="claude-opus-4.8: 46.6%"><span class="bar-label">claude-opus-4.8</span><span class="bar-track"><span class="bar" style="--to: 46.6"></span></span><span class="bar-val">46.6%</span></li>
+      <li title="gpt-5.4: 45.4%"><span class="bar-label">gpt-5.4</span><span class="bar-track"><span class="bar" style="--to: 45.4"></span></span><span class="bar-val">45.4%</span></li>
+      <li title="claude-sonnet-5: 45.2%"><span class="bar-label">claude-sonnet-5</span><span class="bar-track"><span class="bar" style="--to: 45.2"></span></span><span class="bar-val">45.2%</span></li>
+      <li title="claude-opus-4.6 (max): 36.4%"><span class="bar-label">claude-opus-4.6 (max)</span><span class="bar-track"><span class="bar" style="--to: 36.4"></span></span><span class="bar-val">36.4%</span></li>
+      <li title="gpt-5-mini (high): 33.4%"><span class="bar-label">gpt-5-mini (high)</span><span class="bar-track"><span class="bar" style="--to: 33.4"></span></span><span class="bar-val">33.4%</span></li>
+      <li title="claude-haiku-4.5 (none): 23.0%"><span class="bar-label">claude-haiku-4.5 (none)</span><span class="bar-track"><span class="bar" style="--to: 23.0"></span></span><span class="bar-val">23.0%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table 1. Model names and reasoning settings are as written in the paper (claude: Anthropic; gpt: OpenAI).</figcaption>
+  </figure>
+  <figure class="chart" aria-labelledby="ch-models-cmt">
+    <p class="chart-title" id="ch-models-cmt">Did the AI also catch the bugs humans caught in review?</p>
+    <p class="chart-sub">The best AI caught 79.6%. Of 500 bugs that humans caught and fixed in review, the share the AI also caught (within its top-5 findings).</p>
+    <ul class="bars" style="--max: 100">
+      <li class="main" title="claude-opus-5: 79.6%"><span class="bar-label">claude-opus-5</span><span class="bar-track"><span class="bar" style="--to: 79.6"></span></span><span class="bar-val">79.6%</span></li>
+      <li title="claude-opus-4.8: 70.0%"><span class="bar-label">claude-opus-4.8</span><span class="bar-track"><span class="bar" style="--to: 70.0"></span></span><span class="bar-val">70.0%</span></li>
+      <li title="gpt-5.6-sol: 65.6%"><span class="bar-label">gpt-5.6-sol</span><span class="bar-track"><span class="bar" style="--to: 65.6"></span></span><span class="bar-val">65.6%</span></li>
+      <li title="claude-sonnet-5: 64.7%"><span class="bar-label">claude-sonnet-5</span><span class="bar-track"><span class="bar" style="--to: 64.7"></span></span><span class="bar-val">64.7%</span></li>
+      <li title="gpt-5.6-luna: 63.9%"><span class="bar-label">gpt-5.6-luna</span><span class="bar-track"><span class="bar" style="--to: 63.9"></span></span><span class="bar-val">63.9%</span></li>
+      <li title="gpt-5.5: 63.3%"><span class="bar-label">gpt-5.5</span><span class="bar-track"><span class="bar" style="--to: 63.3"></span></span><span class="bar-val">63.3%</span></li>
+      <li title="gpt-5.4: 61.8%"><span class="bar-label">gpt-5.4</span><span class="bar-track"><span class="bar" style="--to: 61.8"></span></span><span class="bar-val">61.8%</span></li>
+      <li title="claude-opus-4.6 (max): 59.1%"><span class="bar-label">claude-opus-4.6 (max)</span><span class="bar-track"><span class="bar" style="--to: 59.1"></span></span><span class="bar-val">59.1%</span></li>
+      <li title="gpt-5-mini (high): 54.7%"><span class="bar-label">gpt-5-mini (high)</span><span class="bar-track"><span class="bar" style="--to: 54.7"></span></span><span class="bar-val">54.7%</span></li>
+      <li title="claude-haiku-4.5 (none): 43.0%"><span class="bar-label">claude-haiku-4.5 (none)</span><span class="bar-track"><span class="bar" style="--to: 43.0"></span></span><span class="bar-val">43.0%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table 1.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Strong even on bugs that slipped past humans:</b> bugs found after merge are ones that passed human review and got in. The best agent caught 64.2% of them at PR time.</li>
+    <li><b>Cost and time:</b> the best, claude-opus-5, cost $2.97 per task with an average latency of 9.8 minutes.</li>
+    <li><b>Cost trade-off:</b> some small models are strong for their cost; gpt-5.6-luna matched 78% of claude-opus-5's performance at 21% of the cost.</li>
+    <li><b>Good at ranking:</b> 89% of the correct findings were in the top 3.</li>
+  </ul>
+
+  <h3>Humans and agents together</h3>
+  <figure class="chart" aria-labelledby="ch-together">
+    <p class="chart-title" id="ch-together">Who caught the bugs (GitHub repositories)</p>
+    <p class="chart-sub">The human 50% follows from how the benchmark is built (see the note below).</p>
+    <ul class="bars" style="--max: 100">
+      <li title="Human review alone: 50%"><span class="bar-label">Human review alone</span><span class="bar-track"><span class="bar" style="--to: 50; background: var(--c-human)"></span></span><span class="bar-val">50%</span></li>
+      <li title="Best agent alone: 71.9%"><span class="bar-label">Best agent alone</span><span class="bar-track"><span class="bar" style="--to: 71.9; background: var(--c-ai)"></span></span><span class="bar-val">71.9%</span></li>
+      <li class="main" title="Human and agent findings combined: 82.1%"><span class="bar-label">Human and agent combined</span><span class="bar-track"><span class="bar" style="--to: 82.1"></span></span><span class="bar-val">82.1%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.3 and the caption of Figure 5.</figcaption>
+  </figure>
+  <p class="t-note">The tasks are roughly half bugs that humans caught in review before merge (49.7%) and half bugs that slipped through review and were found after merge (50.3%). So human review alone caught 50%. This share depends on how thorough a project's review policy is.</p>
+
+  <h3>On large industry repositories</h3>
+  <ul>
+    <li>The same pipeline built 800 tasks from two large monorepos at one company (enterprise platforms for online collaboration and productivity). They average more than 100k source files, versus about 3k on GitHub, and are certainly not in the models' training data.</li>
+    <li>The same agents lost up to 25.5% in performance, with the same trend of improvement across model generations.</li>
+    <li>Fewer internal bugs were visible in the diff, and more needed project context, wider inspection, or runtime evidence. Adjusting for bug visibility alone explains 20% of the gap.</li>
+  </ul>
+  <figure class="chart" aria-labelledby="ch-visible">
+    <p class="chart-title" id="ch-visible">Share of bugs visible in the diff</p>
+    <ul class="bars" style="--max: 100">
+      <li title="GitHub repositories: 46.1%"><span class="bar-label">GitHub repositories</span><span class="bar-track"><span class="bar" style="--to: 46.1"></span></span><span class="bar-val">46.1%</span></li>
+      <li class="main" title="Industry repositories: 22.8%"><span class="bar-label">Industry repositories</span><span class="bar-track"><span class="bar" style="--to: 22.8"></span></span><span class="bar-val">22.8%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.4. Per-model results on the industry repositories appear only in Figure 2, without numbers in the text, so they are not shown.</figcaption>
+  </figure>
+</section>
+
+<section id="conditions">
+  <h2><span class="num">4</span>When are agents strong, and when do they miss bugs? (Q2)</h2>
+  <div class="key">
+    <p>Agents are strong on severe bugs and on bugs visible in the diff, and better than humans at severe bugs and reliability issues. They are more likely to miss bugs in large changes, mixed changes, and bug-fixing PRs, as well as bugs that need reasoning beyond the diff and non-functional bugs such as usability.</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-or">
+    <p class="chart-title" id="ch-or">How detection changes with conditions</p>
+    <p class="chart-sub">Adjusted odds ratios. The dashed line is “no difference” (1×); left is harder to detect, right is easier. Log scale. Striped bars are not statistically clear.</p>
+    <ul class="bars" style="--min: -1.05; --max: 1.05; --at: 0">
+      <li class="group">The change</li>
+      <li title="Larger diff: 0.591"><span class="bar-label">Larger diff<small>harder</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.526; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.591×</span></li>
+      <li title="More heterogeneous diff: 0.795"><span class="bar-label">Mixed kinds of changes<small>source, tests, configs; harder</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.229; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.795×</span></li>
+      <li title="Bug-fixing PR: 0.521"><span class="bar-label">Bug-fixing PR<small>versus feature PRs; harder</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.652; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.521×</span></li>
+      <li class="group">The bug</li>
+      <li title="Usability bug: 0.454"><span class="bar-label">Usability bug<small>versus functional bugs; harder</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.790; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.454×</span></li>
+      <li class="weak" title="Portability bug: 0.523 (p=0.07, not clear)"><span class="bar-label">Portability bug<small>same direction, weaker evidence</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.648; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.523×</span></li>
+      <li title="Severe bug: 1.906"><span class="bar-label">More severe bug<small>easier</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.645"></span><span class="ref"></span></span><span class="bar-val">1.906×</span></li>
+      <li class="main" title="Bug visible in the diff: 2.621"><span class="bar-label">Bug visible in the diff<small>easier</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.964"></span><span class="ref"></span></span><span class="bar-val">2.621×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.4. Bar lengths are the logarithm of the odds ratio.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Larger diffs:</b> more code dilutes review attention, the authors suggest.</li>
+    <li><b>Mixed changes:</b> they may require reasoning across modules and interfaces, the authors hypothesize.</li>
+    <li><b>Bug-fixing PRs:</b> the agent's attention may go to verifying the fix, with less left for other regressions, the authors suspect.</li>
+    <li><b>Severe bugs are easier:</b> agents are trained and instructed to focus on high-impact issues, so less critical issues get neglected, the authors suggest.</li>
+    <li><b>No significant effect:</b> language (all five are popular, the authors suggest) and repository size (once diff size is adjusted for).</li>
+  </ul>
+
+  <h3>Human and agent strengths differ</h3>
+  <p>Adding bugs caught in human review, the authors compared which kinds of bugs humans and agents detect.</p>
+  <figure class="chart" aria-labelledby="ch-human-ai">
+    <p class="chart-title" id="ch-human-ai">Human detection compared with agents</p>
+    <p class="chart-sub">The dashed line is “same as agents.” Right: humans detect more; left: humans detect less. Log scale.</p>
+    <ul class="bars" style="--min: -1.05; --max: 1.05; --at: 0">
+      <li title="Maintainability issues: 2.702"><span class="bar-label">Maintainability issues<small>humans much better</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.994; background: var(--c-human)"></span><span class="ref"></span></span><span class="bar-val">2.702×</span></li>
+      <li title="More severe bugs: 0.450"><span class="bar-label">More severe bugs<small>humans worse</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.799; --to: 0; background: var(--c-ai)"></span><span class="ref"></span></span><span class="bar-val">0.450×</span></li>
+      <li title="Reliability issues: 0.591"><span class="bar-label">Reliability issues<small>humans worse</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.526; --to: 0; background: var(--c-ai)"></span><span class="ref"></span></span><span class="bar-val">0.591×</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.4. Blue marks human strengths; pink marks agent strengths.</figcaption>
+  </figure>
+  <p>The authors read this as: humans are better at keeping repositories well-maintained, while agents can more tirelessly scrutinize for reliability issues and subtle yet critical bugs. Human-agent collaboration is not uniform either.</p>
+
+  <div class="note note-omit">
+    <p><b>This part is simplified.</b> The paper models detection with a multivariable logistic regression on change and bug features, adjusting for model, track, and calendar time, with standard errors clustered by task and Benjamini-Hochberg correction for multiple testing.</p>
+  </div>
+</section>
+
+<section id="trajectories">
+  <h2><span class="num">5</span>Where agents spend time, and why they fail (Q3)</h2>
+  <div class="key">
+    <p>Every model almost always reaches the buggy file; the difference is whether it diagnoses the bug correctly. Today agents mostly read and search and rarely run code, but agents that did run code found bugs others missed. Sometimes they believe misleading descriptions or comments.</p>
+  </div>
+
+  <h3>They read and search, but rarely run code</h3>
+  <figure class="chart" aria-labelledby="ch-actions">
+    <p class="chart-title" id="ch-actions">What agents' turns are spent on</p>
+    <p class="chart-sub">Share of all turns, across ten models.</p>
+    <ul class="bars" style="--max: 50">
+      <li title="Read files: 39%"><span class="bar-label">Read files</span><span class="bar-track"><span class="bar" style="--to: 39"></span></span><span class="bar-val">39%</span></li>
+      <li title="Search or list: 36%"><span class="bar-label">Search or list</span><span class="bar-track"><span class="bar" style="--to: 36"></span></span><span class="bar-val">36%</span></li>
+      <li class="main" title="Run code (tests, builds, ad-hoc scripts): 8%"><span class="bar-label">Run code<small>tests, builds, ad-hoc scripts</small></span><span class="bar-track"><span class="bar" style="--to: 8"></span></span><span class="bar-val">8%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.5.</figcaption>
+  </figure>
+  <ul>
+    <li>Agents usually start with git operations (64%, mostly git diff and git log), then spend most turns reading and searching.</li>
+    <li>Claude models run code more often than GPT models (9.7% of turns for claude-opus-5 versus 6.9% for gpt-5.6-sol). Running code helped claude-opus-5 find bugs others missed: in one task it retrieved about 25 archived pages and ran the extractor; in another it installed the .NET SDK and built a probe to prove a DLL was missing from the publish output.</li>
+    <li><b>Persistence differs:</b> half of gpt-5.6-sol runs ended by turn 17 and only 3.5% reached turn 50, whereas claude-opus-5 reached its half-life at turn 35. This may partly explain the difference in results, the authors note.</li>
+  </ul>
+
+  <h3>Failures are misdiagnosis, not missing the file</h3>
+  <figure class="chart" aria-labelledby="ch-funnel">
+    <p class="chart-title" id="ch-funnel">How far runs got with the buggy file</p>
+    <p class="chart-sub">Share of all runs of the six large models.</p>
+    <ul class="bars" style="--max: 100">
+      <li title="Inspected the file with the defect: 95.6%"><span class="bar-label">Inspected the file with the defect</span><span class="bar-track"><span class="bar" style="--to: 95.6"></span></span><span class="bar-val">95.6%</span></li>
+      <li title="Produced a finding for that file: 80.2%"><span class="bar-label">Produced a finding for that file</span><span class="bar-track"><span class="bar" style="--to: 80.2"></span></span><span class="bar-val">80.2%</span></li>
+      <li class="main" title="Hit the bug: 56.2%"><span class="bar-label">Correctly hit the bug</span><span class="bar-track"><span class="bar" style="--to: 56.2"></span></span><span class="bar-val">56.2%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 4.5.</figcaption>
+  </figure>
+  <p>The best model, claude-opus-5, produced a finding for the defect file much more often (91.9%), but still gave a correct diagnosis only 75% of the time.</p>
+
+  <h3>They believe what they are told</h3>
+  <ul>
+    <li>In a Selenium task, the code comment and the PR description both asserted the intended behavior, which the code failed to implement. Every model endorsed the buggy condition.</li>
+    <li>In an Elasticsearch task, claude-opus-5 cited the defective line itself as its gold standard of correctness and audited other parts of the same file.</li>
+    <li>The authors call this an overtrust failure: agents accept author claims or existing code as evidence of correctness without independently verifying behavior. They add that security risks can emerge from automated review processes.</li>
+  </ul>
+  <p>Many other failures needed knowledge absent from the diff: repository-wide reasoning, or external context such as library or protocol semantics.</p>
+</section>
+
+<section id="design">
+  <h2><span class="num">6</span>How much do settings and prompts help? (Q4)</h2>
+  <div class="key">
+    <p>One prompt change improved results at about the same cost: ask for comprehensive findings ranked by severity. It was far more cost-effective than multi-agent setups. On the newest model, it made no real difference.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Change</th><th>Effect</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><th>Comprehensive prompt</th><td><b>up to +5.8%</b> (+5.3% for gpt-5.6-sol)</td><td><b>about 1.1×</b></td></tr>
+        <tr><th>Multi-agent setups</th><td>+2.8% on average; +4.7% for the best setup</td><td>3.68× on average; 5.55× for the best setup</td></tr>
+        <tr><th>Higher reasoning effort (gpt-5.6-luna, low to max)</th><td>about 36% to about 57%</td><td>23.22×</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">“Up to +5.8%” and “+4.7% for the best setup” are from the abstract and Section 1; “+2.8% on average” and “+5.3% for gpt-5.6-sol” are from Section 4.6. They summarize the same experiments in different ways.</p>
+  <ul>
+    <li><b>Why the prompt works:</b> models are strong at putting important findings at the top (89% of correct findings were in the top 3). Asking for more findings and leaving the ranking to the model reduces the risk of discarding valid bugs early.</li>
+    <li><b>Multi-agent setups:</b> self-refine, candidate ensembles, and sub-agents all gave smaller gains at a much higher cost.</li>
+  </ul>
+
+  <h3>The prompt's effect differs by model</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Model</th><th class="num">Bugs humans caught in review</th><th class="num">Bugs that slipped past review</th></tr></thead>
+      <tbody>
+        <tr><th>claude-opus-5</th><td class="num"><b>+0.3</b></td><td class="num"><b>−1.8</b></td></tr>
+        <tr><th>claude-opus-4.8</th><td class="num">+5.5</td><td class="num">+6.0</td></tr>
+        <tr><th>gpt-5.6-sol</th><td class="num">+5.6</td><td class="num">+5.0</td></tr>
+        <tr><th>gpt-5.5</th><td class="num">+4.2</td><td class="num">+5.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Change in recall@5 (points) when asking for comprehensive findings, from the paper's Table 2.</p>
+  <p>For the newest model, claude-opus-5, the gain was negligible or even negative. The authors write that useful behaviors are gradually trained into models, so earlier harness designs can become outdated, and that harness designs should be revisited as models evolve.</p>
+
+  <h3>Harnesses differ too</h3>
+  <p>With the same model, Copilot CLI outperformed Claude Code, which is why the paper used Copilot CLI as its main harness. claude-opus-5 in Claude Code used 9.0 sub-agents per run, and its cost rose sharply. The authors warn that model changes can bring unexpected cost surges.</p>
+</section>
+
+<section id="benchmark">
+  <h2><span class="num">7</span>How the benchmark was built and scored</h2>
+
+  <h3>Why a new benchmark</h3>
+  <ul>
+    <li>Earlier code review benchmarks treat human review comments as ground truth and score AI reviews by how closely they match.</li>
+    <li>But human comments can include nitpicks or less useful comments accepted for social reasons, and they can miss valid points; an AI that raises them gets penalized.</li>
+    <li>The authors' intuition: a good review should at least catch the bugs that a human has confirmed and fixed. So they used real bugs as ground truth.</li>
+  </ul>
+
+  <h3>Two kinds of bugs</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Kind</th><th>How they were collected</th><th>Counts along the way</th></tr></thead>
+      <tbody>
+        <tr><th>Bugs humans caught in review (before merge)</th><td>Raised in review comments and fixed before merge. Bot-authored, self-authored, too-short, and rejected comments were removed, and an LLM filtered out non-bug comments (style, naming, tests, nits, refactors)</td><td>1,436,120 threads on 304,601 PRs → 472,039 candidates → 8,639 sampled → 865 bugs</td></tr>
+        <tr><th>Bugs that slipped past review (after merge)</th><td>Reported later and fixed in a later PR. The inducing PR was traced with SZZ (git blame on the fixed lines) and checked with an LLM</td><td>195,075 candidates → 57,725 → 10,784 → 8,846 pairs → 1,168 → 736 → 689 pairs</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>500 tasks were sampled per track, 1,000 in total.</li>
+    <li>Of 40 randomly sampled tasks checked by the authors, 37 (92.5%) were valid — a concrete defect that reviewers could detect (95% CI 80.1–97.4%).</li>
+  </ul>
+
+  <h3>Repositories</h3>
+  <ul>
+    <li><b>Public:</b> five languages (Python, Rust, C#, JavaScript/TypeScript, Java); popular, actively maintained GitHub projects with more than 2,000 PRs and more than 200 contributors, across 31 application domains. 98 repositories in the end; tasks span 2015–2026, with a median churn of 189 lines.</li>
+    <li><b>Industry:</b> 800 tasks from two large monorepos at one company, built with the same pipeline. The paper does not name the company.</li>
+  </ul>
+
+  <h3>Task format and scoring</h3>
+  <ul>
+    <li>Each task is a Docker snapshot of the repository at the inducing PR's base commit, with later history removed to prevent leakage.</li>
+    <li>The agent gets the PR title, description, and the change, is not told a bug exists, and writes findings to review.md, self-ranked by severity.</li>
+    <li>Internet access was restricted and the agent was told not to cheat; an AI-assisted audit of trajectories found no cheating.</li>
+    <li>A panel of three LLM judges (gpt-5.5, claude-opus-4.8, gemini-3.1-flash) decided by majority whether a finding matches the true bug. On 40 samples, agreement with human annotation was almost perfect (κ=0.89).</li>
+  </ul>
+
+  <h3>Terms used on this page</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Term</th><th>Meaning in this paper</th></tr></thead>
+      <tbody>
+        <tr><th>PR (pull request)</th><td>A proposed code change, reviewed before it goes into the main branch</td></tr>
+        <tr><th>Model names (claude-opus-5 and so on)</th><td>The AI models tested. Names starting with claude are Anthropic models; names starting with gpt are OpenAI models. The paper groups them into large models (the three claude-opus models and gpt-5.4 through gpt-5.6-sol) and smaller or older models (claude-sonnet-5, gpt-5.6-luna, claude-haiku-4.5, gpt-5-mini)</td></tr>
+        <tr><th>Review agent</th><td>An AI agent that reads a change and reports problems</td></tr>
+        <tr><th>“Lights-off” software factory</th><td>Development where AI both writes and reviews code, with little to no human supervision</td></tr>
+        <tr><th>recall@5</th><td>Share of tasks where the true bug is among the agent's top-5 findings, ranked by severity</td></tr>
+        <tr><th>Odds ratio</th><td>How much a condition multiplies the odds of detection; below 1 means harder, above 1 means easier</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>The authors' recommendations and the study's limits</h2>
+
+  <h3>Recommendations for adopting review agents</h3>
+  <p>The authors find review agents quite valuable to build into the review pipeline, because they help developers catch many bugs they would otherwise miss. On how to adopt them, they recommend:</p>
+  <ul>
+    <li><b>Scale review effort to PR complexity.</b> Allocate both automated and human review effort by PR size and heterogeneity.</li>
+    <li><b>Steer review directions by priorities.</b> Agent reviews can also be (mis-)directed by surface cues such as the PR type, statements in code comments, or behaviors specified in tests.</li>
+    <li><b>Incorporate repository knowledge.</b> Provide repository-specific instructions and knowledge bases.</li>
+    <li><b>Monitor quality and adapt the harness as models evolve.</b> The codebase changes too, so evaluate the deployed configuration periodically.</li>
+  </ul>
+
+  <h3>Can a software factory be fully lights-off?</h3>
+  <p>On this question the authors conclude: not yet, especially for large proprietary repositories. Even the strongest agent misses known bugs, performance drops heavily on proprietary code, and failures concentrate in diffs that require non-local or domain-specific reasoning. Fully unsupervised operation is supported only for narrowly scoped, low-consequence PRs, and the boundary can move as models improve.</p>
+
+  <h3>Research opportunities</h3>
+  <ul>
+    <li><b>Self-improving review agents:</b> memory that keeps adapting to a repository, built from design documents, past reviews, incidents, and commits.</li>
+    <li><b>More efficient human-in-the-loop review:</b> instead of humans reading every line, systems that walk reviewers through a PR and highlight high-risk, high-impact, or uncertain parts; agents that calibrate and communicate their uncertainty.</li>
+  </ul>
+
+  <h3>The study's limits (as the authors state them)</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>Only bug detection</th><td>Results show recovery of known bugs, not overall review usefulness</td></tr>
+        <tr><th>LLM judges</th><td>Judges may be unreliable; mitigated with a three-model panel and human agreement checks</td></tr>
+        <tr><th>Ground truth may be wrong</th><td>Incorrect ground truths or unsolvable tasks can remain; 92.5% valid in a 40-task check</td></tr>
+        <tr><th>Agents are stochastic</th><td>Mitigated by pinning the harness and fixing the prompt and environment</td></tr>
+        <tr><th>Associations, not causes</th><td>Unmeasured factors and LLM annotation errors may confound estimates</td></tr>
+        <tr><th>Mature, popular projects</th><td>Results may differ for smaller or younger projects, uncommon languages, generated or configuration-heavy code, or other review practices</td></tr>
+        <tr><th>Replication package not public</th><td>An open-source version of the benchmark is public (malusamayo/CRBugBench on GitHub)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>How far can AI review be trusted? (microtaro's reading)</h2>
+  <div class="note note-view">
+    <p><b>This section is microtaro's reading, not the paper's claim.</b></p>
+  </div>
+  <ul>
+    <li><b>This is not a reason to avoid AI review.</b> The best agent caught 64.2% of bugs that slipped through human review, at PR time, and humans plus the agent reached 82.1%. microtaro reads this paper not as a reason to skip AI review, but as evidence of how to build it in so it works well.</li>
+    <li><b>The trust that came from looking can move into a test.</b> A person reviewing a change was itself the basis for saying the code could be trusted. The authors' advice — build a benchmark from your own repository's past bugs and keep monitoring the AI reviewer's detection rate — reads to microtaro as a way to move that basis from a person looking every time to a test that can be run again and again. It is one concrete answer to this theme's question: can the trust that came from people reading code move to another basis?</li>
+    <li><b>Humans and agents can split the work.</b> Agents are strong on severe bugs and reliability issues; humans catch maintainability issues far more often (2.702×). In <a href="2x-mandate.html">AI Writes Faster Than Humans Can Review</a>, part of human review was replaced by AI review. What humans should have kept, on this reading, is the eye for maintainability, which that paper's short-horizon quality proxies (reverts, quick follow-up fixes) would not show. Note that the two papers share one author (Hao He: first author of the first paper, second author of this one), and the first paper cites this one.</li>
+    <li><b>Writing accurate PR descriptions helps AI review too.</b> Agents sometimes take PR descriptions and comments as evidence of correctness without checking. When the description is wrong, the AI review goes wrong with it, so an accurate description helps the AI reviewer as well as human readers.</li>
+    <li><b>Mind the dates.</b> The rise from 47.7% to 71.9% is between February and July 2026 models. The paper appeared in October, but later models are not included.</li>
+    <li><b>Building alone with AI: split changes small and let AI review them.</b> Small, focused changes are where AI review did well in this paper, and solo projects are usually small and new, the side agents handle well. Not bundling large changes, and writing accurate descriptions, are the two practices this paper supports.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2610.13668v1">Yang, He, Cheng, Butler, Murphy-Hill, Badea, Bird, “(When) Should a Software Factory be Lights-off? Benchmarking Code Review Agents on Bug Detection”</a> arXiv:2610.13668v1; v1 2026-10-09 (the only version); not peer reviewed; license <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">Affiliations: Carnegie Mellon University (Yang; work done at Microsoft Research), Microsoft (He, Cheng, Butler, Murphy-Hill), Microsoft Research (Badea, Bird). This page is based on the HTML version of v1, main text and tables</span></li>
+    <li><a href="https://github.com/malusamayo/CRBugBench">malusamayo/CRBugBench</a><span class="use">The open-source version of the benchmark, as given in the paper. microtaro did not open it when writing this page</span></li>
+    <li><a href="../../../../topics/ai-trust/data/review-agents-bugs.json">topics/ai-trust/data/review-agents-bugs.json</a><span class="use">The numbers used in this page's charts and tables, with where each appears in the paper (labels in Japanese)</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>Numbers are taken from the main text and Tables 1–3 of v1. No values were computed for this page (only the odds-ratio bars are drawn on a log scale).</li>
+    <li>The text's 71.9% (claude-opus-5), 47.7% (claude-opus-4.6), $2.97, and 9.8 minutes match the averages of the two tracks in Table 1.</li>
+    <li>Per-model results on the industry repositories and the per-condition rates in Figure 7 appear only in figures, without numbers in the text, so they are not shown.</li>
+    <li>The gains from prompts and multi-agent setups are summarized differently in the abstract and Section 1 (maximums) and in Section 4.6 (averages); both match Tables 2 and 3.</li>
+    <li>“Received 5 June 2009” in the HTML version's front matter appears to be a template default; the publication date follows the arXiv submission record (2026-10-09).</li>
+    <li>On 2026-11-16, microtaro re-read the main text and tables and checked every statement on the Japanese page against the paper; this English page follows it. The version and license were checked on the paper's arXiv page.</li>
+  </ul>
+  <p class="stamp">The text and charts on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Quotations and numbers from the paper are under the paper's license (CC BY 4.0).</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+  "about": "解説「AI のレビュー役は、どこまでバグを見つけるか」の図と表に使った数値。すべて論文の第 1 版から拾い、出典の場所を where に書いた。この解説で計算した値は入れていない。",
+  "paper": {
+    "title": "(When) Should a Software Factory be Lights-off? Benchmarking Code Review Agents on Bug Detection",
+    "authors": ["Chenyang Yang", "Hao He", "Ti-Chung Cheng", "Jenna Butler", "Emerson Murphy-Hill", "Carmen Badea", "Christian Bird"],
+    "url": "https://arxiv.org/abs/2610.13668v1",
+    "license": "CC BY 4.0"
+  },
+  "checked": "2026-11-16",
+  "recall_at5_by_model": {
+    "where": "表 1（公開のリポジトリ。recall@5。Cmt は取り込む前に人が見つけたバグ、Fix は取り込んだあとに見つかったバグ）",
+    "unit": "%",
+    "rows": [
+      { "model": "claude-opus-5", "group": "large", "cmt": 79.6, "fix": 64.2, "cost_usd": { "cmt": 2.55, "fix": 3.38 } },
+      { "model": "claude-opus-4.8", "group": "large", "cmt": 70.0, "fix": 46.6, "cost_usd": { "cmt": 1.54, "fix": 1.98 } },
+      { "model": "claude-opus-4.6 (max)", "group": "large", "cmt": 59.1, "fix": 36.4, "cost_usd": { "cmt": 0.99, "fix": 1.44 } },
+      { "model": "gpt-5.6-sol", "group": "large", "cmt": 65.6, "fix": 49.0, "cost_usd": { "cmt": 1.50, "fix": 2.03 } },
+      { "model": "gpt-5.5", "group": "large", "cmt": 63.3, "fix": 47.8, "cost_usd": { "cmt": 1.86, "fix": 2.33 } },
+      { "model": "gpt-5.4", "group": "large", "cmt": 61.8, "fix": 45.4, "cost_usd": { "cmt": 1.27, "fix": 1.59 } },
+      { "model": "claude-sonnet-5", "group": "small", "cmt": 64.7, "fix": 45.2, "cost_usd": { "cmt": 1.18, "fix": 1.60 } },
+      { "model": "gpt-5.6-luna", "group": "small", "cmt": 63.9, "fix": 47.8, "cost_usd": { "cmt": 0.51, "fix": 0.72 } },
+      { "model": "claude-haiku-4.5 (none)", "group": "small", "cmt": 43.0, "fix": 23.0, "cost_usd": { "cmt": 0.21, "fix": 0.26 } },
+      { "model": "gpt-5-mini (high)", "group": "small", "cmt": 54.7, "fix": 33.4, "cost_usd": { "cmt": 0.12, "fix": 0.14 } }
+    ]
+  },
+  "headline": {
+    "where": "要旨、本文 1・4.3",
+    "best_recall_at5_both_tracks": 71.9,
+    "best_cost_usd_per_task": 2.97,
+    "best_latency_min": 9.8,
+    "opus_4_6_feb_2026": 47.7,
+    "opus_5_jul_2026": 71.9,
+    "top3_share_of_hits": 89,
+    "luna_vs_opus5": { "performance_share": 78, "cost_share": 21 },
+    "industry_drop_up_to": 25.5
+  },
+  "human_and_agent": {
+    "where": "本文 4.3（図 5）と脚注 3",
+    "unit": "%",
+    "human_only": 50,
+    "best_agent_only": 71.9,
+    "combined": 82.1,
+    "pre_vs_post_merge_bugs": { "pre": 49.7, "post": 50.3 }
+  },
+  "odds_ratios": {
+    "where": "本文 4.4（図 6）。多変量ロジスティック回帰の調整済みオッズ比",
+    "rows": [
+      { "name": "変更が大きい", "or": 0.591, "p": "***" },
+      { "name": "いろいろな種類の変更が混ざる", "or": 0.795, "p": "*" },
+      { "name": "不具合を直す変更", "or": 0.521, "p": "***" },
+      { "name": "使いやすさのバグ", "or": 0.454, "p": "***" },
+      { "name": "移植のしやすさのバグ", "or": 0.523, "p": "0.07" },
+      { "name": "重大なバグ", "or": 1.906, "p": "**" },
+      { "name": "変更の部分を見れば分かるバグ", "or": 2.621, "p": "***" }
+    ],
+    "human_vs_agent": [
+      { "name": "保守のしやすさの問題（人がよく見つける）", "or": 2.702, "p": "*" },
+      { "name": "重大なバグ（人が見つけにくい）", "or": 0.450, "p": "*" },
+      { "name": "信頼性の問題（人が見つけにくい）", "or": 0.591, "p": "*" }
+    ],
+    "model_pr_type_interaction": { "refactor_ror": 0.568, "other_ror": 0.476 }
+  },
+  "visible_bugs": {
+    "where": "本文 4.4",
+    "unit": "%",
+    "github": 46.1,
+    "industry": 22.8,
+    "share_of_gap_explained": 20
+  },
+  "model_migration": {
+    "where": "本文 4.4（図 5）",
+    "regressions_some_pairs": 8.9,
+    "opus_5_regressions_up_to": 1.2
+  },
+  "trajectories": {
+    "where": "本文 4.5（図 8）",
+    "start_with_git": 64,
+    "turn_share": { "read": 39, "probe": 36, "execute": 8 },
+    "execute_share": { "claude-opus-5": 9.7, "gpt-5.6-sol": 6.9 },
+    "median_turns": { "gpt-5.6-sol": 17, "claude-opus-5": 35 },
+    "gpt_5_6_sol_survive_to_turn_50": 3.5,
+    "failure_funnel_all": { "inspected_defect_file": 95.6, "finding_on_file": 80.2, "hit_bug": 56.2 },
+    "failure_funnel_opus_5": { "finding_on_file": 91.9, "correct_diagnosis": 75 }
+  },
+  "design_choices": {
+    "where": "要旨、本文 1・4.6、表 2・表 3",
+    "effort_gpt_5_6_luna": { "low": 36, "max": 57, "cost_multiplier": 23.22, "approx": true },
+    "comprehensive_prompt_up_to": { "gain": 5.8, "cost_multiplier": 1.10 },
+    "comprehensive_prompt_gpt_5_6_sol": 5.3,
+    "multi_agent_average": { "gain": 2.8, "cost_multiplier": 3.68 },
+    "multi_agent_up_to": { "gain": 4.7, "cost_multiplier": 5.55 },
+    "comprehensive_prompt_delta_recall_at5": {
+      "where": "表 2（Default から Comprehensive への差。ポイント）",
+      "rows": [
+        { "model": "claude-opus-5", "cmt": 0.3, "fix": -1.8 },
+        { "model": "claude-opus-4.8", "cmt": 5.5, "fix": 6.0 },
+        { "model": "gpt-5.6-sol", "cmt": 5.6, "fix": 5.0 },
+        { "model": "gpt-5.5", "cmt": 4.2, "fix": 5.2 }
+      ]
+    },
+    "claude_code_subagents_per_run": { "claude-opus-5 + claude-code": 9.0, "copilot-cli": 0, "claude-opus-4.8 + claude-code": 0.1 }
+  },
+  "benchmark": {
+    "where": "本文 3",
+    "public_tasks": 1000,
+    "public_repositories": 98,
+    "industry_tasks": 800,
+    "industry_repositories": 2,
+    "languages": 5,
+    "domains": 31,
+    "tasks_per_track": 500,
+    "pre_merge_pipeline": { "prs": 304601, "threads": 1436120, "candidate_threads": 472039, "sampled_threads": 8639, "bugs": 865 },
+    "post_merge_pipeline": { "candidate_prs": 195075, "fix_prs_with_issue": 57725, "fix_prs_after_llm": 10784, "pairs": 8846, "top12_pairs": 1168, "llm_checked_pairs": 736, "final_pairs": 689 },
+    "quality_check": { "sampled": 40, "valid": 37, "valid_share": 92.5, "ci95": [80.1, 97.4] },
+    "judge_agreement": { "human_llm_kappa": 0.89, "across_llm_fleiss_kappa": 0.95 },
+    "median_churn_lines": 189,
+    "single_language_share": 82,
+    "avg_source_files": { "industry": "100k 超", "github": "3k" },
+    "repositories_collected": "2026-06-26"
+  }
+}

@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI のレビュー役は、どこまでバグを見つけるか（論文の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="review-agents-bugs.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/papers/review-agents-bugs.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#model-change"><span class="n">2</span>モデルが新しくなると、何が変わるか</a></li>
+    <li><a href="#detect"><span class="n">3</span>AI はどれだけバグを見つけたか（Q1）</a></li>
+    <li><a href="#conditions"><span class="n">4</span>どんなときに強く、どんなときに見落とすか（Q2）</a></li>
+    <li><a href="#trajectories"><span class="n">5</span>どこに時間を使い、なぜ外すか（Q3）</a></li>
+    <li><a href="#design"><span class="n">6</span>設定や使い方で、どこまで良くなるか（Q4）</a></li>
+    <li><a href="#benchmark"><span class="n">7</span>試験の作り方と確かめ方</a></li>
+    <li><a href="#advice"><span class="n">8</span>著者の提言と、この研究の限界</a></li>
+    <li><a href="#reading"><span class="n">9</span>AI のレビューをどこまで信頼できるか（microtaro の読み方）</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/papers/review-agents-bugs.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">論文の解説</p>
+  <h1>AI のレビュー役は、どこまでバグを見つけるか</h1>
+  <p class="src"><b>元の論文</b>Yang, He, Cheng, Butler, Murphy-Hill, Badea, Bird「(When) Should a Software Factory be Lights-off? Benchmarking Code Review Agents on Bug Detection」arXiv:2610.13668 第 1 版（2026-10-09）、未査読、CC BY 4.0
+    <span class="links"><a href="https://arxiv.org/abs/2610.13668v1">arXiv のページ</a><a href="https://arxiv.org/html/2610.13668v1">HTML 版で読む</a><a href="https://arxiv.org/pdf/2610.13668v1">PDF</a></span></p>
+  <p class="lead">人が実際に見つけて直したバグを試験問題にして、レビューをする AI がどこまで見つけるかを測った論文の解説です。いちばん良い AI は、人のレビューをすり抜けたバグの 6 割以上を含め、全体の 7 割を見つけました。AI がコードを書く量に人のレビューが追いつかない中で、AI のレビューをどう組み込めばよいかを、データで示しています。Carnegie Mellon 大学と Microsoft の研究者が書きました。</p>
+  <p class="stamp">2026-11-13 に下書きを作成（microtaro と AI）。2026-11-16、arXiv の第 1 版（2026-10-09。版はこれだけ）の本文と表を読み直し、この形に書き直しました。論文の成果と限界を、原文の重みどおりに書いています。数字は第 1 版のものです。論文が言っていることと、microtaro の読み方は分けて書いています。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>この論文は、4 つの問いを立てています。問いごとに、答えと、そのもとになった結果をまとめます。ここだけ読めば、論文の要点が分かるようにしています。灰色の小さな字は、それぞれを何から読み取ったかです。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>レビューをする AI は、変更（PR）に入ったバグを、どれだけ見つけるか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>よく見つける。いちばん良い AI は、人が確かめたバグの 71.9% を上位 5 件の指摘の中で見つけ、人のレビューをすり抜けたバグでも 64.2% を見つけた。半年足らずで 47.7% から伸びている。変更を見ただけでは分からないバグが多い社内の巨大なコードでは、成績が下がった。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>いちばん良い AI（claude-opus-5）は 71.9%。</b>
+          <span class="why">人がレビューで見つけていたバグでは、AI も 79.6% を見つけました。1 問あたり 2.97 ドル、平均 9.8 分でした。</span>
+          <span class="how">論文の表 1 と本文から</span>
+        </li>
+        <li>
+          <b>人のレビューをすり抜けたバグの 64.2% を見つけた。</b>
+          <span class="why">取り込んだあとに見つかったバグは、人のレビューを通って入ってしまったものです。いちばん良い AI は、その 64.2% を変更の時点で見つけました。</span>
+          <span class="how">論文の表 1 から</span>
+        </li>
+        <li>
+          <b>半年足らずで大きく伸びた。</b>
+          <span class="why">2026 年 2 月のモデル（claude-opus-4.6）の 47.7% から、7 月のモデル（claude-opus-5）の 71.9% へ伸びました。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+        <li>
+          <b>人と AI の指摘を合わせると 82.1%。</b>
+          <span class="why">この試験の作り方では、人のレビューで見つかったバグは半分（50%）です。AI だけで 71.9%、人と AI の指摘を合わせると 82.1% になりました。</span>
+          <span class="how">論文の本文と図 5 の説明から</span>
+        </li>
+        <li>
+          <b>社内の巨大なコードでは、成績が下がった。</b>
+          <span class="why">最大 25.5% 下がりました。社内のコードのバグは、変更の部分を見れば分かるものが少なく（22.8%。公開のものは 46.1%）、プロジェクトの知識が要るものが多かった。モデルが新しくなるほど良くなる傾向は同じでした。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#detect">3</a>（AI はどれだけバグを見つけたか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>どんな変更、どんなバグで、AI は強く、どんなときに見落としやすいか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>重大なバグと、変更を見れば分かるバグに強く、重大なバグと信頼性の問題は人より見つけやすい。見落としやすいのは、大きな変更、種類の混ざった変更、不具合を直す変更と、変更の外まで考えないと分からないバグ。保守のしやすさは人が強いので、組むと見つかる範囲が広がる。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>重大なバグと、変更を見れば分かるバグは見つけやすい。</b>
+          <span class="why">ほかの条件をそろえると、重大なバグは 1.906 倍、変更の部分を見れば分かるバグは 2.621 倍、見つかりやすかった（オッズ比）。</span>
+          <span class="how">ほかの条件をそろえた比較（回帰分析）から</span>
+        </li>
+        <li>
+          <b>重大なバグと信頼性の問題は、人より AI のほうが見つけやすい。</b>
+          <span class="why">人は保守のしやすさの問題をよく見つけます。得意が違うので、組み合わせると見つかる範囲が広がります。</span>
+          <span class="how">人のレビューで見つかったバグも入れた比較から</span>
+        </li>
+        <li>
+          <b>大きな変更、種類の混ざった変更、不具合を直す変更では見落としやすい。</b>
+          <span class="why">変更の外まで考えないと分からないバグや、使いやすさなど機能以外のバグも見落としやすかった。</span>
+          <span class="how">同じ比較から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#conditions">4</a>（どんなときに強く、どんなときに見落とすか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>レビューをする AI は、どこに時間を使い、なぜ外すのか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>バグのあるファイルには、ほとんど必ずたどり着く。差が出るのは、そこから正しく言い当てられるかで、コードを動かして確かめた AI は、ほかが見落としたバグを見つけた。いまは読むことと探すことが中心で、動かすのは 8%。説明やコメントを信じ込んで誤ることもある。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>バグのある所には、ほとんどたどり着く。</b>
+          <span class="why">95.6% がバグのあるファイルを開き、80.2% がそのファイルについて指摘し、56.2% が正しく言い当てました。いちばん良い claude-opus-5 は、そのファイルへの指摘が 91.9%、正しい診断が 75% でした。</span>
+          <span class="how">AI の作業の記録と正解の照合から</span>
+        </li>
+        <li>
+          <b>動かして確かめた AI は、ほかが見落としたバグを見つけた。</b>
+          <span class="why">全体では、コードを動かすのは手順の 8% だけでした。動かす割合が高い claude-opus-5（9.7%）は、動かしたことで、ほかのモデルが見落としたバグを見つけた例がありました。</span>
+          <span class="how">AI の作業の記録の集計と、中身を調べた分析から</span>
+        </li>
+        <li>
+          <b>説明を信じ込むことがある。</b>
+          <span class="why">コードのコメントと PR の説明が「こう動く」と書いていたため、実際のコードがそう動かないのに、すべてのモデルが正しいと判断した例がありました。</span>
+          <span class="how">20 問を選んで中身を調べた分析から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#trajectories">5</a>（どこに時間を使い、なぜ外すか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>AI の設定や使い方を変えると、どこまで良くなるか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>一言の指示で良くなる。「もれなく挙げて、重大な順に並べて」と頼むだけで最大 +5.8%、費用はほぼ同じ（1.1 倍）。複数の AI を組み合わせるより、ずっと費用対効果が良い。推論を深くするのも効く。いちばん新しいモデルでは、この工夫で差が出なかった。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>指示を変える：最大 +5.8%、費用は 1.1 倍。</b>
+          <span class="why">複数の AI の組み合わせは平均 +2.8% で、費用は平均 3.68 倍でした。</span>
+          <span class="how">論文の表 2・表 3 と本文から</span>
+        </li>
+        <li>
+          <b>推論を深くする：約 36% から約 57% へ。</b>
+          <span class="why">小さいモデル（gpt-5.6-luna）で、推論の深さを最低から最大にした場合です。費用は 23.22 倍になりました。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+        <li>
+          <b>いちばん新しいモデルでは、指示の工夫で差が出なかった。</b>
+          <span class="why">勧めたい振る舞いの多くが、モデルの学習に取り込まれていくからだ、と著者は読んでいます。</span>
+          <span class="how">論文の表 2 と本文から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#design">6</a>（設定や使い方で、どこまで良くなるか）</p>
+    </div>
+  </div>
+
+  <h3>4 つの答えから、著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（論文の考察と結論の節）</p>
+      <p class="claim">レビューをする AI は、人が見落とすはずだった多くのバグを見つける。だから、レビューの流れに組み込む価値は十分あり、急速に良くなってもいる。そのうえで、大事な変更の最後の判断は責任を持つ人がし、人がまったく見ない運用は、範囲が狭く影響の小さい変更にとどめる。</p>
+      <p class="en">“they are still quite valuable to be incorporated into the review pipeline to help developers catch many bugs they would otherwise miss”</p>
+      <p class="en">“For consequential changes, review agents are better treated as scalable peers that broaden coverage while an accountable human retains the final decision.”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">上手に組み込むために、著者は次のことを勧めています</p>
+      <ul class="recs">
+        <li><b>変更の複雑さで、レビューの力の入れ方を変える。</b>小さく単純な変更は安い設定で、大きく種類の混ざった変更は、強いモデル、深い推論、もれなく挙げる指示、人の丁寧なレビューで見る。関係のない変更は分けて出す。保守のしやすさとプロジェクトの価値観は、人が受け持つ。</li>
+        <li><b>何を見てほしいかを、AI に指示する。</b>AI は放っておくと、重大な機能のバグに向かう。使いやすさ、移植のしやすさ、互換性、保守のしやすさが大事なら、そう指示する。</li>
+        <li><b>リポジトリの知識を、AI に渡す。</b>AI はプロジェクト固有の知識が要るバグに弱いので、リポジトリの説明や知識を与えて、レビューの質を上げる。</li>
+        <li><b>モデルが変わるたびに、品質を見張り、使い方を見直す。</b>この論文の方法で、自分のリポジトリの過去のバグから自分用の試験を作る。費用が気になるなら、変更の性質に合わせてモデルと設定を使い分ける。</li>
+      </ul>
+      <p class="conclusion-note">人がまったく見ない運用の線は、モデルが良くなれば動きうる。ただし試験の平均点ではなく、自分のリポジトリで見張り続けた証拠で決めるべきだ、とも書いています。詳しくは <a href="#advice">8</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>人のレビューが追いつかない</li>
+    <li>AI にレビューを任せられるか、実際のバグで試す</li>
+    <li>人がすり抜けさせたバグも 6 割以上見つける</li>
+    <li>人と組むと 8 割を超える</li>
+    <li>小さく、目的の絞られた変更ほど強い</li>
+    <li>大事な変更は、人が最後に判断する</li>
+  </ol>
+
+  <h3>論文が答えていないこと</h3>
+  <p>次のことは、著者自身が「測っていない」「当てはまらないかもしれない」と書いています。</p>
+  <ul>
+    <li><b>レビューの役立ち方の全体：</b>測ったのは、すでに分かっているバグを見つけるかだけです。設計の提案や保守の助言など、レビューのほかの役目は入っていません。</li>
+    <li><b>原因：</b>どんな変更で見落としやすいかの分析は、関係を見たもので、因果ではありません。</li>
+    <li><b>ほかのプロジェクト：</b>選んだのは、成熟して活発な人気のプロジェクトです。小さい、新しい、珍しい言語、設定ばかりのコードなどでは、結果が違いうる、としています。</li>
+  </ul>
+</section>
+
+<section id="model-change">
+  <h2><span class="num">2</span>モデルが新しくなると、何が変わるか</h2>
+  <div class="key">
+    <p>モデルが新しくなるたびに、成績は伸びました。半年足らずで 47.7% から 71.9% です。この伸びを生かすには、乗り換えのたびに確かめることが大事です。乗り換えると、前のモデルが見つけていたバグを見落とすことがあり、前のモデルで効いた工夫が古くなり、費用が変わることもあるからです。</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-evolve">
+    <p class="chart-title" id="ch-evolve">モデルの世代による成績の伸び（2026 年）</p>
+    <p class="chart-sub">上位 5 件の指摘の中に、正解のバグが入っていた割合。人がレビューで見つけていたバグと、人のレビューをすり抜けたバグの平均。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="2026 年 2 月（claude-opus-4.6）：47.7%"><span class="bar-label">2026 年 2 月<small>claude-opus-4.6</small></span><span class="bar-track"><span class="bar" style="--to: 47.7"></span></span><span class="bar-val">47.7%</span></li>
+      <li class="main" title="2026 年 7 月（claude-opus-5）：71.9%"><span class="bar-label">2026 年 7 月<small>claude-opus-5</small></span><span class="bar-track"><span class="bar" style="--to: 71.9"></span></span><span class="bar-val">71.9%</span></li>
+    </ul>
+    <figcaption>論文の本文の数値から作った図です。</figcaption>
+  </figure>
+
+  <ul>
+    <li><b>乗り換えると、後退もある。</b>モデルを乗り換えると、全体では良くなっても、前のモデルが見つけていたバグを見落とすことがありました。8.9% の後退を伴う組み合わせもありました。claude-opus-5 は例外的に後退が少なく、最大 1.2% でした。</li>
+    <li><b>伸び方は、変更の種類で違う。</b>claude-opus-5 がほかのモデルより強いのは、機能の追加と不具合の直しの変更で、リファクタリングなどほかの種類の変更では差が縮みました。</li>
+    <li><b>前のモデルで効いた工夫が、効かなくなる。</b>「もれなく挙げて」と指示する工夫は、前のモデルでは効きましたが、claude-opus-5 ではほとんど効きませんでした（<a href="#design">6</a>）。著者は、勧めたい振る舞いの多くが、だんだんモデルの学習に取り込まれていくからだと読んでいます。</li>
+    <li><b>費用が急に増えることもある。</b>claude-opus-5 を Claude Code で動かすと、補助の AI（サブエージェント）を 1 回あたり 9.0 個呼び、費用が急に増えました。同じ Claude Code でも claude-opus-4.8 では 0.1 個、Copilot CLI では 0 個でした。</li>
+  </ul>
+  <p class="t-note">試したのは 2026 年 2 月から 7 月までのモデルです。リポジトリを集めたのは 2026 年 6 月 26 日で、論文が出たのは 10 月です。秋以降のモデルは入っていません。</p>
+</section>
+
+<section id="detect">
+  <h2><span class="num">3</span>AI はどれだけバグを見つけたか（Q1）</h2>
+  <div class="key">
+    <p>いちばん良い AI は、人が確かめたバグの 71.9% を、上位 5 件の指摘の中で見つけました。人のレビューをすり抜けて取り込まれたバグでも、64.2% を見つけています。費用は 1 問 3 ドルほど、時間は 10 分ほどです。変更を見ただけでは分からないバグが多い社内の巨大なコードでは、成績が下がりました。</p>
+  </div>
+
+  <h3>試験のしくみ（短く）</h3>
+  <ul>
+    <li>人が実際に見つけて直したバグと、そのバグを入れた変更（PR）を組にして、試験問題にしました。詳しくは <a href="#benchmark">7</a>。</li>
+    <li>AI には「バグがある」とは伝えずに変更をレビューさせ、指摘を重大な順に並べて書かせました。</li>
+    <li>上位 5 件の指摘の中に、正解のバグが入っていた問題の割合で採点しました（論文の言葉で recall@5）。</li>
+    <li>どのモデルも、同じ道具（Copilot CLI、版を固定）と同じ指示（その道具の /review の公式の指示）で、できるだけ深い推論で動かしました。</li>
+  </ul>
+
+  <h3>モデルごとの成績</h3>
+  <figure class="chart" aria-labelledby="ch-models">
+    <p class="chart-title" id="ch-models">人のレビューをすり抜けたバグを、AI はどれだけ見つけたか</p>
+    <p class="chart-sub">いちばん良い AI は 64.2%。人のレビューを通って入ってしまったバグ 500 問のうち、AI が変更の時点で見つけた割合（上位 5 件の指摘の中）。各行が AI のモデル。</p>
+    <ul class="bars" style="--max: 100">
+      <li class="main" title="claude-opus-5：64.2%"><span class="bar-label">claude-opus-5</span><span class="bar-track"><span class="bar" style="--to: 64.2"></span></span><span class="bar-val">64.2%</span></li>
+      <li title="gpt-5.6-sol：49.0%"><span class="bar-label">gpt-5.6-sol</span><span class="bar-track"><span class="bar" style="--to: 49.0"></span></span><span class="bar-val">49.0%</span></li>
+      <li title="gpt-5.5：47.8%"><span class="bar-label">gpt-5.5</span><span class="bar-track"><span class="bar" style="--to: 47.8"></span></span><span class="bar-val">47.8%</span></li>
+      <li title="gpt-5.6-luna：47.8%"><span class="bar-label">gpt-5.6-luna</span><span class="bar-track"><span class="bar" style="--to: 47.8"></span></span><span class="bar-val">47.8%</span></li>
+      <li title="claude-opus-4.8：46.6%"><span class="bar-label">claude-opus-4.8</span><span class="bar-track"><span class="bar" style="--to: 46.6"></span></span><span class="bar-val">46.6%</span></li>
+      <li title="gpt-5.4：45.4%"><span class="bar-label">gpt-5.4</span><span class="bar-track"><span class="bar" style="--to: 45.4"></span></span><span class="bar-val">45.4%</span></li>
+      <li title="claude-sonnet-5：45.2%"><span class="bar-label">claude-sonnet-5</span><span class="bar-track"><span class="bar" style="--to: 45.2"></span></span><span class="bar-val">45.2%</span></li>
+      <li title="claude-opus-4.6（推論 max）：36.4%"><span class="bar-label">claude-opus-4.6（推論 max）</span><span class="bar-track"><span class="bar" style="--to: 36.4"></span></span><span class="bar-val">36.4%</span></li>
+      <li title="gpt-5-mini（推論 high）：33.4%"><span class="bar-label">gpt-5-mini（推論 high）</span><span class="bar-track"><span class="bar" style="--to: 33.4"></span></span><span class="bar-val">33.4%</span></li>
+      <li title="claude-haiku-4.5（推論なし）：23.0%"><span class="bar-label">claude-haiku-4.5（推論なし）</span><span class="bar-track"><span class="bar" style="--to: 23.0"></span></span><span class="bar-val">23.0%</span></li>
+    </ul>
+    <figcaption>論文の表 1 の数値から作った図です。モデルの名前と推論の設定は論文の表記のままです（claude で始まるのは Anthropic、gpt で始まるのは OpenAI のモデル）。</figcaption>
+  </figure>
+  <figure class="chart" aria-labelledby="ch-models-cmt">
+    <p class="chart-title" id="ch-models-cmt">人がレビューで見つけていたバグを、AI も見つけられたか</p>
+    <p class="chart-sub">いちばん良い AI は 79.6%。人がレビューで見つけて直していたバグ 500 問のうち、AI も見つけた割合（上位 5 件の指摘の中）。</p>
+    <ul class="bars" style="--max: 100">
+      <li class="main" title="claude-opus-5：79.6%"><span class="bar-label">claude-opus-5</span><span class="bar-track"><span class="bar" style="--to: 79.6"></span></span><span class="bar-val">79.6%</span></li>
+      <li title="claude-opus-4.8：70.0%"><span class="bar-label">claude-opus-4.8</span><span class="bar-track"><span class="bar" style="--to: 70.0"></span></span><span class="bar-val">70.0%</span></li>
+      <li title="gpt-5.6-sol：65.6%"><span class="bar-label">gpt-5.6-sol</span><span class="bar-track"><span class="bar" style="--to: 65.6"></span></span><span class="bar-val">65.6%</span></li>
+      <li title="claude-sonnet-5：64.7%"><span class="bar-label">claude-sonnet-5</span><span class="bar-track"><span class="bar" style="--to: 64.7"></span></span><span class="bar-val">64.7%</span></li>
+      <li title="gpt-5.6-luna：63.9%"><span class="bar-label">gpt-5.6-luna</span><span class="bar-track"><span class="bar" style="--to: 63.9"></span></span><span class="bar-val">63.9%</span></li>
+      <li title="gpt-5.5：63.3%"><span class="bar-label">gpt-5.5</span><span class="bar-track"><span class="bar" style="--to: 63.3"></span></span><span class="bar-val">63.3%</span></li>
+      <li title="gpt-5.4：61.8%"><span class="bar-label">gpt-5.4</span><span class="bar-track"><span class="bar" style="--to: 61.8"></span></span><span class="bar-val">61.8%</span></li>
+      <li title="claude-opus-4.6（推論 max）：59.1%"><span class="bar-label">claude-opus-4.6（推論 max）</span><span class="bar-track"><span class="bar" style="--to: 59.1"></span></span><span class="bar-val">59.1%</span></li>
+      <li title="gpt-5-mini（推論 high）：54.7%"><span class="bar-label">gpt-5-mini（推論 high）</span><span class="bar-track"><span class="bar" style="--to: 54.7"></span></span><span class="bar-val">54.7%</span></li>
+      <li title="claude-haiku-4.5（推論なし）：43.0%"><span class="bar-label">claude-haiku-4.5（推論なし）</span><span class="bar-track"><span class="bar" style="--to: 43.0"></span></span><span class="bar-val">43.0%</span></li>
+    </ul>
+    <figcaption>論文の表 1 の数値から作った図です。</figcaption>
+  </figure>
+  <ul>
+    <li><b>人のレビューをすり抜けたバグにも強い：</b>取り込んだあとに見つかったバグは、人のレビューを通って入ってしまったものです。いちばん良い AI は、その 64.2% を変更の時点で見つけました。</li>
+    <li><b>費用と時間：</b>いちばん良い claude-opus-5 で、1 問あたり 2.97 ドル、平均 9.8 分でした。</li>
+    <li><b>費用との釣り合い：</b>小さいモデルでも健闘し、gpt-5.6-luna は claude-opus-5 の 78% の成績を、21% の費用で出しました。</li>
+    <li><b>並べ方が上手い：</b>見つかった正解のうち 89% は、上位 3 件の指摘に入っていました。</li>
+  </ul>
+
+  <h3>人と AI を合わせると</h3>
+  <figure class="chart" aria-labelledby="ch-together">
+    <p class="chart-title" id="ch-together">人と AI のどちらが見つけたか（公開のリポジトリ）</p>
+    <p class="chart-sub">人の 50% は、この試験の作り方から決まる値です（下の注）。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="人のレビューだけ：50%"><span class="bar-label">人のレビューだけ</span><span class="bar-track"><span class="bar" style="--to: 50; background: var(--c-human)"></span></span><span class="bar-val">50%</span></li>
+      <li title="いちばん良い AI だけ：71.9%"><span class="bar-label">いちばん良い AI だけ</span><span class="bar-track"><span class="bar" style="--to: 71.9; background: var(--c-ai)"></span></span><span class="bar-val">71.9%</span></li>
+      <li class="main" title="人と AI の指摘を合わせる：82.1%"><span class="bar-label">人と AI の指摘を合わせる</span><span class="bar-track"><span class="bar" style="--to: 82.1"></span></span><span class="bar-val">82.1%</span></li>
+    </ul>
+    <figcaption>論文の本文（4.3 節）と図 5 の説明の数値から作った図です。</figcaption>
+  </figure>
+  <p class="t-note">この試験の問題は、取り込む前に人がレビューで見つけたバグ（49.7%）と、人がレビューで見落として取り込んだあとに見つかったバグ（50.3%）が、ほぼ半分ずつです。なので、人のレビューだけで見つかったのは 50% になります。レビューを丁寧にするプロジェクトかどうかで、この割合は変わります。</p>
+
+  <h3>社内の巨大なリポジトリでは</h3>
+  <ul>
+    <li>1 つの大企業の 2 つの巨大なリポジトリ（オンラインの共同作業と生産性の製品）から、同じ方法で 800 問を作りました。ファイル数は平均 10 万を超え、公開のもの（平均 3 千）よりずっと大きく、モデルの学習データに入っていないことが確かなコードです。</li>
+    <li>同じ AI でも、成績が最大 25.5% 下がりました。モデルが新しくなるほど良くなる傾向は、同じでした。</li>
+    <li>社内のバグは、変更の部分を見れば分かるものが少なく、プロジェクトの知識、広い範囲の確認、動かしてみることが要るものが多かった。この違いだけで、成績の差の 2 割が説明できました。</li>
+  </ul>
+  <figure class="chart" aria-labelledby="ch-visible">
+    <p class="chart-title" id="ch-visible">変更の部分を見れば分かるバグの割合</p>
+    <ul class="bars" style="--max: 100">
+      <li title="公開のリポジトリ：46.1%"><span class="bar-label">公開のリポジトリ</span><span class="bar-track"><span class="bar" style="--to: 46.1"></span></span><span class="bar-val">46.1%</span></li>
+      <li class="main" title="社内のリポジトリ：22.8%"><span class="bar-label">社内のリポジトリ</span><span class="bar-track"><span class="bar" style="--to: 22.8"></span></span><span class="bar-val">22.8%</span></li>
+    </ul>
+    <figcaption>論文の本文（4.4 節）の数値から作った図です。社内のリポジトリでの、モデルごとの成績は論文の図 2 にだけあり、本文に数値がないので載せていません。</figcaption>
+  </figure>
+</section>
+
+<section id="conditions">
+  <h2><span class="num">4</span>どんなときに強く、どんなときに見落とすか（Q2）</h2>
+  <div class="key">
+    <p>重大なバグと、変更を見れば分かるバグに強く、重大なバグと信頼性の問題は人より見つけやすい。見落としやすいのは、大きな変更、種類の混ざった変更、不具合を直す変更と、変更の外まで考えないと分からないバグ、使いやすさなど機能以外のバグです。</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-or">
+    <p class="chart-title" id="ch-or">見つかりやすさが、条件でどれだけ変わるか</p>
+    <p class="chart-sub">ほかの条件をそろえたときの、見つかりやすさの比（オッズ比）。中央の点線が「差なし（1 倍）」で、左は見つかりにくく、右は見つかりやすい。横の目盛りは対数。しま模様は統計ではっきりしない値。</p>
+    <ul class="bars" style="--min: -1.05; --max: 1.05; --at: 0">
+      <li class="group">変更の性質</li>
+      <li title="変更が大きい：0.591"><span class="bar-label">変更が大きい<small>見つかりにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.526; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.591 倍</span></li>
+      <li title="いろいろな種類の変更が混ざる：0.795"><span class="bar-label">いろいろな種類の変更が混ざる<small>コード、テスト、設定など。見つかりにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.229; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.795 倍</span></li>
+      <li title="不具合を直す変更：0.521"><span class="bar-label">不具合を直す変更<small>機能の追加と比べて。見つかりにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.652; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.521 倍</span></li>
+      <li class="group">バグの性質</li>
+      <li title="使いやすさのバグ：0.454"><span class="bar-label">使いやすさのバグ<small>機能のバグと比べて。見つかりにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.790; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.454 倍</span></li>
+      <li class="weak" title="移植のしやすさのバグ：0.523（p=0.07、はっきりしない）"><span class="bar-label">移植のしやすさのバグ<small>同じ向きだが、はっきりしない</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.648; --to: 0"></span><span class="ref"></span></span><span class="bar-val">0.523 倍</span></li>
+      <li title="重大なバグ：1.906"><span class="bar-label">重大なバグ<small>見つかりやすい</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.645"></span><span class="ref"></span></span><span class="bar-val">1.906 倍</span></li>
+      <li class="main" title="変更の部分を見れば分かるバグ：2.621"><span class="bar-label">変更の部分を見れば分かるバグ<small>見つかりやすい</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.964"></span><span class="ref"></span></span><span class="bar-val">2.621 倍</span></li>
+    </ul>
+    <figcaption>論文の本文（4.4 節）の数値から作った図です。棒の長さはオッズ比の対数です。</figcaption>
+  </figure>
+  <ul>
+    <li><b>変更が大きいと見落とす：</b>見る量が多いと注意が薄まるため、と著者は読んでいます。</li>
+    <li><b>種類が混ざると見落とす：</b>モジュールやつなぎ目をまたいで考える必要があるからでは、と著者は推測しています。</li>
+    <li><b>不具合を直す変更で見落とす：</b>直しが正しいかを確かめることに注意が向き、新しく入った問題への注意が減るのでは、と著者は推測しています。</li>
+    <li><b>重大なバグは見つけやすい：</b>AI が重大な問題に注目するように学習し、指示されているからだろう、と著者は読んでいます。その分、重大でない問題は見過ごされやすい。</li>
+    <li><b>はっきりした差がなかったもの：</b>言語（5 つとも人気のある言語なので、と著者は推測）と、リポジトリの大きさ（変更の大きさをそろえると効いていない）。</li>
+  </ul>
+
+  <h3>人と AI の得意の違い</h3>
+  <p>人がレビューで見つけたバグも入れて、人と AI で、見つけやすいバグの種類が違うかを比べました。</p>
+  <figure class="chart" aria-labelledby="ch-human-ai">
+    <p class="chart-title" id="ch-human-ai">人の見つけやすさを、AI と比べると</p>
+    <p class="chart-sub">中央の点線が「AI と同じ」。右は人のほうが見つけやすく、左は人のほうが見つけにくい。横の目盛りは対数。</p>
+    <ul class="bars" style="--min: -1.05; --max: 1.05; --at: 0">
+      <li title="保守のしやすさの問題：2.702"><span class="bar-label">保守のしやすさの問題<small>人のほうがずっと見つけやすい</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 0.994; background: var(--c-human)"></span><span class="ref"></span></span><span class="bar-val">2.702 倍</span></li>
+      <li title="重大なバグ：0.450"><span class="bar-label">重大なバグ<small>人のほうが見つけにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.799; --to: 0; background: var(--c-ai)"></span><span class="ref"></span></span><span class="bar-val">0.450 倍</span></li>
+      <li title="信頼性の問題：0.591"><span class="bar-label">信頼性の問題<small>人のほうが見つけにくい</small></span><span class="bar-track"><span class="bar neg" style="--from: -0.526; --to: 0; background: var(--c-ai)"></span><span class="ref"></span></span><span class="bar-val">0.591 倍</span></li>
+    </ul>
+    <figcaption>論文の本文（4.4 節）の数値から作った図です。青は人が強い所、桃は AI が強い所です。</figcaption>
+  </figure>
+  <p>著者は、人はリポジトリを保守しやすく保つのに向き、AI は疲れずに信頼性の問題や、細かいが重大なバグを調べ続けるのに向く、と読んでいます。人と AI の組み合わせも、一様ではないということです。</p>
+
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>論文は、見つけられたかどうかを、変更とバグの性質から予測する多変量ロジスティック回帰で分析しています。モデル、問題の組、時期もそろえる項目に入れ、同じ問題をくり返し解いた分の相関を考えた信頼区間を使い、多重比較の補正（Benjamini-Hochberg 法）もしています。</p>
+  </div>
+</section>
+
+<section id="trajectories">
+  <h2><span class="num">5</span>どこに時間を使い、なぜ外すか（Q3）</h2>
+  <div class="key">
+    <p>どのモデルも、バグのある所にはほとんどたどり着きます。差が出るのは、そこから正しく言い当てられるかです。いまは読んで探すことが中心で、コードを動かして確かめるのはまれですが、動かした AI は、ほかが見落としたバグを見つけていました。説明やコメントを信じ込んで誤ることもあります。</p>
+  </div>
+
+  <h3>読んで探すが、動かさない</h3>
+  <figure class="chart" aria-labelledby="ch-actions">
+    <p class="chart-title" id="ch-actions">AI の作業の手順の内訳</p>
+    <p class="chart-sub">全部の手順のうちの割合。10 のモデルをまとめた値。</p>
+    <ul class="bars" style="--max: 50">
+      <li title="ファイルを読む：39%"><span class="bar-label">ファイルを読む</span><span class="bar-track"><span class="bar" style="--to: 39"></span></span><span class="bar-val">39%</span></li>
+      <li title="探す、一覧を見る：36%"><span class="bar-label">探す、一覧を見る</span><span class="bar-track"><span class="bar" style="--to: 36"></span></span><span class="bar-val">36%</span></li>
+      <li class="main" title="コードを動かす（テスト、ビルド、試しのスクリプト）：8%"><span class="bar-label">コードを動かす<small>テスト、ビルド、試しのスクリプト</small></span><span class="bar-track"><span class="bar" style="--to: 8"></span></span><span class="bar-val">8%</span></li>
+    </ul>
+    <figcaption>論文の本文（4.5 節）の数値から作った図です。</figcaption>
+  </figure>
+  <ul>
+    <li>AI はたいてい、まず git で差分や履歴を見ます（64%）。そのあとは、読むことと探すことが中心です。</li>
+    <li>コードを動かす割合は、Claude のほうが GPT より高く（claude-opus-5 で 9.7%、gpt-5.6-sol で 6.9%）、動かしたことで、ほかのモデルが見落としたバグを見つけた例がありました。古いページを 25 ほど取り寄せて実際に動かした例や、開発キットを入れてビルドし、必要なファイルが出力にないことを示した例です。</li>
+    <li><b>粘り強さが違う：</b>gpt-5.6-sol は、半分の実行が 17 手までに終わり、50 手まで続いたのは 3.5% だけでした。claude-opus-5 は、半分が終わるのが 35 手でした。この差が、成績の差の一部を説明するかもしれない、と著者は書いています。</li>
+  </ul>
+
+  <h3>外す理由は「見ていない」より「見たのに誤る」</h3>
+  <figure class="chart" aria-labelledby="ch-funnel">
+    <p class="chart-title" id="ch-funnel">バグのあるファイルに、どこまでたどり着いたか</p>
+    <p class="chart-sub">大きい 6 つのモデルの全部の実行のうちの割合。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="バグのあるファイルを開いた：95.6%"><span class="bar-label">バグのあるファイルを開いた</span><span class="bar-track"><span class="bar" style="--to: 95.6"></span></span><span class="bar-val">95.6%</span></li>
+      <li title="そのファイルについて何か指摘した：80.2%"><span class="bar-label">そのファイルについて何か指摘した</span><span class="bar-track"><span class="bar" style="--to: 80.2"></span></span><span class="bar-val">80.2%</span></li>
+      <li class="main" title="正しくバグを言い当てた：56.2%"><span class="bar-label">正しくバグを言い当てた</span><span class="bar-track"><span class="bar" style="--to: 56.2"></span></span><span class="bar-val">56.2%</span></li>
+    </ul>
+    <figcaption>論文の本文（4.5 節）の数値から作った図です。</figcaption>
+  </figure>
+  <p>いちばん良い claude-opus-5 は、バグのあるファイルについて指摘するところまでは 91.9% と大きく良くなりましたが、正しく言い当てたのは 75% でした。</p>
+
+  <h3>説明を信じ込む</h3>
+  <ul>
+    <li>Selenium の問題では、コードのコメントと PR の説明が、意図した動きを「こう動く」と書いていました。実際のコードはそう動いていないのに、すべてのモデルが、そのバグのある条件を正しいと判断しました。</li>
+    <li>Elasticsearch の問題では、claude-opus-5 が、バグのある行そのものを「正しさの手本」として引用し、同じファイルのほかの部分を調べました。</li>
+    <li>著者はこれを、作者の主張や既存のコードを、自分で確かめずに正しさの証拠として受け取る「信じすぎ」の失敗と呼んでいます。AI のレビューを自動で回すと、安全上の危うさにもなりうる、としています。</li>
+  </ul>
+  <p>ほかに外した問題の多くは、変更の中にない知識が要るものでした。リポジトリ全体にかかわる考えが要るものや、ライブラリや通信の決まりなど、外の知識が要るものです。</p>
+</section>
+
+<section id="design">
+  <h2><span class="num">6</span>設定や使い方で、どこまで良くなるか（Q4）</h2>
+  <div class="key">
+    <p>一言の指示で、ほぼ同じ費用のまま良くなりました。「もれなく挙げて、重大な順に並べて」と頼むことです。複数の AI を組み合わせるより、ずっと費用対効果が良い方法でした。いちばん新しいモデルでは、この工夫で差が出ませんでした。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>工夫</th><th>効果</th><th>費用</th></tr></thead>
+      <tbody>
+        <tr><th>「もれなく挙げて」と指示する</th><td><b>最大 +5.8%</b>（gpt-5.6-sol で +5.3%）</td><td><b>約 1.1 倍</b></td></tr>
+        <tr><th>複数の AI を組み合わせる</th><td>平均 +2.8%。いちばん良い組み合わせで +4.7%</td><td>平均 3.68 倍。いちばん良い組み合わせで 5.55 倍</td></tr>
+        <tr><th>推論を深くする（gpt-5.6-luna、最低 → 最大）</th><td>約 36% → 約 57%</td><td>23.22 倍</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">「最大 +5.8%」「いちばん良い組み合わせで +4.7%」は論文の要旨と第 1 節の数値、「平均 +2.8%」「gpt-5.6-sol で +5.3%」は第 4.6 節の数値です。同じ実験を、違う形でまとめたものです。</p>
+  <ul>
+    <li><b>なぜ指示を変えると効くか：</b>AI は、指摘を増やしても、大事なものを上位に並べるのが上手いからです（見つかった正解の 89% は上位 3 件）。もれなく挙げさせて、並べ方は AI に任せると、正しいバグを早くに捨ててしまう危うさが減ります。</li>
+    <li><b>複数の AI の組み合わせ：</b>1 回目の結果をもう 1 つの AI に直させる、いくつかの候補をまとめる、補助の AI に手分けさせる、を試しました。どれも効果は小さく、費用が高くつきました。</li>
+  </ul>
+
+  <h3>指示の工夫の効き方は、モデルで違う</h3>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>モデル</th><th class="num">人がレビューで見つけていたバグ</th><th class="num">人のレビューをすり抜けたバグ</th></tr></thead>
+      <tbody>
+        <tr><th>claude-opus-5</th><td class="num"><b>+0.3</b></td><td class="num"><b>−1.8</b></td></tr>
+        <tr><th>claude-opus-4.8</th><td class="num">+5.5</td><td class="num">+6.0</td></tr>
+        <tr><th>gpt-5.6-sol</th><td class="num">+5.6</td><td class="num">+5.0</td></tr>
+        <tr><th>gpt-5.5</th><td class="num">+4.2</td><td class="num">+5.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">「もれなく挙げて」と指示したときの、上位 5 件で見つけた割合の変わり方（ポイント）。論文の表 2 の数値です。</p>
+  <p>いちばん新しい claude-opus-5 では、効果がほとんどないか、かえって下がりました。著者は、勧めたい振る舞いの多くがモデルの学習に取り込まれていくので、前に役立った工夫が古くなることがある、モデルが変わるたびに見直すことが大事だ、と書いています。</p>
+
+  <h3>道具の違い</h3>
+  <p>同じモデルでも、道具は Copilot CLI のほうが Claude Code より成績が良く、この論文が Copilot CLI を主に使った理由になっています。claude-opus-5 を Claude Code で動かすと、補助の AI を 1 回あたり 9.0 個呼んで費用が急に増えました。モデルを変えると、思わぬ費用の増加が起きうる、と著者は注意しています。</p>
+</section>
+
+<section id="benchmark">
+  <h2><span class="num">7</span>試験の作り方と確かめ方</h2>
+
+  <h3>なぜ新しい試験を作ったか</h3>
+  <ul>
+    <li>これまでのレビューの試験は、人のレビューのコメントを正解にして、AI の指摘がそれに似ているかで採点していました。</li>
+    <li>しかし人のコメントには、細かすぎる指摘や、人間関係で受け入れられた役に立たない指摘も混ざります。逆に、人が見落とした正しい指摘を AI が出すと、減点されてしまいます。</li>
+    <li>そこで著者は、「良いレビューなら、少なくとも人が確かめて直したバグは見つけるはず」と考え、実際のバグを正解にしました。</li>
+  </ul>
+
+  <h3>2 種類のバグ</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>種類</th><th>どう集めたか</th><th>件数の流れ</th></tr></thead>
+      <tbody>
+        <tr><th>人がレビューで見つけていたバグ（取り込む前）</th><td>レビューのコメントで指摘され、取り込む前に直されたもの。bot や自分のコメント、短すぎるもの、却下されたものを除き、AI で「バグではない指摘」（書き方、名前、テスト、細かい好み、リファクタリングなど）を除いた</td><td>PR 304,601 件のやり取り 1,436,120 件 → 候補 472,039 件 → 抜き出し 8,639 件 → バグ 865 件</td></tr>
+        <tr><th>人のレビューをすり抜けたバグ（取り込んだあと）</th><td>あとから報告され、別の変更で直されたもの。直した行を最後に触った変更をたどって（SZZ という方法）、バグを入れた変更を特定し、AI で確かめた</td><td>直しの候補 195,075 件 → 57,725 件 → 10,784 件 → 対応づけ 8,846 組 → 1,168 組 → 736 組 → 689 組</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>それぞれから 500 問ずつ、合計 1,000 問を作りました。</li>
+    <li>無作為に選んだ 40 問を著者が確かめたところ、37 問（92.5%）が「本当のバグで、レビューで見つけられるもの」でした（95% の信頼区間で 80.1〜97.4%）。</li>
+  </ul>
+
+  <h3>リポジトリ</h3>
+  <ul>
+    <li><b>公開のもの：</b>Python、Rust、C#、JavaScript/TypeScript、Java の 5 つの言語。GitHub で人気が高く、PR が 2,000 件を超え、参加者が 200 人を超える活発なプロジェクトから、31 の分野にまたがって選びました。最終的に 98 のリポジトリで、問題の変更は 2015〜2026 年のもの、変更の大きさの中央値は 189 行です。</li>
+    <li><b>社内のもの：</b>1 つの大企業の 2 つの巨大なリポジトリから、同じ方法で 800 問を作りました。論文は会社名を書いていません。</li>
+  </ul>
+
+  <h3>解かせ方と採点</h3>
+  <ul>
+    <li>バグを入れる直前の状態のリポジトリを、コンテナ（Docker）で用意しました。それより後の履歴は消して、答えが漏れないようにしました。</li>
+    <li>PR の題名と説明、変更そのものを渡し、「バグがある」とは伝えずにレビューさせました。AI は review.md に、重大な順に並べた指摘を書きます。</li>
+    <li>インターネットは使えないようにし、ずるをしないよう指示しました。あとで AI の作業の記録を調べ、ずるは見つかりませんでした。</li>
+    <li>採点は、3 つの AI（gpt-5.5、claude-opus-4.8、gemini-3.1-flash）の多数決で、指摘が正解のバグと一致するかを判定しました。40 件で人の判定と比べると、ほぼ完全に一致しました（κ=0.89）。</li>
+  </ul>
+
+  <h3>この解説で使う言葉</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>言葉</th><th>この論文での意味</th></tr></thead>
+      <tbody>
+        <tr><th>変更（PR、プルリクエスト）</th><td>コードの変更を、本流に取り込む前に出す申し出。ここでレビューする</td></tr>
+        <tr><th>モデル名（claude-opus-5 など）</th><td>試した AI のモデルの名前。claude で始まるのは Anthropic、gpt で始まるのは OpenAI のモデル。論文は、大きいモデル（claude-opus の 3 つと gpt-5.4 以降の 3 つ）と、小さいモデルや古いモデル（claude-sonnet-5、gpt-5.6-luna、claude-haiku-4.5、gpt-5-mini）に分けている</td></tr>
+        <tr><th>レビューをする AI（AI のレビュー役）</th><td>変更を読んで、問題を指摘する AI エージェント。論文では review agent</td></tr>
+        <tr><th>人のいない開発</th><td>AI が書き、AI がレビューもして、人がほとんど見ない開発。論文では “lights-off” software factory（明かりを消しても動く工場、のたとえ）</td></tr>
+        <tr><th>上位 5 件の指摘で見つけた割合</th><td>AI が重大な順に並べた指摘の上位 5 件に、正解のバグが入っていた問題の割合。論文では recall@5</td></tr>
+        <tr><th>オッズ比</th><td>ある条件のとき、見つかりやすさが何倍になるか。1 より小さいと見つかりにくく、大きいと見つかりやすい。正確には「見つかる見込み」の比</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>著者の提言と、この研究の限界</h2>
+
+  <h3>使うときの勧め</h3>
+  <p>著者は、レビューをする AI は、人が見落とすはずだった多くのバグを見つける助けになるので、レビューの流れに組み込む価値は十分ある、としています。そのうえで、組み込み方について次のように勧めています。</p>
+  <ul>
+    <li><b>変更の複雑さで、レビューの力の入れ方を変える。</b>人のレビューも AI のレビューも、変更の大きさと種類の混ざり方に合わせて配分する。</li>
+    <li><b>何を見てほしいかを指示する。</b>AI のレビューは、変更の種類、コードのコメント、テストに書かれた動きといった表面の手がかりに、引っぱられることもある。</li>
+    <li><b>リポジトリの知識を渡す。</b>リポジトリ固有の指示や知識の置き場を用意する。</li>
+    <li><b>モデルが変わるたびに品質を見張り、使い方を見直す。</b>コードの側も変わっていくので、使っている設定を定期的に評価する。</li>
+  </ul>
+
+  <h3>人がまったく見ない開発にしてよいか</h3>
+  <p>ここについては、「まだ準備ができていない。特に、大企業の巨大なリポジトリでは」というのが著者の結論です。いちばん強い AI でも分かっているバグを見落とし、社内のコードでは成績が大きく下がり、失敗は変更の外の知識や、分野の知識が要るところに集まりました。人がまったく見ない運用を支持できるのは、範囲が狭く、失敗しても影響の小さい変更だけで、この線はモデルが良くなれば動きうる、としています。</p>
+
+  <h3>これからの研究</h3>
+  <ul>
+    <li><b>自分で育つレビューをする AI：</b>設計の文書、過去のレビュー、障害の記録などから、リポジトリのことを覚え続ける仕組み。</li>
+    <li><b>人の確認を助ける仕組み：</b>人がすべての行を読むのではなく、変更の案内をし、危ない所、影響の大きい所、AI 自身が自信のない所を示す。自分の確かさを正しく見積もって、人に伝える AI。</li>
+  </ul>
+
+  <h3>この研究の限界（著者が書いているもの）</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>測ったのはバグを見つける力だけ</th><td>分かっているバグを見つけるかの試験で、レビューの役立ち方の全体ではない</td></tr>
+        <tr><th>採点に AI を使っている</th><td>AI の判定は誤りうる。3 つの AI の多数決と、人との一致の確認で補っている</td></tr>
+        <tr><th>正解が誤っていることもありうる</th><td>何段階も絞り込んでも、正解の誤りや、解けない問題が残りうる。40 問の確認では 92.5% が有効だった</td></tr>
+        <tr><th>AI の振る舞いはぶれる</th><td>道具の版、指示、環境を固定して抑えた</td></tr>
+        <tr><th>条件の分析は関係を見たもの</th><td>因果ではない。測っていない要因や、AI による分類の誤りが影響しうる</td></tr>
+        <tr><th>選んだのは成熟した人気のプロジェクト</th><td>小さい、新しい、珍しい言語、自動生成や設定ばかりのコード、違うレビューのやり方では、結果が違いうる</td></tr>
+        <tr><th>再現用のデータは公開できない</th><td>公開のリポジトリの部分は、試験として公開されている（GitHub の malusamayo/CRBugBench）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>AI のレビューをどこまで信頼できるか（microtaro の読み方）</h2>
+  <div class="note note-view">
+    <p><b>この節は、microtaro の読み方です。</b>論文が言っていることではありません。</p>
+  </div>
+  <ul>
+    <li><b>「AI のレビューは使えない」という根拠にはならない。</b>人のレビューをすり抜けたバグの 64.2% を、いちばん良い AI は変更の時点で見つけ、人と組めば 82.1% でした。この論文は、AI のレビューを使わない理由ではなく、どう組み込めば強いかを示した論文として読むのがよいと思います。</li>
+    <li><b>「見る」ことで得ていた信頼を、試験の形に移せる。</b>人がレビューで変更を見ることは、それ自体が「このコードは信頼してよい」と言うための根拠でした。著者の勧め（自分のリポジトリの過去のバグで試験を作り、AI のレビューの発見率を見張り続ける）は、その根拠を、人が毎回見ることから、何度でも測り直せる試験へ移す方法として読めます。このテーマの問い「人がコードを読むことで得ていた信頼を、別の根拠へ移せるか」への、1 つの具体的な答えです。</li>
+    <li><b>人と AI で、受け持ちを分けられる。</b>AI は重大なバグと信頼性の問題に強く、人は保守のしやすさの問題をずっとよく見つけます（2.702 倍）。<a href="2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a>では、人のレビューの一部が AI のレビューに置き換わりました。そのとき人に残すべきだったのは、保守のしやすさを見る目だと読めます。1 本目の論文が測った短い期間の品質の目安（取り消し、すぐあとの直し）には、ここは映りません。なお、2 本の論文は著者が 1 人重なっています（Hao He。1 本目の第一著者で、この論文の 2 人目の著者）。1 本目は、この論文を参考文献に挙げています。</li>
+    <li><b>PR の説明を正しく書くことが、AI のレビューにも効く。</b>AI は PR の説明やコメントを、確かめずに正しさの証拠として受け取ることがあります。説明が間違っていると AI のレビューも一緒に間違えるので、説明を正しく書くことは、人のためだけでなく、AI のレビューのためにもなります。</li>
+    <li><b>時期に注意。</b>伸びの 47.7% から 71.9% は、2026 年 2 月から 7 月のモデルの差です。論文が出たのは 10 月ですが、秋以降のモデルは入っていません。</li>
+    <li><b>1 人で AI と作るなら、変更を小さく分けて AI にレビューさせる。</b>小さく、目的の絞られた変更は、この論文で AI のレビューが強かった条件です。1 人で扱うのはたいてい小さく新しいコードで、AI が得意な側でもあります。変更を大きくまとめて頼まないことと、説明を正しく書くことの 2 つが、この論文から言える使い方です。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2610.13668v1">Yang, He, Cheng, Butler, Murphy-Hill, Badea, Bird「(When) Should a Software Factory be Lights-off? Benchmarking Code Review Agents on Bug Detection」</a>　arXiv:2610.13668v1、第 1 版 2026-10-09（版はこれだけ）、未査読論文、ライセンスは <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><span class="use">所属は Carnegie Mellon 大学（Yang。研究は Microsoft Research で行った）、Microsoft（He、Cheng、Butler、Murphy-Hill）、Microsoft Research（Badea、Bird）。この解説は第 1 版の HTML 版の本文と表によります</span></li>
+    <li><a href="https://github.com/malusamayo/CRBugBench">malusamayo/CRBugBench</a><span class="use">論文に書かれた、公開版の試験の置き場所。この解説を書くときには開いていません</span></li>
+    <li><a href="../data/review-agents-bugs.json">data/review-agents-bugs.json</a><span class="use">この解説の図と表に使った数値と、論文の中の出典の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>数字は、第 1 版の本文と表 1〜3 から拾いました。この解説で計算した値は使っていません（オッズ比の図の棒の長さだけ、対数に直しています）。</li>
+    <li>本文の 71.9%（claude-opus-5）、47.7%（claude-opus-4.6）、2.97 ドル、9.8 分は、表 1 の 2 つの組の値の平均と一致することを確かめました。</li>
+    <li>社内のリポジトリでのモデルごとの成績と、図 7 の条件ごとの成績は、図にだけあって本文に数値がないので載せていません。</li>
+    <li>指示の工夫と複数の AI の効果は、要旨・第 1 節（最大値）と第 4.6 節（平均など）で数え方が違います。表 2・表 3 の値と照らして、どちらも同じ実験のまとめ方の違いであることを確かめました。</li>
+    <li>論文の HTML 版の書誌の欄に「Received 5 June 2009」とあるのは、論文の雛形の既定の値と思われます。公開日は arXiv の投稿の記録（2026-10-09）によりました。</li>
+    <li>2026-11-13 に下書きを作り、2026-11-16 に本文と表を読み直して、1 文ずつ照合し直しました。版とライセンスは、arXiv の論文のページで確かめました。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。論文から引用した英文と数値は、上の論文（CC BY 4.0）によります。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>

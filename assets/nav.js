@@ -26,6 +26,10 @@
             name: { ja: 'Claude Code のチームは、AI が書くコードをどうレビューしているか', en: 'How the Claude Code team does code review' },
             path: 'topics/ai-trust/articles/claude-code-team-review.html',
           },
+          {
+            name: { ja: 'AI のレビュー役は、どこまでバグを見つけるか', en: '(When) Should a Software Factory be Lights-off?' },
+            path: 'topics/ai-trust/papers/review-agents-bugs.html',
+          },
         ],
       },
     ],
