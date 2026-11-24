@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habituation at the Gate (paper explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/papers/review-habituation.html">
+<link rel="alternate" hreflang="en" href="review-habituation.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#over-time"><span class="n">2</span>What changes as reviewers review more</a></li>
+    <li><a href="#approval"><span class="n">3</span>Does approval rise with experience? (Q1)</a></li>
+    <li><a href="#effort"><span class="n">4</span>Did review effort change? (Q2)</a></li>
+    <li><a href="#ai-only"><span class="n">5</span>Is it only AI PRs that get easier approval? (Q3)</a></li>
+    <li><a href="#why"><span class="n">6</span>Grounded trust or habituation? (Q4)</a></li>
+    <li><a href="#study"><span class="n">7</span>The data and the comparisons</a></li>
+    <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the study's limits</a></li>
+    <li><a href="#reading"><span class="n">9</span>Should trust in AI move by habit? (microtaro's reading)</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/papers/review-habituation.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Paper explainer</p>
+  <h1>Habituation at the Gate</h1>
+  <p class="src"><b>Original paper</b>Yu, Liu, Jiang, Jia, Wang, Qian, Chen, “Habituation at the Gate: Rising Approval and Declining Scrutiny in Human Review of AI Agent Code,” arXiv:2606.22721 version 1 (2026-06-21), not peer reviewed (stated as accepted at a KDD 2026 workshop), <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv non-exclusive distribution license</a>
+    <span class="links"><a href="https://arxiv.org/abs/2606.22721v1">arXiv page</a><a href="https://arxiv.org/html/2606.22721v1">Read the HTML version</a><a href="https://arxiv.org/pdf/2606.22721v1">PDF</a></span></p>
+  <p class="lead">A short paper on how the same people review pull requests (PRs) that AI coding agents submit to open-source projects, as they review more of them. Across 11,429 reviews by 400 people, approval rose and comments fell with experience. The paper asks whether that is reviewers coming to trust AI on good grounds, or getting used to it and checking less.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-16 by microtaro and AI. Based on the main text and tables of arXiv version 1 (2026-06-21; the only version); all numbers are from version 1. This paper is not CC BY, so quotations are kept very short and the explanation is in microtaro's own words. What the paper says is kept separate from microtaro's reading.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>The paper has one central question: do reviewers become systematically more approving of AI agent PRs as they accumulate reviewing experience? It checks the answer in four steps — the change in approval, the change in review effort, a comparison with human-written PRs, and three interpretations. Here those four steps are written as questions and answers. The small grey text says where each finding comes from.</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>Do people approve AI PRs more as they review more of them?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Yes. Approval rose from 27.9% in the earliest tenth of each reviewer's experience to 42.4% in the latest tenth (+14.5 pp). Change requests fell from 11.2% to 5.6%. What mattered was each reviewer's experience, not the calendar.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Approval rose with experience.</b>
+          <span class="why">Splitting each reviewer's reviews into ten experience deciles, approval rose from 27.9% to 42.4%. Comparing each reviewer's first and second halves, it rose from 30.1% to 36.8%.</span>
+          <span class="how">From Table 1 and the main text</span>
+        </li>
+        <li>
+          <b>Not driven by a few people.</b>
+          <span class="why">52% of reviewers became more approving, 28% less, and 20% did not change. The early-to-late shift is statistically clear in paired per-reviewer tests.</span>
+          <span class="how">From the main text</span>
+        </li>
+        <li>
+          <b>Experience, not calendar time.</b>
+          <span class="why">Modeling approval with both the reviewer's review count and the date, experience carried the signal. Later PRs were not smaller or easier, either.</span>
+          <span class="how">From per-reviewer models for 343 reviewers and monthly PR sizes</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#approval">3</a> (does approval rise with experience)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>As approval rose, did review effort change?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>It fell. Inline comments per review fell 22%, and their word count 28%. Reviewers whose approval rose most cut comments most. Meanwhile, the time from PR opening to review grew from 3.9 to 13.5 hours.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Fewer comments, and fewer words.</b>
+          <span class="why">Inline comments fell from 1.01 to 0.79 per review, and words from 18.6 to 13.5.</span>
+          <span class="how">From the main text (earliest versus latest experience decile)</span>
+        </li>
+        <li>
+          <b>The more approval rose, the more comments fell.</b>
+          <span class="why">Reviewers whose approval rose by more than 10 pp cut 0.48 comments per review on average; reviewers whose approval barely changed (under 5 pp) kept comments about the same (+0.10).</span>
+          <span class="how">From within-reviewer correlations</span>
+        </li>
+        <li>
+          <b>Time to review grew.</b>
+          <span class="why">The authors read this as longer time in queue but shorter active inspection, while noting it could also reflect changes in when PRs are submitted.</span>
+          <span class="how">From the main text and discussion</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#effort">4</a> (did review effort change)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>Did reviewers get easier only on AI PRs? Does it differ by AI agent?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>Only on AI PRs. In the same repositories, approval of human-written PRs actually fell over the same period. By June 2025, AI PRs were approved 10 pp more readily than human PRs. By agent, Copilot shows the largest shift, but reviewers who reviewed several agents became more approving of all of them about equally.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>It did not happen for human PRs.</b>
+          <span class="why">In January 2025, approval was 30.7% for AI PRs and 37.8% for human PRs. AI PR approval rose to 41.7% by July; human PR approval fell to 29.1% by June.</span>
+          <span class="how">From a comparison with 6,618 human-written PRs in the same repositories (Figure 2)</span>
+        </li>
+        <li>
+          <b>Not about one particular agent.</b>
+          <span class="why">Among reviewers of two or more agents, shifts were similar: Codex +9.4, Copilot +9.8, Devin +8.7 pp.</span>
+          <span class="how">From 108 reviewers (the authors note this check is underpowered)</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#ai-only">5</a> (is it only AI PRs)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>Is the rise in approval grounded trust, or habituation?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>The authors read it as closest to habituation. If reviewers had only come to trust AI on good grounds, they would approve more while keeping their inspection effort. Instead, those whose approval rose most commented least. But the possibility that AI code really improved cannot be ruled out.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Three interpretations were compared.</b>
+          <span class="why">Trust calibration from positive experience, deliberation under workload, and habituation from repetition. Rising approval with falling comments in the same reviewers fits habituation best.</span>
+          <span class="how">From the discussion (Section 4.2)</span>
+        </li>
+        <li>
+          <b>AI code quality was not measured.</b>
+          <span class="why">All four agents were updated during the 2025 observation period. If agent code really improved, rising approval would be rational. The authors call this the crucial limitation.</span>
+          <span class="how">From Section 1 and the limitations</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#why">6</a> (grounded trust or habituation)</p>
+    </div>
+  </div>
+
+  <h3>What the authors take from the four answers</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (discussion and conclusion sections)</p>
+      <p class="claim">As people keep reviewing AI PRs, they approve more and inspect less. This happens only for AI PRs, is hard to explain by trust calibration alone, and looks most like habituation under a growing workload. Teams that rely on human review as a quality gate should act on it.</p>
+      <p class="en">“most consistent with reflexive habituation under growing workload rather than rational trust calibration alone” (from the abstract)</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">So the authors recommend</p>
+      <ul class="recs">
+        <li><b>Rotate reviewers.</b> Keep any single reviewer from accumulating too large a share of AI PR reviews.</li>
+        <li><b>Re-check long approval streaks.</b> Flag long runs of consecutive approvals by one reviewer for a second look.</li>
+        <li><b>Show reviewers their own trend.</b> Show each reviewer their approval-rate trajectory alongside data on defects found later.</li>
+      </ul>
+      <p class="conclusion-note">The authors make these recommendations because, whether the mechanism is habituation or trust calibration, the practical outcome is the same: over time, more reviewers approve AI PRs with less scrutiny. More in <a href="#advice">8</a>.</p>
+    </div>
+  </div>
+
+  <h3>The story in one line</h3>
+  <ol class="cycle" aria-label="The story in one line">
+    <li>The same people review AI PRs repeatedly</li>
+    <li>Approval rises</li>
+    <li>Comments fall</li>
+    <li>Not for human PRs</li>
+    <li>Closer to habituation than grounded trust</li>
+    <li>Rotate reviewers and re-check approval streaks</li>
+  </ol>
+
+  <h3>What the paper does not answer</h3>
+  <p>The authors themselves say the following are not measured or not known.</p>
+  <ul>
+    <li><b>Whether AI code improved:</b> agent code quality over time was not measured directly. If it improved, rising approval would be rational.</li>
+    <li><b>Causes:</b> the study shows an association with experience, not causality.</li>
+    <li><b>Other settings and longer periods:</b> only open-source repositories with more than 100 stars, over at most 207 days. Enterprise repositories may differ.</li>
+  </ul>
+</section>
+
+<section id="over-time">
+  <h2><span class="num">2</span>What changes as reviewers review more</h2>
+  <div class="key">
+    <p>As the same people reviewed more AI PRs, approval rose, change requests and comments fell, and the time from PR opening to review grew.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Measure</th><th class="num">Early</th><th class="num">Late</th><th>Comparison</th></tr></thead>
+      <tbody>
+        <tr><th>Approval rate for AI PRs</th><td class="num">30.1%</td><td class="num"><b>36.8%</b></td><td>Each reviewer's first versus second half (400 reviewers)</td></tr>
+        <tr><th>Change-request rate</th><td class="num">11.2%</td><td class="num"><b>5.6%</b></td><td>First versus second half</td></tr>
+        <tr><th>Inline comments per review</th><td class="num">1.01</td><td class="num"><b>0.79</b></td><td>Earliest versus latest experience decile (−22%)</td></tr>
+        <tr><th>Comment words per review</th><td class="num">18.6</td><td class="num"><b>13.5</b></td><td>Earliest versus latest experience decile (−28%)</td></tr>
+        <tr><th>Time from PR opening to review (median)</th><td class="num">3.9 h</td><td class="num"><b>13.5 h</b></td><td>First versus second half (3.5×)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">“First versus second half” splits each reviewer's reviews in time order at the midpoint. “Experience deciles” order each reviewer's reviews from earliest to latest and split them into ten equal parts. The data covers roughly January to July 2025.</p>
+</section>
+
+<section id="approval">
+  <h2><span class="num">3</span>Does approval rise with experience? (Q1)</h2>
+  <div class="key">
+    <p>Yes. Approval rose from 27.9% in the earliest tenth of experience to 42.4% in the latest tenth. Half of the reviewers became more approving, and what mattered was their experience, not the calendar.</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-decile">
+    <p class="chart-title" id="ch-decile">How did the approval rate for AI PRs change as reviewers reviewed more?</p>
+    <p class="chart-sub">From 27.9% to 42.4%, +14.5 pp. It moves up and down along the way, but rises overall. Each reviewer's reviews are ordered and split into ten experience deciles, pooled across reviewers.</p>
+    <ul class="bars" style="--max: 50">
+      <li title="Decile 1 (earliest): 27.9%"><span class="bar-label">Decile 1<small>earliest</small></span><span class="bar-track"><span class="bar" style="--to: 27.9"></span></span><span class="bar-val">27.9%</span></li>
+      <li title="Decile 2: 27.1%"><span class="bar-label">Decile 2</span><span class="bar-track"><span class="bar" style="--to: 27.1"></span></span><span class="bar-val">27.1%</span></li>
+      <li title="Decile 3: 30.0%"><span class="bar-label">Decile 3</span><span class="bar-track"><span class="bar" style="--to: 30.0"></span></span><span class="bar-val">30.0%</span></li>
+      <li title="Decile 4: 28.1%"><span class="bar-label">Decile 4</span><span class="bar-track"><span class="bar" style="--to: 28.1"></span></span><span class="bar-val">28.1%</span></li>
+      <li title="Decile 5: 33.3%"><span class="bar-label">Decile 5</span><span class="bar-track"><span class="bar" style="--to: 33.3"></span></span><span class="bar-val">33.3%</span></li>
+      <li title="Decile 6: 35.6%"><span class="bar-label">Decile 6</span><span class="bar-track"><span class="bar" style="--to: 35.6"></span></span><span class="bar-val">35.6%</span></li>
+      <li title="Decile 7: 32.6%"><span class="bar-label">Decile 7</span><span class="bar-track"><span class="bar" style="--to: 32.6"></span></span><span class="bar-val">32.6%</span></li>
+      <li title="Decile 8: 34.2%"><span class="bar-label">Decile 8</span><span class="bar-track"><span class="bar" style="--to: 34.2"></span></span><span class="bar-val">34.2%</span></li>
+      <li title="Decile 9: 38.6%"><span class="bar-label">Decile 9</span><span class="bar-track"><span class="bar" style="--to: 38.6"></span></span><span class="bar-val">38.6%</span></li>
+      <li class="main" title="Decile 10 (latest): 42.4%"><span class="bar-label">Decile 10<small>latest</small></span><span class="bar-track"><span class="bar" style="--to: 42.4"></span></span><span class="bar-val">42.4%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table 1; the paper's Figure 1 is not copied. In the same table, the change-request rate fell from 11.2% to 5.6%.</figcaption>
+  </figure>
+
+  <figure class="chart" aria-labelledby="ch-split">
+    <p class="chart-title" id="ch-split">Reviewer by reviewer, how many became more approving?</p>
+    <p class="chart-sub">Half (52%) became more approving. Breakdown of 400 reviewers by the change from their first to second half.</p>
+    <ul class="bars" style="--max: 60">
+      <li class="main" title="More approving: 52%"><span class="bar-label">More approving</span><span class="bar-track"><span class="bar" style="--to: 52"></span></span><span class="bar-val">52%</span></li>
+      <li title="Less approving: 28%"><span class="bar-label">Less approving</span><span class="bar-track"><span class="bar" style="--to: 28"></span></span><span class="bar-val">28%</span></li>
+      <li title="No change: 20%"><span class="bar-label">No change</span><span class="bar-track"><span class="bar" style="--to: 20"></span></span><span class="bar-val">20%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 3.1. Among reviewers with a meaningful change (5 pp or more), 65% moved toward more approval and 35% toward less.</figcaption>
+  </figure>
+
+  <h3>Experience, calendar time, or easier PRs?</h3>
+  <ul>
+    <li><b>Experience:</b> for each of 343 reviewers, the authors modeled approval with both the reviewer's review index and the date. Experience carried the signal (mean coefficient +0.11, positive for 65% of reviewers); calendar time contributed little (mean −0.007, positive for 46%). A global shift over time does not explain it.</li>
+    <li><b>Not easier PRs:</b> monthly median PR size (lines changed) did not decline over the window.</li>
+    <li><b>Not a few reviewers:</b> the early-to-late shift is statistically clear in paired per-reviewer tests (Wilcoxon signed-rank, p&lt;10<sup>−6</sup>). Per-reviewer means give similar results, 30.5% to 36.6%.</li>
+  </ul>
+</section>
+
+<section id="effort">
+  <h2><span class="num">4</span>Did review effort change? (Q2)</h2>
+  <div class="key">
+    <p>It fell. Inline comments per review fell 22% and their word count 28%, and the reviewers whose approval rose most cut comments most.</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-comments">
+    <p class="chart-title" id="ch-comments">Did reviewers write fewer comments as they reviewed more?</p>
+    <p class="chart-sub">Yes: −22% in inline comments and −28% in words, comparing the earliest and latest experience deciles.</p>
+    <p class="db-group">Inline comments per review</p>
+    <ul class="bars" style="--max: 1.2">
+      <li title="Earliest decile: 1.01"><span class="bar-label">Earliest decile</span><span class="bar-track"><span class="bar" style="--to: 1.01"></span></span><span class="bar-val">1.01</span></li>
+      <li class="main" title="Latest decile: 0.79"><span class="bar-label">Latest decile</span><span class="bar-track"><span class="bar" style="--to: 0.79"></span></span><span class="bar-val">0.79</span></li>
+    </ul>
+    <p class="db-group">Comment words per review</p>
+    <ul class="bars" style="--max: 20">
+      <li title="Earliest decile: 18.6 words"><span class="bar-label">Earliest decile</span><span class="bar-track"><span class="bar" style="--to: 18.6"></span></span><span class="bar-val">18.6</span></li>
+      <li class="main" title="Latest decile: 13.5 words"><span class="bar-label">Latest decile</span><span class="bar-track"><span class="bar" style="--to: 13.5"></span></span><span class="bar-val">13.5</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 3.2. Both declines are statistically clear in paired early-versus-late tests.</figcaption>
+  </figure>
+  <ul>
+    <li><b>The more approval rose, the more comments fell:</b> within reviewers, the shift in approval and the shift in comments were strongly negatively correlated (ρ=−0.556). Reviewers whose approval rose by more than 10 pp cut 0.48 comments per review on average; reviewers whose approval barely changed (under 5 pp) stayed about the same (+0.10).</li>
+    <li><b>The authors' reading:</b> this fits declining inspection effort, not unchanged effort with a rationally raised approval threshold.</li>
+    <li><b>Time to review grew:</b> the median time from PR opening to review grew from 3.9 hours in the first half to 13.5 hours in the second. Approving more while taking longer looks contradictory; the authors suggest a growing review backlog, deprioritizing routine agent PRs, or changes in submission timing. In the discussion they favor longer queue time with shorter active review.</li>
+  </ul>
+</section>
+
+<section id="ai-only">
+  <h2><span class="num">5</span>Is it only AI PRs that get easier approval? (Q3)</h2>
+  <div class="key">
+    <p>Yes, only AI PRs. In the same repositories, approval of human-written PRs actually fell over the same period. The change was not about one agent, but reviewers becoming more approving of AI PRs in general.</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-human-ai">
+    <p class="chart-title" id="ch-human-ai">In the same repositories, how did approval change for AI PRs versus human PRs?</p>
+    <p class="chart-sub">Only AI PRs rose. By June 2025, AI PRs were approved 10 pp more readily than human PRs.</p>
+    <p class="db-group">January 2025</p>
+    <ul class="bars" style="--max: 50">
+      <li title="AI PRs (January 2025): 30.7%"><span class="bar-label">AI PRs</span><span class="bar-track"><span class="bar" style="--to: 30.7; background: var(--c-ai)"></span></span><span class="bar-val">30.7%</span></li>
+      <li title="Human PRs (January 2025): 37.8%"><span class="bar-label">Human PRs</span><span class="bar-track"><span class="bar" style="--to: 37.8; background: var(--c-human)"></span></span><span class="bar-val">37.8%</span></li>
+    </ul>
+    <p class="db-group">Late in the window</p>
+    <ul class="bars" style="--max: 50">
+      <li class="main" title="AI PRs (July 2025): 41.7%"><span class="bar-label">AI PRs<small>July 2025</small></span><span class="bar-track"><span class="bar" style="--to: 41.7; background: var(--c-ai)"></span></span><span class="bar-val">41.7%</span></li>
+      <li title="Human PRs (June 2025): 29.1%"><span class="bar-label">Human PRs<small>June 2025</small></span><span class="bar-track"><span class="bar" style="--to: 29.1; background: var(--c-human)"></span></span><span class="bar-val">29.1%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Section 3.5. Pink is AI PRs, blue is human PRs. The July value for human PRs (22.2%) is left out because it rests on only 207 reviews. The paper's Figure 2 is not copied.</figcaption>
+  </figure>
+  <ul>
+    <li><b>How:</b> the authors collected 11,415 reviews of 6,618 human-written PRs from the same repositories (1,851 reviewers, 728 of whom also reviewed AI PRs) and compared monthly approval rates.</li>
+    <li><b>The authors' reading:</b> if reviewers were simply becoming more lenient overall, human PR approval would rise too. It fell instead, consistent with reviewers developing a different trust in agent-generated code.</li>
+    <li><b>Caveats:</b> human PR reviews drop to 207 in July, so the late comparison is noisy, and this is a population-level comparison, not a within-reviewer paired test.</li>
+  </ul>
+
+  <h3>Does it differ by agent?</h3>
+  <figure class="chart" aria-labelledby="ch-agent">
+    <p class="chart-title" id="ch-agent">How much did approval change for each AI agent?</p>
+    <p class="chart-sub">Copilot changed most, +9.1 pp. Change from first to second half, in percentage points. The dashed line is 0 (no change). Striped bars have 95% confidence intervals that cross 0.</p>
+    <ul class="bars" style="--min: -2; --max: 10; --at: 0">
+      <li class="main" title="Copilot: +9.1 pp (241 reviewers, 95% CI +5.8 to +12.3)"><span class="bar-label">Copilot<small>241 reviewers</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 9.1"></span><span class="ref"></span></span><span class="bar-val">+9.1</span></li>
+      <li class="weak" title="Devin: +3.8 pp (95 reviewers, 95% CI −0.8 to +8.3)"><span class="bar-label">Devin<small>95 reviewers</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 3.8"></span><span class="ref"></span></span><span class="bar-val">+3.8</span></li>
+      <li class="weak" title="Codex: +1.8 pp (51 reviewers, 95% CI −6.4 to +9.6)"><span class="bar-label">Codex<small>51 reviewers</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 1.8"></span><span class="ref"></span></span><span class="bar-val">+1.8</span></li>
+      <li class="weak" title="Cursor: −1.4 pp (18 reviewers, 95% CI −14.8 to +10.3)"><span class="bar-label">Cursor<small>18 reviewers</small></span><span class="bar-track"><span class="bar neg" style="--from: -1.4; --to: 0"></span><span class="ref"></span></span><span class="bar-val">−1.4</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table 2 (reviewers with at least five reviews for that agent).</figcaption>
+  </figure>
+  <ul>
+    <li><b>How to read it:</b> the authors caution that Copilot's larger shift may reflect its larger and more diverse reviewer pool rather than the agent itself. Codex and Cursor have too few reviewers for firm conclusions.</li>
+    <li><b>Within the same reviewers, similar for all agents:</b> among 108 reviewers of two or more agents (75 reviewer–agent pairs with at least five reviews), shifts were Codex +9.4, Copilot +9.8, Devin +8.7 pp (Cursor −10.3, from only 10 pairs and unreliable). The authors read this as a change on the reviewer side rather than one agent's code improving, while noting the check is underpowered.</li>
+  </ul>
+</section>
+
+<section id="why">
+  <h2><span class="num">6</span>Grounded trust or habituation? (Q4)</h2>
+  <div class="key">
+    <p>The authors read it as closest to habituation, because rising approval and falling comments happened within the same reviewers. But the possibility that AI code really improved cannot be ruled out.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Interpretation</th><th>What it predicts</th><th>Fit with the data</th></tr></thead>
+      <tbody>
+        <tr><th>1. Trust calibration<small style="display:block;font-weight:400;color:var(--sub)">raising the approval threshold rationally after positive experience</small></th><td>More approval, with inspection effort maintained</td><td>Comments fell, so this alone does not fit. Some effort reduction may be rational, so it cannot be fully excluded</td></tr>
+        <tr><th>2. Deliberation under workload<small style="display:block;font-weight:400;color:var(--sub)">a growing backlog means longer waits that end in approval</small></th><td>Longer time to review goes with more approval</td><td>The link between time and approval is weak (correlation +0.08) and not clear</td></tr>
+        <tr><th>3. Habituation<small style="display:block;font-weight:400;color:var(--sub)">reducing inspection effort after repeated positive experience</small></th><td>More approval, with fewer comments in the same reviewers</td><td><b>Fits best.</b> Longer time to review also fits as longer queue time with shorter active review</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Given the size of the effort reduction, the authors read it as going beyond rational updating, and add that the practical outcome is the same whatever the mechanism.</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>The data and the comparisons</h2>
+
+  <h3>Data</h3>
+  <ul>
+    <li>The study uses AIDev, a public dataset of PRs that AI coding agents submitted to GitHub repositories with at least 100 stars. It has 16,895 human reviews by 2,494 reviewers.</li>
+    <li>The agents are GitHub Copilot Autofix, Devin, OpenAI Codex CLI, Cursor, and Claude Code. Claude Code makes up under 2% of repeat-reviewer reviews and is left out of the per-agent analysis.</li>
+    <li>The study focuses on the 400 reviewers who reviewed 10 or more agent PRs, with 11,429 reviews (median 17 each). Of these, 52 reviewed 50 or more, with observation spans up to 178 days. The full dataset covers 207 days.</li>
+  </ul>
+
+  <h3>Comparisons</h3>
+  <ul>
+    <li><b>First versus second half:</b> each reviewer's reviews are ordered in time and split at the midpoint, and approval rates are compared.</li>
+    <li><b>Experience deciles:</b> all reviews are pooled by each reviewer's review index and split into ten parts.</li>
+    <li><b>Human PR comparison:</b> reviews of human-written PRs in the same repositories are collected, and monthly approval rates are compared.</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>This part is simplified.</b> The early-to-late shift is tested with the Wilcoxon signed-rank test; with 400 pairs the test can detect small effects (Cohen's d of 0.14, about 2.1 pp of approval). Experience and calendar time are separated with per-reviewer logistic regressions.</p>
+  </div>
+
+  <h3>Terms used on this page</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Term</th><th>Meaning in this paper</th></tr></thead>
+      <tbody>
+        <tr><th>PR (pull request)</th><td>A proposed code change, reviewed before it goes into the main branch</td></tr>
+        <tr><th>AI PR</th><td>A PR submitted by an AI coding agent such as GitHub Copilot, Devin, OpenAI Codex, or Cursor</td></tr>
+        <tr><th>Approved / changes requested</th><td>Outcomes of a GitHub review; the third is “commented”</td></tr>
+        <tr><th>Inline comment</th><td>A comment attached to a specific line of code</td></tr>
+        <tr><th>Experience decile</th><td>One of ten equal parts of a reviewer's reviews, ordered from earliest to latest</td></tr>
+        <tr><th>Trust calibration</th><td>Rationally changing the approval threshold based on accumulated positive evidence</td></tr>
+        <tr><th>Habituation</th><td>Reducing inspection effort after repeated positive experiences</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>The authors' recommendations and the study's limits</h2>
+
+  <h3>Recommendations for teams that rely on human review as a quality gate</h3>
+  <ul>
+    <li><b>Rotate reviewers:</b> keep any single reviewer from accumulating too large a share of AI PR reviews.</li>
+    <li><b>Re-check approval streaks:</b> flag long runs of consecutive approvals by one reviewer for a second look.</li>
+    <li><b>Show reviewers their own trend:</b> show each reviewer their approval-rate trajectory alongside data on defects found later.</li>
+  </ul>
+  <p>The authors note that among reviewers with a meaningful change, 65% moved toward more approval, and that whatever the mechanism, more reviewers approve AI PRs with less scrutiny over time.</p>
+
+  <h3>The study's limits (as the authors state them)</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>AI code quality not measured</th><td>The crucial limit. If agent code really improved, rising approval would be rational rather than habituation</td></tr>
+        <tr><th>No causal claim</th><td>All four agents received updates during 2025</td></tr>
+        <tr><th>Only open-source repositories with more than 100 stars</th><td>Enterprise repositories may differ</td></tr>
+        <tr><th>At most 207 days</th><td>Longer periods are not known</td></tr>
+        <tr><th>Some agents have few reviewers</th><td>Cursor has 18 and Codex 51, too few for per-agent conclusions</td></tr>
+        <tr><th>Few human PR reviews late in the window</th><td>Only 207 in July; a population-level, not within-reviewer, comparison</td></tr>
+        <tr><th>Longer time to review</th><td>May reflect changes in when PRs are submitted rather than reviewer behavior</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>Should trust in AI move by habit? (microtaro's reading)</h2>
+  <div class="note note-view">
+    <p><b>This section is microtaro's reading, not the paper's claim.</b></p>
+  </div>
+  <ul>
+    <li><b>More approval is not the same as more grounded trust.</b> Looking only at approval rates, people's trust in AI seems to be moving smoothly. But within the same reviewers, inspection effort (comments) fell. microtaro reads this paper's numbers as showing that trust can rise even when its grounds do not.</li>
+    <li><b>Looking was itself the basis of trust, so move it to checks that leave a record, not to habit.</b> If reviewing code was the basis of trust, then less looking means a thinner basis. To move trust, it is better to move it into tests and measurements that can be checked afterward than to let habit carry it. The authors of <a href="review-agents-bugs.html">(When) Should a Software Factory be Lights-off?</a> recommend building a benchmark from your repository's past bugs and monitoring how many an AI reviewer catches. This paper's own recommendation — show reviewers their approval trend alongside defects found later — also checks trust by results rather than by feel.</li>
+    <li><b>Same direction inside a company and in open source.</b> At the company in <a href="2x-mandate.html">AI Writes Faster Than Humans Can Review</a>, the median reviewer's silent approvals roughly doubled. This paper shows the same reviewers in open-source projects approving more while commenting less. Two studies, different settings and methods, same direction.</li>
+    <li><b>Telling habituation from grounded trust needs outcome data.</b> This paper could not separate them because it did not measure whether approved AI code later caused problems. Moving trust needs a way to keep checking, by results, whether the new basis is right.</li>
+    <li><b>Mind the dates.</b> The data covers roughly January to July 2025; 2026 models are not included.</li>
+    <li><b>A caution for people building alone with AI.</b> When you keep accepting AI changes and nothing goes wrong, you gradually stop checking. That happened to open-source reviewers too. “It has been fine so far” is not a check. The longer the run of acceptances, the more it helps to set points where you confirm with tests.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2606.22721v1">Yu, Liu, Jiang, Jia, Wang, Qian, Chen, “Habituation at the Gate: Rising Approval and Declining Scrutiny in Human Review of AI Agent Code”</a> arXiv:2606.22721v1; v1 2026-06-21 (the only version); not peer reviewed (stated as accepted at the KDD 2026 Workshop on Agentic Software Engineering; 5 pages); license <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv non-exclusive distribution license</a><span class="use">Affiliations: four independent researchers (Yu, Liu, Jiang, Jia), Carnegie Mellon University (Wang, Qian), Georgia Institute of Technology (Chen). This page is based on the HTML version of v1, main text and tables</span></li>
+    <li><a href="https://anonymous.4open.science/r/reviewer-behavioral-shift-FE86">reviewer-behavioral-shift</a><span class="use">The analysis scripts, as given in the paper (anonymous host). microtaro did not open them when writing this page</span></li>
+    <li><a href="../../../../topics/ai-trust/data/review-habituation.json">topics/ai-trust/data/review-habituation.json</a><span class="use">The numbers used in this page's charts and tables, with where each appears in the paper (labels in Japanese)</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>Numbers are taken from the main text, Tables 1 and 2, and figure captions of v1. No values were computed for this page.</li>
+    <li>The paper describes the comment decline two ways: “−22%” in the abstract and conclusion is the number of inline comments; “28% less commenting” in the discussion is the −28% in word count. This page keeps them separate.</li>
+    <li>Per-agent shifts differ between Table 2 (reviewers with at least five reviews for that agent; Copilot +9.1 pp) and the comparison of reviewers of several agents (Copilot +9.8 pp). These are different aggregations over different reviewers.</li>
+    <li>The discussion (Section 4.3) says Copilot and Devin both show a clear positive shift, but Devin's 95% confidence interval in Table 2 (−0.8 to +8.3) crosses 0. The chart stripes bars whose intervals cross 0.</li>
+    <li>“Agent-specific” in the abstract means “for AI PRs, not human PRs,” not “for one particular agent” (among reviewers of several agents, the shift was similar across agents).</li>
+    <li>This paper is not CC BY, so only one quotation (part of the abstract) is used, and all charts are redrawn from the numbers.</li>
+    <li>On 2026-11-16, microtaro re-read the main text and tables and checked every statement on the Japanese page against the paper; this English page follows it. The version and license were checked on the paper's arXiv page.</li>
+  </ul>
+  <p class="stamp">The text and charts on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Quotations and numbers from the paper remain under the paper's license (the arXiv non-exclusive distribution license).</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

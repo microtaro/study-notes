@@ -1,0 +1,102 @@
+{
+  "about": "解説「人は、AI の変更のレビューに慣れていく」の図と表に使った数値。すべて論文の第 1 版から拾い、出典の場所を where に書いた。この解説で計算した値は入れていない。",
+  "paper": {
+    "title": "Habituation at the Gate: Rising Approval and Declining Scrutiny in Human Review of AI Agent Code",
+    "authors": ["Haoran Yu", "Lifei Liu", "Xiaochong Jiang", "Yuwen Jia", "Su Wang", "Pin Qian", "Yihang Chen"],
+    "url": "https://arxiv.org/abs/2606.22721v1",
+    "license": "arXiv non-exclusive distribution license 1.0",
+    "license_url": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/"
+  },
+  "checked": "2026-11-16",
+  "dataset": {
+    "where": "本文 2.1",
+    "human_reviews": 16895,
+    "reviewers": 2494,
+    "repeat_reviewers": 400,
+    "repeat_reviewer_reviews": 11429,
+    "heavy_reviewers_50_plus": 52,
+    "max_span_days": 178,
+    "dataset_days": 207,
+    "median_reviews_per_reviewer": 17
+  },
+  "approval_by_decile": {
+    "where": "表 1（経験の 10 段階。各人のレビューを古い順に並べて 10 等分し、全員分をまとめた値）",
+    "unit": "%",
+    "rows": [
+      { "decile": 1, "approval": 27.9, "change_request": 11.2 },
+      { "decile": 2, "approval": 27.1, "change_request": 11.3 },
+      { "decile": 3, "approval": 30.0, "change_request": 8.0 },
+      { "decile": 4, "approval": 28.1, "change_request": 7.9 },
+      { "decile": 5, "approval": 33.3, "change_request": 6.2 },
+      { "decile": 6, "approval": 35.6, "change_request": 7.0 },
+      { "decile": 7, "approval": 32.6, "change_request": 7.3 },
+      { "decile": 8, "approval": 34.2, "change_request": 6.6 },
+      { "decile": 9, "approval": 38.6, "change_request": 6.9 },
+      { "decile": 10, "approval": 42.4, "change_request": 5.6 }
+    ],
+    "total_shift_pp": 14.5
+  },
+  "early_vs_late": {
+    "where": "要旨、本文 3.1 と脚注 1（各人のレビューを時間の真ん中で前半と後半に分けた比較）",
+    "approval": { "early": 30.1, "late": 36.8, "shift_pp": 6.7 },
+    "approval_per_reviewer_mean": { "early": 30.5, "late": 36.6, "shift_pp": 6.1 },
+    "change_request": { "early": 11.2, "late": 5.6 },
+    "latency_median_hours": { "early": 3.9, "late": 13.5, "multiplier": 3.5 },
+    "reviewer_split": { "more_approving": 52, "less_approving": 28, "no_change": 20, "unit": "%" },
+    "meaningful_change_split": { "toward_more": 65, "toward_less": 35, "unit": "%" }
+  },
+  "comment_effort": {
+    "where": "本文 3.2（経験の初めの 1 割と終わりの 1 割）",
+    "inline_comments_per_review": { "first_decile": 1.01, "tenth_decile": 0.79, "change": "-22%" },
+    "words_per_review": { "first_decile": 18.6, "tenth_decile": 13.5, "change": "-28%" },
+    "spearman_rho_approval_vs_comments": -0.556,
+    "drifted_up_comment_change": -0.48,
+    "stable_comment_change": 0.10
+  },
+  "per_agent_shift": {
+    "where": "表 2（その AI を 5 件以上レビューした人。承認の割合の前半から後半への変化）",
+    "unit": "pp",
+    "rows": [
+      { "agent": "Copilot", "n": 241, "early_approval": 28.1, "shift": 9.1, "ci95": [5.8, 12.3] },
+      { "agent": "Devin", "n": 95, "early_approval": 33.0, "shift": 3.8, "ci95": [-0.8, 8.3] },
+      { "agent": "Codex", "n": 51, "early_approval": 35.5, "shift": 1.8, "ci95": [-6.4, 9.6] },
+      { "agent": "Cursor", "n": 18, "early_approval": 39.8, "shift": -1.4, "ci95": [-14.8, 10.3] }
+    ]
+  },
+  "cross_agent_proxy": {
+    "where": "本文 3.4（2 つ以上の AI をレビューした 108 人。5 件以上ある 75 組）",
+    "unit": "pp",
+    "reviewers": 108,
+    "pairs": 75,
+    "shift": { "Codex": 9.4, "Copilot": 9.8, "Devin": 8.7, "Cursor": -10.3 },
+    "cursor_pairs": 10
+  },
+  "human_pr_control": {
+    "where": "本文 3.5（同じリポジトリの人が書いた PR。図 2）",
+    "unit": "%",
+    "human_prs": 6618,
+    "human_reviews": 11415,
+    "human_reviewers": 1851,
+    "overlap_reviewers": 728,
+    "jan_2025": { "agent": 30.7, "human": 37.8, "gap_pp": -7.1 },
+    "agent_jul_2025": 41.7,
+    "human_jun_2025": 29.1,
+    "human_jul_2025": 22.2,
+    "human_jul_2025_reviews": 207,
+    "jun_2025_agent_minus_human_pp": 10
+  },
+  "experience_vs_calendar": {
+    "where": "本文 4.1（343 人について 1 人ずつのロジスティック回帰）",
+    "reviewers": 343,
+    "excluded": 57,
+    "experience_coef_mean": 0.11,
+    "experience_positive_share": 65,
+    "calendar_coef_mean": -0.007,
+    "calendar_positive_share": 46,
+    "pr_size_spearman_rho": 0.02
+  },
+  "interpretations": {
+    "where": "本文 4.2",
+    "latency_approval_rho": 0.08
+  }
+}

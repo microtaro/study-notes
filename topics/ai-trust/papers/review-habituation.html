@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人は、AI の変更のレビューに慣れていく（論文の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="review-habituation.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/papers/review-habituation.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#over-time"><span class="n">2</span>レビューを重ねると、何が変わっていくか</a></li>
+    <li><a href="#approval"><span class="n">3</span>レビューを重ねると、承認は増えるか（Q1）</a></li>
+    <li><a href="#effort"><span class="n">4</span>確かめる手間は変わったか（Q2）</a></li>
+    <li><a href="#ai-only"><span class="n">5</span>甘くなったのは AI の PR にだけか（Q3）</a></li>
+    <li><a href="#why"><span class="n">6</span>根拠のある信頼か、慣れか（Q4）</a></li>
+    <li><a href="#study"><span class="n">7</span>調べたデータと比べ方</a></li>
+    <li><a href="#advice"><span class="n">8</span>著者の提言と、この研究の限界</a></li>
+    <li><a href="#reading"><span class="n">9</span>AI への信頼は、慣れで移ってよいか（microtaro の読み方）</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/papers/review-habituation.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">論文の解説</p>
+  <h1>人は、AI の変更のレビューに慣れていく</h1>
+  <p class="src"><b>元の論文</b>Yu, Liu, Jiang, Jia, Wang, Qian, Chen「Habituation at the Gate: Rising Approval and Declining Scrutiny in Human Review of AI Agent Code」arXiv:2606.22721 第 1 版（2026-06-21）、未査読（KDD 2026 のワークショップに採択と記載）、<a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv の標準ライセンス（非独占の配布許諾）</a>
+    <span class="links"><a href="https://arxiv.org/abs/2606.22721v1">arXiv のページ</a><a href="https://arxiv.org/html/2606.22721v1">HTML 版で読む</a><a href="https://arxiv.org/pdf/2606.22721v1">PDF</a></span></p>
+  <p class="lead">AI のコーディングエージェントが公開のプロジェクトに出した変更（PR）を、同じ人がくり返しレビューすると、どう変わっていくかを調べた短い論文の解説です。400 人のレビュー 11,429 件で、経験を重ねるほど承認が増え、コメントが減っていました。それが「AI を根拠をもって信頼するようになった」のか、「慣れて確かめなくなった」のかを調べています。</p>
+  <p class="stamp">2026-11-13 に下書きを作成（microtaro と AI）。2026-11-16、arXiv の第 1 版（2026-06-21。版はこれだけ）の本文と表を読み直し、この形に書き直しました。数字は第 1 版のものです。この論文は CC BY ではないので、原文からの引用はごく短くし、説明は microtaro の言葉で書いています。論文が言っていることと、microtaro の読み方は分けて書いています。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>この論文の中心の問いは 1 つです。「レビューする人は、AI の PR のレビューの経験を重ねるにつれて、決まって承認しやすくなるか」。論文はその答えを、承認の変化、確かめる手間、人の PR との比べ、3 つの解釈の順に確かめています。ここでは、その 4 点を問いと答えの形にまとめます。灰色の小さな字は、それぞれを何から読み取ったかです。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>AI の PR を何度もレビューすると、人は承認しやすくなっていくか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>なっていく。経験のいちばん初めの 1 割では 27.9% だった承認が、いちばん終わりの 1 割では 42.4%（+14.5 ポイント）。直しを求める割合は 11.2% から 5.6% に下がった。効いていたのは、その人のレビューの経験で、暦の時期ではない。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>経験を重ねるほど、承認が増えた。</b>
+          <span class="why">各人のレビューを古い順に 10 段階に分けると、承認は 27.9% から 42.4% に上がりました。同じ人の前半と後半で比べても、30.1% から 36.8% です。</span>
+          <span class="how">論文の表 1 と本文から</span>
+        </li>
+        <li>
+          <b>少数の人が引っぱった結果ではない。</b>
+          <span class="why">1 人ずつ見ると、52% の人が承認しやすくなり、28% が承認しにくくなり、20% は変わりませんでした。前半と後半の差は、1 人ずつの組で比べても統計ではっきりしています。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+        <li>
+          <b>暦の時期ではなく、経験で決まっていた。</b>
+          <span class="why">その人の何件目のレビューかと、日付の両方で承認を説明すると、効いていたのは経験のほうでした。あとの PR ほど小さく簡単だった、ということもありません。</span>
+          <span class="how">343 人について 1 人ずつ作った式と、月ごとの PR の大きさから</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#approval">3</a>（レビューを重ねると、承認は増えるか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>承認が増えたとき、確かめる手間は変わったか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>減った。1 回のレビューで書く行ごとのコメントは 22%、その語数は 28% 減った。承認が大きく増えた人ほど、コメントが減っていた。一方、PR が開かれてからレビューされるまでの時間は 3.9 時間から 13.5 時間に延びた。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>コメントの数も語数も減った。</b>
+          <span class="why">行ごとのコメントは 1 回あたり 1.01 件から 0.79 件に、語数は 18.6 語から 13.5 語になりました。</span>
+          <span class="how">論文の本文から（経験の初めの 1 割と終わりの 1 割）</span>
+        </li>
+        <li>
+          <b>承認が増えた人ほど、コメントが減った。</b>
+          <span class="why">承認が 10 ポイント以上上がった人は、コメントが 1 回あたり平均 0.48 件減りました。承認がほとんど変わらなかった人（変化が 5 ポイント未満）では、コメントもほとんど変わりませんでした（+0.10 件）。</span>
+          <span class="how">同じ人の中での相関から</span>
+        </li>
+        <li>
+          <b>レビューまでの時間は延びた。</b>
+          <span class="why">著者は、待たせる時間が延び、実際にコードを見る時間は短くなった、と読んでいます。PR が出る時間帯が変わっただけ、という可能性も残る、としています。</span>
+          <span class="how">論文の本文と考察から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#effort">4</a>（確かめる手間は変わったか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>甘くなったのは AI の PR にだけか。AI の種類で違うか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>AI の PR にだけ。同じリポジトリの、人が書いた PR への承認は、同じ時期にむしろ下がった。2025 年 6 月には、AI の PR のほうが 10 ポイント多く承認されていた。AI の種類では Copilot の変化がいちばん大きいが、複数の AI をレビューした人では、どの AI にも同じくらい甘くなっていた。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>人の PR には起きなかった。</b>
+          <span class="why">2025 年 1 月の承認は、AI の PR が 30.7%、人の PR が 37.8% でした。AI の PR は 7 月に 41.7% へ上がり、人の PR は 6 月に 29.1% へ下がりました。</span>
+          <span class="how">同じリポジトリの人の PR 6,618 件との比べ（論文の図 2）から</span>
+        </li>
+        <li>
+          <b>特定の AI だけの話ではない。</b>
+          <span class="why">2 つ以上の AI をレビューした人で見ると、Codex で +9.4、Copilot で +9.8、Devin で +8.7 ポイントと、どの AI にも同じくらい承認しやすくなっていました。</span>
+          <span class="how">108 人の比べから（著者は、組が少なく十分な確かめではない、と注意）</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#ai-only">5</a>（甘くなったのは AI の PR にだけか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q4</span><p>承認が増えたのは、根拠のある信頼か、慣れか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>著者は、慣れに最も近いと読んでいる。根拠をもって信頼するようになっただけなら、承認が増えても、確かめる手間は保たれるはず。実際は、承認が増えた人ほどコメントが減っていた。ただし、AI のコードが本当に良くなった可能性は排除できない。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>3 つの解釈を比べた。</b>
+          <span class="why">良い経験にもとづく信頼の調整、仕事量が増える中での判断、くり返しによる慣れ。承認の増加とコメントの減少が同じ人で起きていることに、いちばん合うのは慣れでした。</span>
+          <span class="how">論文の考察（4.2 節）から</span>
+        </li>
+        <li>
+          <b>AI のコードの質は測っていない。</b>
+          <span class="why">観察した 2025 年の間に、4 つの AI はどれも更新されています。AI のコードが本当に良くなっていたなら、承認が増えるのは合理的です。著者は、ここをいちばん大事な限界としています。</span>
+          <span class="how">論文の第 1 節と限界の節から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#why">6</a>（根拠のある信頼か、慣れか）</p>
+    </div>
+  </div>
+
+  <h3>4 つの答えから、著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（論文の考察と結論の節）</p>
+      <p class="claim">AI の PR をレビューし続けると、人は承認を増やし、確かめる手間を減らしていく。この変わり方は AI の PR にだけ起き、良い経験にもとづく信頼の調整だけでは説明しにくく、仕事量が増える中での慣れに最も近い。人のレビューを品質の関門として頼るチームは、手を打つべきだ。</p>
+      <p class="en">“most consistent with reflexive habituation under growing workload rather than rational trust calibration alone”（要旨より）</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">だから著者は、次のことを勧めています</p>
+      <ul class="recs">
+        <li><b>担当を回す。</b>1 人の人に、AI の PR のレビューが偏りすぎないようにする。</li>
+        <li><b>続けて承認しているときは、もう一度見る。</b>1 人が長く続けて承認していたら、それを見つけて、別の人がもう一度確かめる。</li>
+        <li><b>自分の変わり方を見えるようにする。</b>レビューする人に、自分の承認の割合の移り変わりを、あとで見つかった欠陥のデータと並べて見せる。</li>
+      </ul>
+      <p class="conclusion-note">著者は、承認が増えた仕組みが慣れでも信頼の調整でも、実際に起きることは同じ（時間とともに、より多くの人が、より少ない確認で AI の PR を承認するようになる）として、これを勧めています。詳しくは <a href="#advice">8</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>AI の PR を同じ人がくり返しレビューする</li>
+    <li>承認が増える</li>
+    <li>コメントが減る</li>
+    <li>人の PR では起きない</li>
+    <li>根拠のある信頼より、慣れに近い</li>
+    <li>担当を回し、続けた承認を見直す</li>
+  </ol>
+
+  <h3>論文が答えていないこと</h3>
+  <p>次のことは、著者自身が「測っていない」「分からない」と書いています。</p>
+  <ul>
+    <li><b>AI のコードが良くなったか：</b>AI のコードの質を、時期ごとに直接測っていません。良くなっていたなら、承認が増えるのは合理的です。</li>
+    <li><b>原因：</b>経験と承認の関係は示せても、因果は示せない、としています。</li>
+    <li><b>ほかの場所、もっと長い期間：</b>調べたのは、スター 100 以上の公開のリポジトリの、最大 207 日分です。会社の中のリポジトリでは違いうる、としています。</li>
+  </ul>
+</section>
+
+<section id="over-time">
+  <h2><span class="num">2</span>レビューを重ねると、何が変わっていくか</h2>
+  <div class="key">
+    <p>同じ人が AI の PR のレビューを重ねると、承認が増え、直しを求めることとコメントが減り、PR が開かれてからレビューまでの時間は延びました。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>何を</th><th class="num">初め</th><th class="num">終わり</th><th>比べ方</th></tr></thead>
+      <tbody>
+        <tr><th>AI の PR を承認する割合</th><td class="num">30.1%</td><td class="num"><b>36.8%</b></td><td>同じ人の前半と後半（400 人）</td></tr>
+        <tr><th>直しを求める割合</th><td class="num">11.2%</td><td class="num"><b>5.6%</b></td><td>同じ人の前半と後半</td></tr>
+        <tr><th>行ごとのコメント（1 回のレビューあたり）</th><td class="num">1.01 件</td><td class="num"><b>0.79 件</b></td><td>経験の初めの 1 割と終わりの 1 割（−22%）</td></tr>
+        <tr><th>コメントの語数（1 回のレビューあたり）</th><td class="num">18.6 語</td><td class="num"><b>13.5 語</b></td><td>経験の初めの 1 割と終わりの 1 割（−28%）</td></tr>
+        <tr><th>PR が開かれてからレビューまでの時間（中央値）</th><td class="num">3.9 時間</td><td class="num"><b>13.5 時間</b></td><td>同じ人の前半と後半（3.5 倍）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">「前半と後半」は、各人のレビューを時間の順に並べ、真ん中で 2 つに分けた比べ方です。「経験の初めの 1 割と終わりの 1 割」は、各人のレビューを古い順に 10 等分した段階の、いちばん初めといちばん終わりです。データは 2025 年 1〜7 月ごろのものです。</p>
+</section>
+
+<section id="approval">
+  <h2><span class="num">3</span>レビューを重ねると、承認は増えるか（Q1）</h2>
+  <div class="key">
+    <p>増えました。経験のいちばん初めの 1 割で 27.9% だった承認は、いちばん終わりの 1 割で 42.4% になりました。半分の人が承認しやすくなり、効いていたのは暦の時期ではなく、その人の経験でした。</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-decile">
+    <p class="chart-title" id="ch-decile">AI の PR を承認する割合は、レビューを重ねるとどう変わったか</p>
+    <p class="chart-sub">27.9% から 42.4% へ、+14.5 ポイント。段ごとに上下はあるが、全体として上がった。各人のレビューを古い順に並べて 10 等分し、段階ごとに全員分をまとめた値。</p>
+    <ul class="bars" style="--max: 50">
+      <li title="1 段階目（いちばん初め）：27.9%"><span class="bar-label">1 段階目<small>いちばん初め</small></span><span class="bar-track"><span class="bar" style="--to: 27.9"></span></span><span class="bar-val">27.9%</span></li>
+      <li title="2 段階目：27.1%"><span class="bar-label">2 段階目</span><span class="bar-track"><span class="bar" style="--to: 27.1"></span></span><span class="bar-val">27.1%</span></li>
+      <li title="3 段階目：30.0%"><span class="bar-label">3 段階目</span><span class="bar-track"><span class="bar" style="--to: 30.0"></span></span><span class="bar-val">30.0%</span></li>
+      <li title="4 段階目：28.1%"><span class="bar-label">4 段階目</span><span class="bar-track"><span class="bar" style="--to: 28.1"></span></span><span class="bar-val">28.1%</span></li>
+      <li title="5 段階目：33.3%"><span class="bar-label">5 段階目</span><span class="bar-track"><span class="bar" style="--to: 33.3"></span></span><span class="bar-val">33.3%</span></li>
+      <li title="6 段階目：35.6%"><span class="bar-label">6 段階目</span><span class="bar-track"><span class="bar" style="--to: 35.6"></span></span><span class="bar-val">35.6%</span></li>
+      <li title="7 段階目：32.6%"><span class="bar-label">7 段階目</span><span class="bar-track"><span class="bar" style="--to: 32.6"></span></span><span class="bar-val">32.6%</span></li>
+      <li title="8 段階目：34.2%"><span class="bar-label">8 段階目</span><span class="bar-track"><span class="bar" style="--to: 34.2"></span></span><span class="bar-val">34.2%</span></li>
+      <li title="9 段階目：38.6%"><span class="bar-label">9 段階目</span><span class="bar-track"><span class="bar" style="--to: 38.6"></span></span><span class="bar-val">38.6%</span></li>
+      <li class="main" title="10 段階目（いちばん終わり）：42.4%"><span class="bar-label">10 段階目<small>いちばん終わり</small></span><span class="bar-track"><span class="bar" style="--to: 42.4"></span></span><span class="bar-val">42.4%</span></li>
+    </ul>
+    <figcaption>論文の表 1 の数値から作った図です。論文の図 1 そのものは写していません。同じ表で、直しを求める割合は 11.2% から 5.6% に下がっています。</figcaption>
+  </figure>
+
+  <figure class="chart" aria-labelledby="ch-split">
+    <p class="chart-title" id="ch-split">1 人ずつ見ると、どれだけの人が承認しやすくなったか</p>
+    <p class="chart-sub">半分（52%）の人が、承認しやすくなった。各人の前半と後半の承認の割合を比べた、400 人の内訳。</p>
+    <ul class="bars" style="--max: 60">
+      <li class="main" title="承認しやすくなった：52%"><span class="bar-label">承認しやすくなった</span><span class="bar-track"><span class="bar" style="--to: 52"></span></span><span class="bar-val">52%</span></li>
+      <li title="承認しにくくなった：28%"><span class="bar-label">承認しにくくなった</span><span class="bar-track"><span class="bar" style="--to: 28"></span></span><span class="bar-val">28%</span></li>
+      <li title="変わらなかった：20%"><span class="bar-label">変わらなかった</span><span class="bar-track"><span class="bar" style="--to: 20"></span></span><span class="bar-val">20%</span></li>
+    </ul>
+    <figcaption>論文の本文（3.1 節）の数値から作った図です。目立って変わった人（5 ポイント以上）に限ると、65% が承認しやすい方へ、35% が承認しにくい方へ動いていました。</figcaption>
+  </figure>
+
+  <h3>経験か、時期か、PR が簡単になったのか</h3>
+  <ul>
+    <li><b>経験で決まっていた：</b>343 人について 1 人ずつ、承認を「その人の何件目のレビューか」と「日付」の両方で説明する式を作りました。経験の係数は平均 +0.11（65% の人で正）、日付は平均 −0.007（46% の人で正）で、効いていたのは経験でした。世の中全体が同じ時期に変わった、という説明は当たりません。</li>
+    <li><b>PR が簡単になったのではない：</b>月ごとの PR の大きさ（変更した行数の中央値）は、期間を通して小さくなっていませんでした。</li>
+    <li><b>少数の人のせいではない：</b>前半と後半の差は、1 人ずつの組で比べても統計ではっきりしています（ウィルコクソンの符号順位検定で p&lt;10<sup>−6</sup>）。1 人ずつの平均で見ても、30.5% から 36.6% でした。</li>
+  </ul>
+</section>
+
+<section id="effort">
+  <h2><span class="num">4</span>確かめる手間は変わったか（Q2）</h2>
+  <div class="key">
+    <p>減りました。1 回のレビューで書く行ごとのコメントは 22%、その語数は 28% 減り、承認が大きく増えた人ほど、コメントが減っていました。</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-comments">
+    <p class="chart-title" id="ch-comments">レビューを重ねると、書くコメントは減ったか</p>
+    <p class="chart-sub">減った。行ごとのコメントの数は −22%、語数は −28%。経験のいちばん初めの 1 割と、いちばん終わりの 1 割の比べ。</p>
+    <p class="db-group">1 回のレビューで書く、行ごとのコメントの数</p>
+    <ul class="bars" style="--max: 1.2">
+      <li title="経験の初めの 1 割：1.01 件"><span class="bar-label">経験の初めの 1 割</span><span class="bar-track"><span class="bar" style="--to: 1.01"></span></span><span class="bar-val">1.01 件</span></li>
+      <li class="main" title="経験の終わりの 1 割：0.79 件"><span class="bar-label">経験の終わりの 1 割</span><span class="bar-track"><span class="bar" style="--to: 0.79"></span></span><span class="bar-val">0.79 件</span></li>
+    </ul>
+    <p class="db-group">1 回のレビューで書く、コメントの語数</p>
+    <ul class="bars" style="--max: 20">
+      <li title="経験の初めの 1 割：18.6 語"><span class="bar-label">経験の初めの 1 割</span><span class="bar-track"><span class="bar" style="--to: 18.6"></span></span><span class="bar-val">18.6 語</span></li>
+      <li class="main" title="経験の終わりの 1 割：13.5 語"><span class="bar-label">経験の終わりの 1 割</span><span class="bar-track"><span class="bar" style="--to: 13.5"></span></span><span class="bar-val">13.5 語</span></li>
+    </ul>
+    <figcaption>論文の本文（3.2 節）の数値から作った図です。どちらの減り方も、同じ人の前半と後半の比べで統計ではっきりしています。</figcaption>
+  </figure>
+  <ul>
+    <li><b>承認が増えた人ほど、コメントが減った：</b>承認の変化とコメントの変化の相関は、同じ人の中で強い負（ρ=−0.556）でした。承認が 10 ポイント以上上がった人はコメントが 1 回あたり平均 0.48 件減り、承認がほとんど変わらなかった人（変化が 5 ポイント未満）ではほとんど変わりませんでした（+0.10 件）。</li>
+    <li><b>著者の読み：</b>これは「確かめる手間は同じで、承認する基準だけを合理的に下げた」形ではなく、「確かめる手間そのものが減った」形に合う、としています。</li>
+    <li><b>レビューまでの時間は延びた：</b>PR が開かれてからレビューまでの時間の中央値は、前半の 3.9 時間から後半の 13.5 時間に延びました。承認が増えたのに時間がかかるのは一見矛盾しますが、著者は、レビューの待ちが積み上がった、決まりきった AI の PR を後回しにした、PR が出る時間帯が変わった、などの可能性を挙げています。考察では、待たせる時間は延び、実際に見る時間は短くなった、という読みをとっています。</li>
+  </ul>
+</section>
+
+<section id="ai-only">
+  <h2><span class="num">5</span>甘くなったのは AI の PR にだけか（Q3）</h2>
+  <div class="key">
+    <p>AI の PR にだけでした。同じリポジトリで、人が書いた PR への承認は、同じ時期にむしろ下がりました。AI の種類の違いではなく、AI の PR 全般に対して、レビューする人が承認しやすくなっていました。</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-human-ai">
+    <p class="chart-title" id="ch-human-ai">同じリポジトリで、AI の PR と人の PR の承認の割合はどう変わったか</p>
+    <p class="chart-sub">AI の PR だけが上がった。2025 年 6 月には、AI の PR のほうが人の PR より 10 ポイント多く承認されていた。</p>
+    <p class="db-group">2025 年 1 月</p>
+    <ul class="bars" style="--max: 50">
+      <li title="AI の PR（2025 年 1 月）：30.7%"><span class="bar-label">AI の PR</span><span class="bar-track"><span class="bar" style="--to: 30.7; background: var(--c-ai)"></span></span><span class="bar-val">30.7%</span></li>
+      <li title="人の PR（2025 年 1 月）：37.8%"><span class="bar-label">人の PR</span><span class="bar-track"><span class="bar" style="--to: 37.8; background: var(--c-human)"></span></span><span class="bar-val">37.8%</span></li>
+    </ul>
+    <p class="db-group">期間の終わりごろ</p>
+    <ul class="bars" style="--max: 50">
+      <li class="main" title="AI の PR（2025 年 7 月）：41.7%"><span class="bar-label">AI の PR<small>2025 年 7 月</small></span><span class="bar-track"><span class="bar" style="--to: 41.7; background: var(--c-ai)"></span></span><span class="bar-val">41.7%</span></li>
+      <li title="人の PR（2025 年 6 月）：29.1%"><span class="bar-label">人の PR<small>2025 年 6 月</small></span><span class="bar-track"><span class="bar" style="--to: 29.1; background: var(--c-human)"></span></span><span class="bar-val">29.1%</span></li>
+    </ul>
+    <figcaption>論文の本文（3.5 節）の数値から作った図です。桃は AI の PR、青は人の PR です。人の PR の 7 月の値（22.2%）は、レビューが 207 件と少ないので載せていません。論文の図 2 そのものは写していません。</figcaption>
+  </figure>
+  <ul>
+    <li><b>比べ方：</b>同じリポジトリの、人が書いた PR 6,618 件のレビュー 11,415 件（レビューした人 1,851 人、AI の PR もレビューした人は 728 人）を集めて、月ごとの承認の割合を比べました。</li>
+    <li><b>著者の読み：</b>誰に対しても甘くなっただけなら、人の PR の承認も一緒に上がるはずです。実際は下がったので、レビューする人が AI の PR に対して、人の PR とは違う信頼を持つようになった、と読んでいます。</li>
+    <li><b>注意：</b>7 月の人の PR のレビューは 207 件と少なく、終わりごろの比べははっきりしません。また、これは全体どうしの比べで、同じ人の中での比べではありません。</li>
+  </ul>
+
+  <h3>AI の種類で違うか</h3>
+  <figure class="chart" aria-labelledby="ch-agent">
+    <p class="chart-title" id="ch-agent">AI の種類ごとに、承認の割合はどれだけ変わったか</p>
+    <p class="chart-sub">Copilot がいちばん大きく +9.1 ポイント。前半から後半への変化（ポイント）。中央の点線が 0（変わらない）。しま模様は、95% の信頼区間が 0 をまたぐもの。</p>
+    <ul class="bars" style="--min: -2; --max: 10; --at: 0">
+      <li class="main" title="Copilot：+9.1 ポイント（241 人、95% 信頼区間 +5.8〜+12.3）"><span class="bar-label">Copilot<small>241 人</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 9.1"></span><span class="ref"></span></span><span class="bar-val">+9.1</span></li>
+      <li class="weak" title="Devin：+3.8 ポイント（95 人、95% 信頼区間 −0.8〜+8.3）"><span class="bar-label">Devin<small>95 人</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 3.8"></span><span class="ref"></span></span><span class="bar-val">+3.8</span></li>
+      <li class="weak" title="Codex：+1.8 ポイント（51 人、95% 信頼区間 −6.4〜+9.6）"><span class="bar-label">Codex<small>51 人</small></span><span class="bar-track"><span class="bar" style="--from: 0; --to: 1.8"></span><span class="ref"></span></span><span class="bar-val">+1.8</span></li>
+      <li class="weak" title="Cursor：−1.4 ポイント（18 人、95% 信頼区間 −14.8〜+10.3）"><span class="bar-label">Cursor<small>18 人</small></span><span class="bar-track"><span class="bar neg" style="--from: -1.4; --to: 0"></span><span class="ref"></span></span><span class="bar-val">−1.4</span></li>
+    </ul>
+    <figcaption>論文の表 2 の数値から作った図です（その AI を 5 件以上レビューした人）。</figcaption>
+  </figure>
+  <ul>
+    <li><b>読み方の注意：</b>著者は、Copilot の変化が大きいのは、Copilot をレビューした人が多く、さまざまだからかもしれず、AI そのものの性質とは読まないよう注意しています。Codex と Cursor は人数が少なく、確かなことは言えません。</li>
+    <li><b>同じ人で比べると、どの AI にも同じくらい：</b>2 つ以上の AI をレビューした 108 人（5 件以上ある 75 組）で見ると、Codex +9.4、Copilot +9.8、Devin +8.7 ポイントでした（Cursor は −10.3 ですが、10 組しかなく当てになりません）。ある AI のコードだけが良くなった、という説明より、レビューする人の側の変化に合う、と著者は読んでいます。ただし、この比べは組が少なく、十分な確かめにはなっていない、とも書いています。</li>
+  </ul>
+</section>
+
+<section id="why">
+  <h2><span class="num">6</span>根拠のある信頼か、慣れか（Q4）</h2>
+  <div class="key">
+    <p>著者は、慣れに最も近いと読んでいます。承認の増加とコメントの減少が、同じ人の中で起きていたからです。ただし、AI のコードが本当に良くなった可能性は排除できません。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>解釈</th><th>そうなら、どう見えるはずか</th><th>データとの合い方</th></tr></thead>
+      <tbody>
+        <tr><th>1. 信頼の調整<small style="display:block;font-weight:400;color:var(--sub)">良い経験の積み重ねで、承認の基準を合理的に変えた</small></th><td>承認は増えても、確かめる手間は保たれる</td><td>実際はコメントが減ったので、これだけでは合わない。手間の一部を減らすのは合理的でもありうるので、完全には除けない</td></tr>
+        <tr><th>2. 仕事量の中での判断<small style="display:block;font-weight:400;color:var(--sub)">待ちが積み上がり、時間はかかるが、最後は承認に落ち着く</small></th><td>レビューまでの時間が長いほど、承認が多い</td><td>時間と承認の関係は弱く（相関 +0.08）、はっきりしない</td></tr>
+        <tr><th>3. 慣れ<small style="display:block;font-weight:400;color:var(--sub)">良い経験をくり返すうちに、確かめる手間を減らす</small></th><td>承認が増え、同じ人でコメントが減る</td><td><b>いちばん合う。</b>レビューまでの時間が延びたことも、待たせる時間は長く、見る時間は短い形として説明できる</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>著者は、手間の減り方の大きさから、合理的な見直しを超えて手間が減っている、と読んでいます。そのうえで、仕組みがどれでも、実際に起きることは同じだ、としています。</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>調べたデータと比べ方</h2>
+
+  <h3>データ</h3>
+  <ul>
+    <li>AIDev という公開のデータを使いました。スター 100 以上の GitHub のリポジトリに、AI のコーディングエージェントが出した PR を集めたものです。人のレビューが 16,895 件、レビューした人が 2,494 人あります。</li>
+    <li>AI は、GitHub Copilot Autofix、Devin、OpenAI Codex CLI、Cursor、Claude Code の 5 つです。Claude Code は、くり返しレビューした人のレビューの 2% 未満なので、AI ごとの分析からは外しています。</li>
+    <li>対象は、AI の PR を 10 件以上レビューした 400 人と、その 11,429 件のレビューです（1 人あたりの中央値は 17 件）。うち 52 人は 50 件以上をレビューしていて、その人たちの観察の長さは最大 178 日です。データ全体の期間は 207 日です。</li>
+  </ul>
+
+  <h3>比べ方</h3>
+  <ul>
+    <li><b>前半と後半：</b>1 人ずつ、レビューを時間の順に並べて真ん中で 2 つに分け、承認の割合を比べました。</li>
+    <li><b>経験の 10 段階：</b>全員のレビューを「その人の何件目のレビューか」で 10 等分し、段階ごとの承認の割合を見ました。</li>
+    <li><b>人の PR との比べ：</b>同じリポジトリの人が書いた PR のレビューを集め、月ごとの承認の割合を比べました。</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>前半と後半の差の検定にはウィルコクソンの符号順位検定を使い、400 組なら小さな差（効果量 0.14、承認の割合で約 2.1 ポイント）も見つけられる検出力があることを確かめています。経験と時期の分け方には、1 人ずつのロジスティック回帰を使っています。</p>
+  </div>
+
+  <h3>この解説で使う言葉</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>言葉</th><th>この論文での意味</th></tr></thead>
+      <tbody>
+        <tr><th>変更（PR、プルリクエスト）</th><td>コードの変更を、本流に取り込む前に出す申し出。ここでレビューする</td></tr>
+        <tr><th>AI の PR</th><td>AI のコーディングエージェント（GitHub Copilot、Devin、OpenAI Codex、Cursor など）が出した PR</td></tr>
+        <tr><th>承認／直しを求める</th><td>GitHub のレビューの結果。ほかに「コメントだけ」がある（論文では approved、changes requested、commented）</td></tr>
+        <tr><th>行ごとのコメント</th><td>コードの特定の行に付けるコメント。論文では inline comment</td></tr>
+        <tr><th>経験の 10 段階</th><td>各人のレビューを古い順に並べて 10 等分した段階。論文では experience decile</td></tr>
+        <tr><th>信頼の調整</th><td>良い結果の積み重ねにもとづいて、承認の基準を合理的に変えること。論文では trust calibration</td></tr>
+        <tr><th>慣れ</th><td>良い経験をくり返すうちに、確かめる手間を減らしてしまうこと。論文では habituation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>著者の提言と、この研究の限界</h2>
+
+  <h3>人のレビューを品質の関門にしているチームへの提言</h3>
+  <ul>
+    <li><b>担当を回す：</b>1 人の人に、AI の PR のレビューが偏りすぎないようにする。</li>
+    <li><b>続けた承認を見直す：</b>1 人が長く続けて承認していたら、それを見つけて、別の人がもう一度確かめる。</li>
+    <li><b>自分の変わり方を見えるようにする：</b>レビューする人に、自分の承認の割合の移り変わりを、あとで見つかった欠陥のデータと並べて見せる。</li>
+  </ul>
+  <p>著者は、目立って変わった人のうち 65% が承認しやすい方へ動いたことを挙げ、仕組みが何であれ、時間とともに、より多くの人が、より少ない確認で AI の PR を承認するようになる、としています。</p>
+
+  <h3>この研究の限界（著者が書いているもの）</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>AI のコードの質を測っていない</th><td>いちばん大事な限界。AI のコードが本当に良くなっていたなら、承認が増えたのは慣れではなく合理的な判断になる</td></tr>
+        <tr><th>因果は示せない</th><td>観察した 2025 年の間に、4 つの AI はどれも更新されている</td></tr>
+        <tr><th>スター 100 以上の公開のリポジトリだけ</th><td>会社の中のリポジトリでは違いうる</td></tr>
+        <tr><th>期間は最大 207 日</th><td>もっと長い期間のことは分からない</td></tr>
+        <tr><th>人数の少ない AI がある</th><td>Cursor は 18 人、Codex は 51 人で、AI ごとの結論は出せない</td></tr>
+        <tr><th>人の PR との比べは、終わりごろの件数が少ない</th><td>7 月の人の PR のレビューは 207 件。全体どうしの比べで、同じ人の中での比べではない</td></tr>
+        <tr><th>レビューまでの時間の延び</th><td>PR が出る時間帯が変わっただけかもしれない</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>AI への信頼は、慣れで移ってよいか（microtaro の読み方）</h2>
+  <div class="note note-view">
+    <p><b>この節は、microtaro の読み方です。</b>論文が言っていることではありません。</p>
+  </div>
+  <ul>
+    <li><b>承認が増えることは、根拠のある信頼が増えたことと同じではない。</b>承認の割合だけを見ると、人の AI への信頼が順調に移っていくように見えます。しかし同じ人の中で、確かめる手間（コメント）が減っていました。この論文の数字は、人の信頼が、根拠が増えなくても上がっていくことがある、と示していると読めます。</li>
+    <li><b>見ることそのものが、信頼の根拠だった。だから、移す先は慣れではなく、形のある確かめにする。</b>人がレビューでコードを見ることが信頼の根拠だったなら、見る手間が減れば、その根拠も薄くなります。信頼を移すなら、慣れにまかせるのではなく、テストや測定のような、あとから確かめられる形に移すのがよいと思います。<a href="review-agents-bugs.html">AI のレビュー役は、どこまでバグを見つけるか</a>の著者は、自分のリポジトリの過去のバグで試験を作り、AI のレビューの発見率を見張り続けることを勧めています。この論文の著者の「自分の承認の移り変わりを、あとで見つかった欠陥と並べて見せる」という提言も、信頼を感覚ではなく結果で確かめる形です。</li>
+    <li><b>会社の中でも、公開のプロジェクトでも、同じ向き。</b><a href="2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a>の会社では、レビューの量が真ん中くらいの人で、コメントなしの承認がおよそ 2 倍になりました。この論文は公開のプロジェクトで、同じ人がコメントを減らして承認を増やしていく様子を示しています。場所も調べ方も違う 2 つの研究で、人のレビューは同じ向きに変わっています。</li>
+    <li><b>「慣れ」と「根拠のある信頼」を分けるには、結果のデータが要る。</b>この論文が分けきれなかったのは、承認した AI のコードがあとで問題を起こしたかを測っていないからです。信頼を移すなら、移した先が当たっているかを結果で見続ける仕組みが、一緒に要ると思います。</li>
+    <li><b>時期に注意。</b>データは 2025 年 1〜7 月ごろのもので、2026 年のモデルは入っていません。</li>
+    <li><b>1 人で AI と作る場合に当てはめるときの注意。</b>AI の変更を何度も受け入れて、問題が出ない経験が続くと、だんだん確かめなくなる。これは公開のプロジェクトでレビューをする人にも起きていました。「ずっと大丈夫だったから今回も大丈夫」は、確かめたことにはなりません。続けて受け入れているときほど、テストで確かめる区切りを決めておくのがよいと思います。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2606.22721v1">Yu, Liu, Jiang, Jia, Wang, Qian, Chen「Habituation at the Gate: Rising Approval and Declining Scrutiny in Human Review of AI Agent Code」</a>　arXiv:2606.22721v1、第 1 版 2026-06-21（版はこれだけ）、未査読論文（KDD 2026 の Workshop on Agentic Software Engineering に採択と記載。5 ページ）、ライセンスは <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv の標準ライセンス（非独占の配布許諾）</a><span class="use">所属は、独立の研究者 4 人（Yu、Liu、Jiang、Jia）、Carnegie Mellon 大学 2 人（Wang、Qian）、Georgia 工科大学 1 人（Chen）。この解説は第 1 版の HTML 版の本文と表によります</span></li>
+    <li><a href="https://anonymous.4open.science/r/reviewer-behavioral-shift-FE86">reviewer-behavioral-shift</a><span class="use">論文に書かれた、分析のスクリプトの置き場所（匿名の公開先）。この解説を書くときには開いていません</span></li>
+    <li><a href="../data/review-habituation.json">data/review-habituation.json</a><span class="use">この解説の図と表に使った数値と、論文の中の出典の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>数字は、第 1 版の本文、表 1、表 2、図の説明から拾いました。この解説で計算した値は使っていません。</li>
+    <li>コメントの減り方は、論文の中で 2 通りに書かれています。要旨と結論の「−22%」は行ごとのコメントの数、考察の「28% less commenting」は語数の −28% です。この解説では 2 つを分けて書きました。</li>
+    <li>AI ごとの承認の変化は、表 2（その AI を 5 件以上レビューした人。Copilot +9.1 ポイントなど）と、2 つ以上の AI をレビューした人の比べ（Copilot +9.8 ポイントなど）で数字が違います。対象の人が違う、別の集計です。</li>
+    <li>論文の考察（4.3 節）は、Copilot と Devin がどちらも「はっきり増えた」と書いていますが、表 2 の Devin の 95% 信頼区間（−0.8〜+8.3）は 0 をまたいでいます。図では、信頼区間が 0 をまたぐものをしま模様にしました。</li>
+    <li>要旨の「agent-specific」は、「人の PR ではなく AI の PR にだけ起きた」という意味です。特定の AI だけで起きた、という意味ではありません（2 つ以上の AI をレビューした人では、どの AI にも同じくらい起きていた）。</li>
+    <li>この論文は CC BY ではないので、原文からの引用は 1 つ（要旨の一部）にとどめ、図はすべて数値から作り直しました。</li>
+    <li>2026-11-13 に下書きを作り、2026-11-16 に本文と表を読み直して、1 文ずつ照合し直しました。版とライセンスは、arXiv の論文のページで確かめました。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。論文から引用した英文と数値は、上の論文のライセンス（arXiv の標準ライセンス）によります。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>

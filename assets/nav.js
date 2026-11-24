@@ -30,6 +30,10 @@
             name: { ja: 'AI のレビュー役は、どこまでバグを見つけるか', en: '(When) Should a Software Factory be Lights-off?' },
             path: 'topics/ai-trust/papers/review-agents-bugs.html',
           },
+          {
+            name: { ja: '人は、AI の変更のレビューに慣れていく', en: 'Habituation at the Gate' },
+            path: 'topics/ai-trust/papers/review-habituation.html',
+          },
         ],
       },
     ],
