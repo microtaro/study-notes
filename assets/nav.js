@@ -34,6 +34,10 @@
             name: { ja: '人は、AI の変更のレビューに慣れていく', en: 'Habituation at the Gate' },
             path: 'topics/ai-trust/papers/review-habituation.html',
           },
+          {
+            name: { ja: '人のレビューと AI のレビューは、中身がどう違うか', en: 'Human-AI Synergy in Agentic Code Review' },
+            path: 'topics/ai-trust/papers/human-ai-review.html',
+          },
         ],
       },
     ],

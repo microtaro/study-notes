@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Human-AI Synergy in Agentic Code Review (paper explainer)</title>
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="stylesheet" href="../../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/ai-trust/papers/human-ai-review.html">
+<link rel="alternate" hreflang="en" href="human-ai-review.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>Questions and answers (summary)</a></li>
+    <li><a href="#human-on-ai"><span class="n">2</span>What changes when humans review AI-written code</a></li>
+    <li><a href="#comments"><span class="n">3</span>How human and AI comments differ (Q1)</a></li>
+    <li><a href="#interactions"><span class="n">4</span>How conversations unfold, and whether code changed (Q2)</a></li>
+    <li><a href="#suggestions"><span class="n">5</span>Were suggestions adopted, and how did code change? (Q3)</a></li>
+    <li><a href="#tools"><span class="n">6</span>Differences between AI tools</a></li>
+    <li><a href="#study"><span class="n">7</span>The data and how it was classified</a></li>
+    <li><a href="#advice"><span class="n">8</span>The authors' recommendations and the study's limits</a></li>
+    <li><a href="#reading"><span class="n">9</span>What part of human review can move to other forms? (microtaro's reading)</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>Sources and checks</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../../topics/ai-trust/papers/human-ai-review.html" hreflang="ja" lang="ja">日本語</a></p>
+  <p class="kind">Paper explainer</p>
+  <h1>Human-AI Synergy in Agentic Code Review</h1>
+  <p class="src"><b>Original paper</b>Zhong, Noei, Zou, Adams, “Human-AI Synergy in Agentic Code Review,” arXiv:2603.15911 version 3 (2026-10-30), not peer reviewed, arXiv non-exclusive distribution license
+    <span class="links"><a href="https://arxiv.org/abs/2603.15911v3">arXiv page</a><a href="https://arxiv.org/html/2603.15911v3">Read the HTML version</a><a href="https://arxiv.org/pdf/2603.15911v3">PDF</a></span></p>
+  <p class="lead">Researchers collected 278,790 code review conversations from 300 open-source projects and compared what human reviews and AI reviews actually contain. AI agents handled a large volume of defect detection, while humans carried “why did you do it this way?” questions and the passing on of project knowledge. The data shows how their strengths differ, and gives clues on how to combine them. The authors are from Queen's University in Canada. This page explains their paper.</p>
+  <p class="stamp">English version of the Japanese page, written 2026-11-16 by microtaro and AI. Based on the main text and tables of arXiv version 3 (2026-10-30) and the numbers printed inside Figure 5. All numbers are from version 3. The paper's results and limits are given the weight the paper gives them, and what the paper says is kept separate from microtaro's reading.</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>Questions and answers (summary)</h2>
+  <p>The paper asks three questions. For each one, here is the answer and the findings behind it. Reading this section alone gives you the main points. The small grey text says where each finding comes from.</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>What are the similarities and differences between AI and human review comments?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>For both, the most common type is code improvement. On top of that, AI agents point out defects far more often (30–40% of their comments, versus 7–8% for humans) and put a weakness and its fix in one comment. Humans write a wider range, including “why” questions and passing on project knowledge. Human comments are easier to read.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>Over 95% of AI comments are code improvement or defect detection.</b>
+          <span class="why">Defect detection made up 30–40% of AI comments, versus 7–8% of human comments.</span>
+          <span class="how">From the main text and the numbers printed inside Figure 5</span>
+        </li>
+        <li>
+          <b>Humans ask “why” and pass on knowledge.</b>
+          <span class="why">Understanding questions were 31% of comments when humans reviewed human-written code and 17% for AI-written code. Knowledge transfer, such as pointing to existing code or conventions, was 4–6%.</span>
+          <span class="how">From the main text</span>
+        </li>
+        <li>
+          <b>AI agents put the weakness and the fix in one comment.</b>
+          <span class="why">Comments that name a weakness and suggest a fix without asking a question were 87.7–94.5% for AI agents and 31.3–31.9% for humans. Reading-ease scores were 67.2–72.8 for humans and 43.0–43.9 for AI agents.</span>
+          <span class="how">From Table IV and the main text</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#comments">3</a> (how human and AI comments differ)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>How do conversations differ between human and AI reviews, and was the code changed afterward?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>85–87% of AI-initiated reviews end after the first comment. When humans review AI-written code, conversations run 11.8% longer. The share of conversations followed by a related code change after the first comment was highest when humans reviewed human-written code (47.6%).</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>AI comments usually stand alone.</b>
+          <span class="why">85.2–86.7% of AI-initiated reviews ended at the AI's first comment with no follow-up. When humans reviewed human-written code, 48.9% had multiple rounds.</span>
+          <span class="how">From the analysis of interaction sequences</span>
+        </li>
+        <li>
+          <b>Humans reviewing AI-written code talk longer.</b>
+          <span class="why">11.8% longer on average than when reviewing human-written code. The paper also gives an example where an AI agent offered to do something it could not do (open a separate PR), dragging the conversation out.</span>
+          <span class="how">From the main text, Figure 7, and the example in Figure 8</span>
+        </li>
+        <li>
+          <b>Code was changed most often when humans reviewed human-written code.</b>
+          <span class="why">After the first comment, with no further exchange, a related code change followed in 47.6% of human-on-human conversations, 30.9% of AI-on-AI, 24.5% of AI-on-human, and 17.5% of human-on-AI.</span>
+          <span class="how">From the main text and Figure 7</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#interactions">4</a> (how conversations unfold)</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>How often are human and AI code suggestions adopted, and how does code change once they are?</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>AI agents make far more suggestions (88,011 versus 25,673), but only 16.6% were adopted, versus 56.5% for humans. The most common reasons for non-adoption were an incorrect suggestion (28.7%) and the developer choosing a different fix (24.0%). Adopted AI suggestions increased code complexity and size more than human ones.</p></div>
+    <div class="qa-body">
+      <p class="qa-label">Findings behind the answer</p>
+      <ul class="points">
+        <li>
+          <b>AI agents suggest a lot.</b>
+          <span class="why">AI agents made suggestions in 56.6% of their conversations (88,011 suggestions); humans in 20.8% (25,673).</span>
+          <span class="how">From the main text</span>
+        </li>
+        <li>
+          <b>Adopted: 56.5% of human suggestions, 16.6% of AI suggestions.</b>
+          <span class="why">The gap was largest for suggestions that pass on project-specific knowledge, such as renamed classes and repository conventions, which AI agents rarely give.</span>
+          <span class="how">From Table V and the main text</span>
+        </li>
+        <li>
+          <b>Adopted AI suggestions tend to add complexity and lines.</b>
+          <span class="why">Human suggestions slightly lowered complexity metrics; AI suggestions slightly raised them. Some tools went the other way (Greptile lowered complexity).</span>
+          <span class="how">From Table VII and the main text</span>
+        </li>
+      </ul>
+      <p class="qa-more">More in <a href="#suggestions">5</a> (adoption and code changes)</p>
+    </div>
+  </div>
+
+  <h3>What the authors take from the three answers</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">The authors' conclusion (abstract, introduction, and conclusion)</p>
+      <p class="claim">AI agents can screen for defects at scale. Human oversight remains essential for checking suggestion quality and for the contextual feedback AI agents lack. Assign review roles to humans and AI agents according to their strengths, and combine them.</p>
+      <p class="en">“while AI agents can scale defect screening, human oversight remains critical for ensuring suggestion quality and providing contextual feedback that AI agents lack”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">To that end, the authors recommend (mainly to tool builders and researchers)</p>
+      <ul class="recs">
+        <li><b>Assign review roles by strength.</b> The results give practitioners a basis for giving defect screening to AI agents and intent and knowledge to humans.</li>
+        <li><b>Help AI agents check developer intent.</b> Mechanisms for asking clarifying questions and retrieving project-specific context can help AI agents address intent-related feedback.</li>
+        <li><b>Give AI suggestions project-specific information.</b> Study whether build configurations, prior review decisions, and similar information change suggestion accuracy and adoption.</li>
+        <li><b>Evaluate AI comments for readability too.</b> Not only for technical coverage, but for readability and clarity.</li>
+        <li><b>Keep context across multi-turn conversations.</b> Stronger context tracking and self-verification can help AI agents act on reviewers' concerns.</li>
+      </ul>
+      <p class="conclusion-note">For practitioners, the authors add that adopted AI suggestions should be reviewed carefully so they do not degrade maintainability. More in <a href="#advice">8</a>.</p>
+    </div>
+  </div>
+
+  <h3>The story in one line</h3>
+  <ol class="cycle" aria-label="The story in one line">
+    <li>AI agents join code review</li>
+    <li>AI agents handle much of the defect detection</li>
+    <li>Humans carry intent and knowledge</li>
+    <li>16.6% of AI suggestions are adopted</li>
+    <li>Humans check before adopting</li>
+    <li>Split by strength and combine</li>
+  </ol>
+
+  <h3>What the paper does not answer</h3>
+  <p>The authors themselves say the following are not measured or cannot be separated.</p>
+  <ul>
+    <li><b>Whether bugs went down:</b> code quality was measured with file-level metrics of size, complexity, coupling, and cohesion. Architecture-level changes, security vulnerabilities, and fault proneness were not measured.</li>
+    <li><b>AI inside human accounts:</b> humans and AI agents were told apart by account. Content from human accounts may include AI-generated work, which limits how precisely the human-AI difference is known.</li>
+    <li><b>Tool versions:</b> GitHub comments do not reveal which version of a tool was used. The data runs to November 2025.</li>
+  </ul>
+</section>
+
+<section id="human-on-ai">
+  <h2><span class="num">2</span>What changes when humans review AI-written code</h2>
+  <div class="key">
+    <p>When humans reviewed AI-written code rather than human-written code, they asked fewer “why” questions and more often gave a fix without explaining. Conversations ran longer, yet the share followed by a code change after the first comment was the lowest of all.</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Measure</th><th class="num">Human reviews human-written code</th><th class="num">Human reviews AI-written code</th></tr></thead>
+      <tbody>
+        <tr><th>“Why” questions (Understanding)</th><td class="num">31%</td><td class="num"><b>17%</b></td></tr>
+        <tr><th>A fix only, with no question and no weakness named</th><td class="num">11.7%</td><td class="num"><b>32.6%</b></td></tr>
+        <tr><th>Knowledge transfer</th><td class="num" colspan="2" style="text-align:center">4–6% in both</td></tr>
+        <tr><th>Conversation length (average)</th><td class="num">baseline</td><td class="num"><b>11.8% longer</b></td></tr>
+        <tr><th>Code changed after the first comment</th><td class="num">47.6%</td><td class="num"><b>17.5%</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Numbers from the main text, Table IV, and Figure 7.</p>
+  <ul>
+    <li>When humans reviewed AI-written code, two thirds of conversations went past the first human comment, into human-AI back-and-forth.</li>
+    <li>At later stages, code changes became less frequent and continued discussion more frequent (66.4% to 77.5%).</li>
+    <li>The authors suggest the extra rounds may include checking whether the AI agent can actually do what it offered.</li>
+  </ul>
+</section>
+
+<section id="comments">
+  <h2><span class="num">3</span>How human and AI comments differ (Q1)</h2>
+  <div class="key">
+    <p>For both humans and AI agents, code improvement is the most common type. AI agents point out defects far more often; humans also ask “why” and pass on knowledge. AI agents bundle a weakness with its fix; humans ask questions more often, and their comments are easier to read.</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-defect">
+    <p class="chart-title" id="ch-defect">How many comments point out a defect?</p>
+    <p class="chart-sub">30–40% of AI comments, 7–8% of human comments. Share of the first comment in each conversation.</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw ai"></i>AI review</li>
+      <li><i class="sw human"></i>Human review</li>
+    </ul>
+    <ul class="bars" style="--max: 100">
+      <li title="AI reviews human-written code: 40%"><span class="bar-label">AI reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 40; background: var(--c-ai)"></span></span><span class="bar-val">40%</span></li>
+      <li title="AI reviews AI-written code: 30%"><span class="bar-label">AI reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 30; background: var(--c-ai)"></span></span><span class="bar-val">30%</span></li>
+      <li title="Human reviews AI-written code: 8%"><span class="bar-label">Human reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 8; background: var(--c-human)"></span></span><span class="bar-val">8%</span></li>
+      <li title="Human reviews human-written code: 7%"><span class="bar-label">Human reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 7; background: var(--c-human)"></span></span><span class="bar-val">7%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers printed inside the paper's Figure 5(a). The paper's figure is not copied.</figcaption>
+  </figure>
+
+  <figure class="chart" aria-labelledby="ch-understand">
+    <p class="chart-title" id="ch-understand">How many comments ask “why did you do it this way?”</p>
+    <p class="chart-sub">31% when humans review human-written code, 17% for AI-written code. AI comments hardly ever do (see note).</p>
+    <ul class="bars" style="--max: 100">
+      <li title="Human reviews human-written code: 31%"><span class="bar-label">Human reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 31; background: var(--c-human)"></span></span><span class="bar-val">31%</span></li>
+      <li title="Human reviews AI-written code: 17%"><span class="bar-label">Human reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 17; background: var(--c-human)"></span></span><span class="bar-val">17%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's main text. Because code improvement and defect detection alone make up over 95% of AI comments, understanding questions are under 5% even together with all other types.</figcaption>
+  </figure>
+
+  <ul>
+    <li><b>Humans also mostly suggest improvements:</b> 49–55% of human comments were code improvement, the most common type, as for AI agents.</li>
+    <li><b>Humans pass on knowledge:</b> 4–6% of human comments pointed to existing code or settings. The authors sum up that humans clarify design intent through questions and share project-specific references, while AI agents rarely give references to support their fixes.</li>
+    <li><b>Finer categories:</b> four statistically significant differences appeared within code improvement and defect detection, all with small effect sizes. For example, AI agents reviewing AI-written code gave more documentation feedback (29%, versus 18% for humans reviewing human-written code).</li>
+  </ul>
+
+  <figure class="chart" aria-labelledby="ch-form">
+    <p class="chart-title" id="ch-form">How often does one comment name a weakness and a fix, without asking a question?</p>
+    <p class="chart-sub">About 90% for AI agents, about 30% for humans.</p>
+    <ul class="bars" style="--max: 100">
+      <li title="AI reviews AI-written code: 94.5%"><span class="bar-label">AI reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 94.5; background: var(--c-ai)"></span></span><span class="bar-val">94.5%</span></li>
+      <li title="AI reviews human-written code: 87.7%"><span class="bar-label">AI reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 87.7; background: var(--c-ai)"></span></span><span class="bar-val">87.7%</span></li>
+      <li title="Human reviews AI-written code: 31.9%"><span class="bar-label">Human reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 31.9; background: var(--c-human)"></span></span><span class="bar-val">31.9%</span></li>
+      <li title="Human reviews human-written code: 31.3%"><span class="bar-label">Human reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 31.3; background: var(--c-human)"></span></span><span class="bar-val">31.3%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table IV.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Readability:</b> reading-ease scores (0–100, higher is easier) were 67.2–72.8 for human comments and 43.0–43.9 for AI comments, a large difference.</li>
+    <li><b>Questions:</b> humans often check by asking; when humans reviewed human-written code, 21.1% of comments were questions only.</li>
+  </ul>
+</section>
+
+<section id="interactions">
+  <h2><span class="num">4</span>How conversations unfold, and whether code changed (Q2)</h2>
+  <div class="key">
+    <p>Most AI-initiated reviews ended after the first comment. When humans reviewed AI-written code, conversations ran longer. The share followed by a code change after the first comment was highest when humans reviewed human-written code, and lower whenever AI agents were involved.</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-changed">
+    <p class="chart-title" id="ch-changed">After the first comment, how often was the code changed accordingly?</p>
+    <p class="chart-sub">Highest when humans reviewed human-written code: 47.6%. Share changed without further exchange and kept in the main branch.</p>
+    <ul class="bars" style="--max: 100">
+      <li title="Human reviews human-written code: 47.6%"><span class="bar-label">Human reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 47.6; background: var(--c-human)"></span></span><span class="bar-val">47.6%</span></li>
+      <li title="AI reviews AI-written code: 30.9%"><span class="bar-label">AI reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 30.9; background: var(--c-ai)"></span></span><span class="bar-val">30.9%</span></li>
+      <li title="AI reviews human-written code: 24.5%"><span class="bar-label">AI reviews human-written code</span><span class="bar-track"><span class="bar" style="--to: 24.5; background: var(--c-ai)"></span></span><span class="bar-val">24.5%</span></li>
+      <li title="Human reviews AI-written code: 17.5%"><span class="bar-label">Human reviews AI-written code</span><span class="bar-track"><span class="bar" style="--to: 17.5; background: var(--c-human)"></span></span><span class="bar-val">17.5%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's main text and Figure 7. Blue is human review; pink is AI review.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Human on human:</b> 99.8% of conversations ended without any AI participation, averaging 1.76 rounds; 48.9% had multiple rounds.</li>
+    <li><b>AI-initiated:</b> 85.2–86.7% ended at the AI's first comment with no follow-up, 30.6% fewer rounds than human-on-human conversations.</li>
+    <li><b>When the AI keeps responding:</b> in AI-on-human conversations, the share ending in a code change rose at each successive AI turn (24.5%, 32.8%, 35.3%). But after a human replied to the AI and another AI-human exchange followed, it fell from 19.1% to 7.2%.</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>This part is simplified.</b> The paper extracts the sequence of who commented and models it as a finite state machine. “Changed” means a change addressing the comment that was kept in the main branch when the PR merged.</p>
+  </div>
+</section>
+
+<section id="suggestions">
+  <h2><span class="num">5</span>Were suggestions adopted, and how did code change? (Q3)</h2>
+  <div class="key">
+    <p>AI agents make far more suggestions than humans, but only 16.6% were adopted, versus 56.5% for humans. Incorrect suggestions and alternative fixes were the main reasons. Adopted AI suggestions tended to add complexity and lines more than human ones.</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-adopt">
+    <p class="chart-title" id="ch-adopt">How many suggestions were adopted?</p>
+    <p class="chart-sub">56.5% of human suggestions, 16.6% of AI suggestions.</p>
+    <ul class="bars" style="--max: 100">
+      <li title="Human suggestions (25,673): 56.5%"><span class="bar-label">Human suggestions<small>25,673</small></span><span class="bar-track"><span class="bar" style="--to: 56.5; background: var(--c-human)"></span></span><span class="bar-val">56.5%</span></li>
+      <li title="AI suggestions (88,011): 16.6%"><span class="bar-label">AI suggestions<small>88,011</small></span><span class="bar-track"><span class="bar" style="--to: 16.6; background: var(--c-ai)"></span></span><span class="bar-val">16.6%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table V.</figcaption>
+  </figure>
+
+  <h3>Adoption by feedback type</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Feedback type</th><th class="num">Human: count</th><th class="num">Human: adopted</th><th class="num">AI: count</th><th class="num">AI: adopted</th></tr></thead>
+      <tbody>
+        <tr><th>Knowledge Transfer</th><td class="num">2,038</td><td class="num"><b>75.8%</b></td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><th>Code Improvement</th><td class="num">20,166</td><td class="num">59.2%</td><td class="num">53,501</td><td class="num">16.8%</td></tr>
+        <tr><th>Defects</th><td class="num">616</td><td class="num">53.7%</td><td class="num">33,019</td><td class="num">16.7%</td></tr>
+        <tr><th>Understanding</th><td class="num">1,354</td><td class="num">51.0%</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><th>External Impact</th><td class="num">—</td><td class="num">—</td><td class="num">658</td><td class="num">6.5%</td></tr>
+        <tr><th>Testing</th><td class="num">—</td><td class="num">—</td><td class="num">833</td><td class="num">7.6%</td></tr>
+        <tr><th>Total</th><td class="num">25,673</td><td class="num"><b>56.5%</b></td><td class="num">88,011</td><td class="num"><b>16.6%</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Numbers from the paper's Table V. “—” means insufficient data. Human “Misc” (1,499 suggestions, 1.2% adopted) is omitted.</p>
+  <p>The largest gap is for suggestions that pass on project-specific knowledge (renamed classes, repository conventions), which AI agents rarely make. The authors suggest designing AI agents to retrieve project-level knowledge related to the reviewed code before suggesting.</p>
+
+  <figure class="chart" aria-labelledby="ch-reasons">
+    <p class="chart-title" id="ch-reasons">Why were AI suggestions not adopted?</p>
+    <p class="chart-sub">Most often because the suggestion was incorrect (28.7%). Breakdown of 383 randomly sampled unadopted AI suggestions.</p>
+    <ul class="bars" style="--max: 30">
+      <li class="main" title="Incorrect or would break the code: 28.7%"><span class="bar-label">Incorrect, or would break the code</span><span class="bar-track"><span class="bar" style="--to: 28.7"></span></span><span class="bar-val">28.7%</span></li>
+      <li title="Developer applied a different fix: 24.0%"><span class="bar-label">Developer applied a different fix</span><span class="bar-track"><span class="bar" style="--to: 24.0"></span></span><span class="bar-val">24.0%</span></li>
+      <li title="Not needed or already handled: 16.4%"><span class="bar-label">Not needed, or already handled</span><span class="bar-track"><span class="bar" style="--to: 16.4"></span></span><span class="bar-val">16.4%</span></li>
+      <li title="Claimed fixed but no matching commit: 11.2%"><span class="bar-label">Claimed fixed, but no matching commit</span><span class="bar-track"><span class="bar" style="--to: 11.2"></span></span><span class="bar-val">11.2%</span></li>
+      <li title="Developer preferred a different style: 10.2%"><span class="bar-label">Developer preferred another style</span><span class="bar-track"><span class="bar" style="--to: 10.2"></span></span><span class="bar-val">10.2%</span></li>
+      <li title="Deferred: 8.4%"><span class="bar-label">Deferred to later</span><span class="bar-track"><span class="bar" style="--to: 8.4"></span></span><span class="bar-val">8.4%</span></li>
+      <li title="Unclear: 1.0%"><span class="bar-label">Unclear</span><span class="bar-track"><span class="bar" style="--to: 1.0"></span></span><span class="bar-val">1.0%</span></li>
+    </ul>
+    <figcaption>Redrawn from the numbers in the paper's Table VI.</figcaption>
+  </figure>
+
+  <h3>How code changed after adoption</h3>
+  <p>The paper compared 111 file metrics before and after each adopted suggestion (3,467 human, 5,518 AI). The metrics with clear human-AI differences included these. Values are the mean change per adopted suggestion.</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Metric</th><th class="num">Human suggestions</th><th class="num">AI suggestions</th></tr></thead>
+      <tbody>
+        <tr><th>Sum of cyclomatic complexity (Sum CC)</th><td class="num">−0.063</td><td class="num">+0.044</td></tr>
+        <tr><th>Average cyclomatic complexity (Average CC)</th><td class="num">−0.006</td><td class="num">+0.007</td></tr>
+        <tr><th>Code Lines</th><td class="num">+0.087</td><td class="num">+0.241</td></tr>
+        <tr><th>Executable Statements</th><td class="num">+0.033</td><td class="num">+0.093</td></tr>
+        <tr><th>Functions</th><td class="num">+0.003</td><td class="num">+0.010</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Selected rows from the paper's Table VII; four more complexity metrics in Table VII differ in the same direction. All values are small per suggestion; a clear difference is not the same as a large one.</p>
+  <p>Human suggestions slightly lowered complexity; AI suggestions slightly raised it. The authors say adopted AI suggestions should be reviewed carefully so they do not degrade maintainability. Tools differ, though: adopted Greptile suggestions lowered cyclomatic complexity (<a href="#tools">6</a>).</p>
+</section>
+
+<section id="tools">
+  <h2><span class="num">6</span>Differences between AI tools</h2>
+  <div class="key">
+    <p>Most tools behaved like AI agents overall. Some stood out, such as a tool that almost only points out defects (Cursor) and one whose adopted suggestions lowered complexity (Greptile). Treating AI review as one thing hides these differences.</p>
+  </div>
+  <p>Seven tools that produced enough comments or suggestions were compared, with 383 randomly sampled observations each.</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Tool</th><th>Difference from AI agents overall</th></tr></thead>
+      <tbody>
+        <tr><th>Cursor</th><td>Almost only defect detection (99%, versus 40% overall). 86.4% name a weakness without a fix (4.6% overall). Lower readability. Adopted suggestions reduced executable statements</td></tr>
+        <tr><th>Claude Code</th><td>Fewer defect comments (20%, versus 40% overall). Reviews it started had less follow-up discussion (7.3%, versus 14.6%) and fewer code changes (22.5%, versus 31.2%)</td></tr>
+        <tr><th>Gemini Code Assist</th><td>Higher readability. More follow-up discussion (19.8%, versus 14.6%)</td></tr>
+        <tr><th>Greptile</th><td>Less often bundles a weakness with a fix (71.3%, versus 91.1%). Adopted suggestions lowered cyclomatic complexity (−0.979, versus +0.045 overall)</td></tr>
+        <tr><th>Sourcery AI</th><td>Lower readability. Adopted suggestions reduced executable statements</td></tr>
+        <tr><th>GitHub Copilot, CodeRabbit</th><td>No clear differences</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Numbers from the paper's main text. Most differences have small effect sizes (Cursor's focus on defects is large). For six of the tools, code improvement was the most common type (49–62%).</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>The data and how it was classified</h2>
+
+  <h3>Data</h3>
+  <ul>
+    <li>Public GitHub projects with at least 100 stars, at least one closed PR per month from 2022 to November 2025, and at least 100 PRs reviewed by AI agents: 300 projects and 54,330 closed PRs.</li>
+    <li>278,790 inline code review conversations, each attached to specific changed lines.</li>
+    <li>GitHub marks accounts as users or bots but not whether a bot is AI. The authors checked each bot's official documentation and identified 16 AI review bots, counting their reviews only from the date each announced agentic capabilities (GitHub Copilot from 2025-05-19).</li>
+  </ul>
+
+  <h3>Four combinations</h3>
+  <p>Conversations were split by who wrote the code (human or AI) and who commented first (human or AI).</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Combination</th><th class="num">Conversations</th><th class="num">Share</th></tr></thead>
+      <tbody>
+        <tr><th>Human reviews human-written code (HRH)</th><td class="num">116,874</td><td class="num">41.9%</td></tr>
+        <tr><th>Human reviews AI-written code (HRA)</th><td class="num">6,519</td><td class="num">2.3%</td></tr>
+        <tr><th>AI reviews human-written code (ARH)</th><td class="num">154,469</td><td class="num">55.4%</td></tr>
+        <tr><th>AI reviews AI-written code (ARA)</th><td class="num">928</td><td class="num">0.3%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">Numbers from the paper's Table I. Of the 928 AI-on-AI conversations, 94.0% were the same agent reviewing its own code.</p>
+
+  <h3>Terms used on this page</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Term</th><th>Meaning in this paper</th></tr></thead>
+      <tbody>
+        <tr><th>PR (pull request)</th><td>A proposed code change, reviewed before it goes into the main branch</td></tr>
+        <tr><th>Conversation</th><td>A thread of comments attached to specific changed lines (inline code review conversation)</td></tr>
+        <tr><th>Code Improvement</th><td>Suggestions to improve clarity, style, structure, or maintainability, without fixing a defect</td></tr>
+        <tr><th>Defect Detection</th><td>Pointing out functional, logical, or correctness issues</td></tr>
+        <tr><th>Understanding</th><td>Questions to understand context, rationale, design decisions, or intent</td></tr>
+        <tr><th>Knowledge Transfer</th><td>Explaining concepts, conventions, or good practices, or pointing to learning resources</td></tr>
+        <tr><th>Testing, External Impact</th><td>Comments about tests; comments about system-level effects beyond the diff</td></tr>
+        <tr><th>Suggestion</th><td>A proposed replacement written inside a comment with GitHub's suggestion feature, which can be committed directly</td></tr>
+        <tr><th>Adopted</th><td>A later commit in the same PR moved the line closer to the suggestion, was not reverted, and the PR was merged</td></tr>
+        <tr><th>Cyclomatic complexity (CC)</th><td>A complexity metric that counts branching paths in code</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Classification and judgment</h3>
+  <div class="note note-omit">
+    <p><b>This part is simplified.</b> The paper specifies statistical tests and decision procedures in detail.</p>
+  </div>
+  <ul>
+    <li><b>Feedback type:</b> the first comment of each conversation was classified with an LLM (GPT-4.1-mini) into Bacchelli and Bird's nine 2013 categories, dropping low-confidence labels (96.4% of conversations had high confidence). On 383 manually labeled comments, agreement was almost perfect (κ=0.85).</li>
+    <li><b>Comment form:</b> whether a comment is kind, asks a question, names a weakness, or suggests a fix, labeled with an LLM (κ=0.9).</li>
+    <li><b>Code changed:</b> for suggestions, whether the committed code was closer to the suggestion than to the original; for natural-language comments, an LLM judgment (all 50 manually checked cases agreed).</li>
+    <li><b>Changes after adoption:</b> 111 metrics measured with a static analysis tool (SciTools Understand) before and after each adopted suggestion.</li>
+  </ul>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>The authors' recommendations and the study's limits</h2>
+
+  <h3>The authors' recommendations</h3>
+  <p>The authors present their results as guidance for assigning review tasks by the strengths of humans and AI agents, for streamlining review to get the most from human-AI collaboration, and for understanding where AI code modifications work best. Mainly to tool builders and researchers, they recommend:</p>
+  <ul>
+    <li><b>Bridge the gap between AI agents and human reviewers:</b> human feedback focuses on clarifying developer intent. Research methods that let AI agents infer and articulate intent, through clarification and project-specific context retrieval.</li>
+    <li><b>Give suggestions project-specific context:</b> study whether build configurations, prior review decisions, and similar information change suggestion accuracy and adoption.</li>
+    <li><b>Evaluate AI feedback for readability and clarity:</b> not only for technical coverage.</li>
+    <li><b>Keep context across multiple exchanges:</b> conversations where humans review AI-written code are the longest, yet least often lead to code changes. Strengthen context tracking and self-verification.</li>
+  </ul>
+  <p>As future work, they aim to improve AI agents' context awareness, explore multi-agent mechanisms for sharing project knowledge, and reduce incorrect suggestions.</p>
+
+  <h3>The study's limits (as the authors state them)</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>Limit</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><th>Humans and AI told apart by account</th><td>Content from human accounts may include AI-generated or AI-modified work, which stays in the human category and may affect the estimated differences</td></tr>
+        <tr><th>File-level quality metrics</th><td>Size, complexity, coupling, and cohesion; architecture-level changes, security vulnerabilities, and fault proneness are not captured</td></tr>
+        <tr><th>Other factors</th><td>Repository, language, PR size, code churn, developer experience, and the AI tool used may influence the metric changes</td></tr>
+        <tr><th>Tool and version differences</th><td>Tools differ, and GitHub comments do not reveal agent versions, so other tools or versions may give different results</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>What part of human review can move to other forms? (microtaro's reading)</h2>
+  <div class="note note-view">
+    <p><b>This section is microtaro's reading, not the paper's claim.</b> The paper does not frame its findings in terms of trust.</p>
+  </div>
+  <ul>
+    <li><b>Human review carried two jobs.</b> This theme asks whether the trust that came from people reading code can move to another basis. One view is that looking at code is itself the basis of trust, and it can move to other forms such as tests. In this paper's data, human review did at least two jobs: screening for defects, and asking “why” and passing on project knowledge.</li>
+    <li><b>Defect screening can move to AI review and tests.</b> 30–40% of AI comments point out defects, far more than humans' 7–8%. In <a href="review-agents-bugs.html">(When) Should a Software Factory be Lights-off?</a>, AI agents beat humans on severe bugs, and their bug-finding could be measured with a benchmark of past bugs. This is the part that can move from looking to tests and AI review.</li>
+    <li><b>“Why” questions and knowledge transfer show up in neither tests nor AI review.</b> 17–31% of human comments were understanding questions, and knowledge-transfer suggestions were the most often adopted (75.8%). AI agents hardly produce these. They do not show up in a test result or an AI review comment. Moving them would take another form, such as writing down design intent and conventions — that is microtaro's view.</li>
+    <li><b>Humans stop asking “why” when reviewing AI-written code.</b> Understanding questions fell from 31% to 17%, and fix-only comments rose from 11.7% to 32.6%. The drop in human reviews with comments in <a href="2x-mandate.html">AI Writes Faster Than Humans Can Review</a> may have been this checking part.</li>
+    <li><b>Check AI suggestions before adopting them.</b> 28.7% of unadopted AI suggestions were incorrect, and adopted ones tended to add complexity. When building alone with AI too, the use this paper supports is to check whether an AI reviewer's suggestion fits your intent before taking it.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>Sources and checks</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2603.15911v3">Zhong, Noei, Zou, Adams, “Human-AI Synergy in Agentic Code Review”</a> arXiv:2603.15911v3; v1 2026-03-16, v2 2026-10-26, v3 2026-10-30; not peer reviewed; license: <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv non-exclusive distribution license</a><span class="use">Affiliations: Queen's University, Canada (Zhong, Noei, Zou: Department of Electrical and Computer Engineering; Adams: School of Computing, MCIS lab). This page is based on the HTML version of v3 (main text and tables) and the numbers printed inside Figure 5 of the PDF</span></li>
+    <li><a href="../../../../topics/ai-trust/data/human-ai-review.json">topics/ai-trust/data/human-ai-review.json</a><span class="use">The numbers used in this page's charts and tables, with where each appears in the paper (labels in Japanese)</span></li>
+  </ul>
+  <h3>Notes on checking</h3>
+  <ul>
+    <li>Numbers are taken from the main text and Tables I–VII of v3. The defect shares (human 7% and 8%, AI 40% and 30%) and code-improvement shares are numbers printed inside Figure 5(a), read from the figure's text in the PDF (bar lengths were not measured). They match the main text (over 95% of AI comments are improvement or defects; human improvement 49–55%; understanding 31% and 17%; AI defects 40% overall in the cross-agent analysis).</li>
+    <li>Small segments in Figure 5(a) (a few percent) cannot be assigned to categories from the figure text alone, so they are not shown.</li>
+    <li>“Under 5%” for AI understanding questions is the bound implied by the text's “over 95% of AI comments are improvement or defects.”</li>
+    <li>Some per-tool details are in the paper's appendix (a separate document) that microtaro did not open; only numbers in the main text are shown.</li>
+    <li>This paper is not CC BY, so the only quotation from it is one sentence of the abstract; everything else is in microtaro's own words. All charts are redrawn from numbers; none of the paper's figures are copied.</li>
+    <li>On 2026-11-16, microtaro re-read the main text and tables and checked every statement on the Japanese page against the paper; this English page follows it. The version and license were checked on the paper's arXiv page.</li>
+  </ul>
+  <p class="stamp">The text and charts on this page are licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Quotations and numbers from the paper remain under the paper's license (arXiv non-exclusive distribution license).</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人のレビューと AI のレビューは、中身がどう違うか（論文の解説）</title>
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="stylesheet" href="../../../assets/paper.css">
+<link rel="alternate" hreflang="ja" href="human-ai-review.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/ai-trust/papers/human-ai-review.html">
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc" aria-label="目次">
+  <p class="toc-title">このページの目次</p>
+  <ol>
+    <li><a href="#qa"><span class="n">1</span>問いと答え（まとめ）</a></li>
+    <li><a href="#human-on-ai"><span class="n">2</span>人が AI の書いたコードを見るとき、何が変わるか</a></li>
+    <li><a href="#comments"><span class="n">3</span>人と AI のコメントは、何が違うか（Q1）</a></li>
+    <li><a href="#interactions"><span class="n">4</span>やり取りの流れと、そのあと直されたか（Q2）</a></li>
+    <li><a href="#suggestions"><span class="n">5</span>直し案は採用されたか、コードはどう変わったか（Q3）</a></li>
+    <li><a href="#tools"><span class="n">6</span>AI の道具ごとの違い</a></li>
+    <li><a href="#study"><span class="n">7</span>調べたデータと、分け方</a></li>
+    <li><a href="#advice"><span class="n">8</span>著者の提言と、この研究の限界</a></li>
+    <li><a href="#reading"><span class="n">9</span>人のレビューの何を、ほかの形に移せるか（microtaro の読み方）</a></li>
+    <li><a href="#sources"><span class="n">&nbsp;</span>出典と照合</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="masthead">
+  <p class="lang"><a href="../../../en/topics/ai-trust/papers/human-ai-review.html" hreflang="en" lang="en">English</a></p>
+  <p class="kind">論文の解説</p>
+  <h1>人のレビューと AI のレビューは、中身がどう違うか</h1>
+  <p class="src"><b>元の論文</b>Zhong, Noei, Zou, Adams「Human-AI Synergy in Agentic Code Review」arXiv:2603.15911 第 3 版（2026-10-30）、未査読、ライセンスは arXiv の標準ライセンス（非独占の配布許諾）
+    <span class="links"><a href="https://arxiv.org/abs/2603.15911v3">arXiv のページ</a><a href="https://arxiv.org/html/2603.15911v3">HTML 版で読む</a><a href="https://arxiv.org/pdf/2603.15911v3">PDF</a></span></p>
+  <p class="lead">公開の 300 のプロジェクトで、コードの変更に付いたレビューのやり取り 278,790 件を集め、人のレビューと AI のレビューの中身を比べた論文の解説です。AI は欠陥の指摘を大量にこなし、人は「なぜこうしたのか」の確認とプロジェクトの知識の受け渡しを担っていました。人と AI で得意が違い、組み合わせ方の手がかりになるデータです。カナダの Queen's 大学の研究者が書きました。</p>
+  <p class="stamp">2026-11-13 に下書きを作成（microtaro と AI）。2026-11-16、arXiv の第 3 版（2026-10-30）の本文と表、図 5 の中に書かれた数値を読み直し、この形に書き直しました。数字は第 3 版のものです。論文の成果と限界を、原文の重みどおりに書いています。論文が言っていることと、microtaro の読み方は分けて書いています。</p>
+</header>
+
+<section id="qa">
+  <h2><span class="num">1</span>問いと答え（まとめ）</h2>
+  <p>この論文は、3 つの問いを立てています。問いごとに、答えと、そのもとになった結果をまとめます。ここだけ読めば、論文の要点が分かるようにしています。灰色の小さな字は、それぞれを何から読み取ったかです。</p>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q1</span><p>AI のレビューのコメントと、人のレビューのコメントは、何が同じで何が違うか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>どちらも、いちばん多いのはコードの改善の提案。そのうえで AI は欠陥の指摘を多く出し（コメントの 30〜40%。人は 7〜8%）、弱いところと直し案を 1 つのコメントにまとめて出す。人は、「なぜこうしたのか」を聞く質問や、プロジェクトの知識の受け渡しまで、幅広く書く。人のコメントのほうが読みやすい。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>AI のコメントの 95% 以上は、コードの改善か欠陥の指摘。</b>
+          <span class="why">欠陥の指摘は、AI のコメントの 30〜40% を占めました。人のコメントでは 7〜8% です。</span>
+          <span class="how">論文の本文と、図 5 の中に書かれた数値から</span>
+        </li>
+        <li>
+          <b>人は「なぜこうしたのか」を聞き、知識を渡す。</b>
+          <span class="why">理解のための質問は、人が人のコードを見るときに 31%、AI のコードを見るときに 17%。すでにあるコードや決まりを示す知識の受け渡しも 4〜6% ありました。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+        <li>
+          <b>AI は、弱いところと直し案を 1 つのコメントで出す。</b>
+          <span class="why">質問をせずに、弱いところを示して直し案を出すコメントは、AI では 87.7〜94.5%、人では 31.3〜31.9% でした。読みやすさの点数は、人が 67.2〜72.8、AI が 43.0〜43.9 でした。</span>
+          <span class="how">論文の表 IV と本文から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#comments">3</a>（人と AI のコメントは、何が違うか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q2</span><p>人と AI のレビューで、やり取りの流れはどう違い、そのあとコードは直されたか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>AI が始めたレビューは、85〜87% が最初の 1 件で終わる。人が AI の書いたコードを見ると、やり取りは 11.8% 長くなる。最初の指摘のあとにコードが直された割合は、人が人のコードを見たときがいちばん高かった（47.6%）。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>AI の指摘は、1 回で終わることが多い。</b>
+          <span class="why">AI が始めたレビューの 85.2〜86.7% は、AI の最初の指摘のあと、誰も続けずに終わりました。人が人のコードを見るときは、48.9% が複数の往復になりました。</span>
+          <span class="how">やり取りの並びを追った分析から</span>
+        </li>
+        <li>
+          <b>人が AI のコードを見ると、やり取りが長くなる。</b>
+          <span class="why">人が人のコードを見るときより、平均で 11.8% 長くなりました。AI が、自分にはできないこと（別の PR を作るなど）を申し出て、やり取りが長引いた例も挙げられています。</span>
+          <span class="how">論文の本文と図 7、図 8 の例から</span>
+        </li>
+        <li>
+          <b>直された割合は、人が人のコードを見たときがいちばん高い。</b>
+          <span class="why">最初の指摘のあと、ほかのやり取りなしにコードが直された割合は、人 → 人のコードで 47.6%、AI → AI のコードで 30.9%、AI → 人のコードで 24.5%、人 → AI のコードで 17.5% でした。</span>
+          <span class="how">論文の本文と図 7 から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#interactions">4</a>（やり取りの流れと、そのあと直されたか）</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><span class="badge badge-q">Q3</span><p>人と AI の直し案は、どれだけ採用され、採用されるとコードはどう変わるか。</p></div>
+    <div class="qa-a"><span class="badge badge-a">A</span><p>AI は直し案をずっと多く出す（88,011 件。人は 25,673 件）が、採用されたのは 16.6% で、人の 56.5% より低い。採用されなかったものの理由は、直し案の間違い（28.7%）と、開発者が別の直し方をした（24.0%）が多い。採用された AI の直し案は、人のものより、コードの複雑さと行数を大きく増やしていた。</p></div>
+    <div class="qa-body">
+      <p class="qa-label">答えのもとになった結果</p>
+      <ul class="points">
+        <li>
+          <b>AI は直し案をたくさん出す。</b>
+          <span class="why">AI は自分のやり取りの 56.6% で直し案を出しました（88,011 件）。人は 20.8% です（25,673 件）。</span>
+          <span class="how">論文の本文から</span>
+        </li>
+        <li>
+          <b>採用されたのは、人の直し案 56.5%、AI の直し案 16.6%。</b>
+          <span class="why">差がいちばん大きかったのは、プロジェクト固有の知識（名前の変わったクラス、リポジトリの決まりなど）を伝える直し案でした。AI は、この種類の直し案をほとんど出しません。</span>
+          <span class="how">論文の表 V と本文から</span>
+        </li>
+        <li>
+          <b>採用された AI の直し案は、複雑さと行数を増やしやすい。</b>
+          <span class="why">人の直し案は、複雑さの指標をわずかに下げ、AI の直し案はわずかに上げました。ただし、道具によっては逆に下げたものもありました（Greptile）。</span>
+          <span class="how">論文の表 VII と本文から</span>
+        </li>
+      </ul>
+      <p class="qa-more">詳しくは <a href="#suggestions">5</a>（直し案は採用されたか、コードはどう変わったか）</p>
+    </div>
+  </div>
+
+  <h3>3 つの答えから、著者が言いたいこと</h3>
+  <div class="conclusion">
+    <div class="conclusion-head">
+      <p class="label">著者の結論（論文の要旨、はじめに、結論の節）</p>
+      <p class="claim">AI は、欠陥のふるい分けを大きな規模でこなせる。一方で、直し案の質を確かめることと、AI に足りない文脈のある指摘には、人の目が欠かせない。人と AI で得意な役目を分けて組み合わせるのがよい。</p>
+      <p class="en">“while AI agents can scale defect screening, human oversight remains critical for ensuring suggestion quality and providing contextual feedback that AI agents lack”</p>
+    </div>
+    <div class="conclusion-body">
+      <p class="label">そのために、著者は次のことを勧めています（主に、道具を作る人と研究者に向けて）</p>
+      <ul class="recs">
+        <li><b>得意に合わせて、レビューの役目を人と AI に割り振る。</b>欠陥のふるい分けは AI に、意図の確認と知識の受け渡しは人に、という分け方の手がかりになる、としています。</li>
+        <li><b>AI が、開発者の意図を確かめられるようにする。</b>確認のための質問をしたり、プロジェクト固有の文脈を取りに行ったりする仕組みで、意図にかかわる指摘にも対応できるようにする。</li>
+        <li><b>AI の直し案に、プロジェクト固有の情報を渡す。</b>ビルドの設定や、過去のレビューの判断などを渡すと、直し案の正しさと採用の割合が変わるかを調べる。</li>
+        <li><b>AI のコメントを、読みやすさでも評価する。</b>指摘の範囲の広さだけでなく、読みやすさと分かりやすさも見る。</li>
+        <li><b>何往復ものやり取りでも、AI が文脈を保てるようにする。</b>文脈の追跡と、自分での確かめを強めて、レビューする人の指摘を取り込めるようにする。</li>
+      </ul>
+      <p class="conclusion-note">実際に使う人に向けては、採用した AI の直し案が保守のしやすさを下げないよう、注意して見る必要がある、とも書いています。詳しくは <a href="#advice">8</a>。</p>
+    </div>
+  </div>
+
+  <h3>話の流れ</h3>
+  <ol class="cycle" aria-label="話の流れ">
+    <li>AI がレビューに加わる</li>
+    <li>AI は欠陥の指摘を大量にこなす</li>
+    <li>人は意図の確認と知識の受け渡しを担う</li>
+    <li>AI の直し案は 16.6% が採用</li>
+    <li>採用する前に人が確かめる</li>
+    <li>得意を分けて組み合わせる</li>
+  </ol>
+
+  <h3>論文が答えていないこと</h3>
+  <p>次のことは、著者自身が「測っていない」「区別できない」と書いています。</p>
+  <ul>
+    <li><b>バグが減ったか：</b>コードの質は、ファイル単位の大きさ、複雑さ、つながり、まとまりの指標で見ました。設計全体の変化、セキュリティの弱さ、欠陥の起きやすさは測っていません。</li>
+    <li><b>人のアカウントの中の AI：</b>人か AI かは、アカウントで分けました。人のアカウントのコメントやコードにも、AI で作ったものが混ざりうるので、人と AI の差は正確には分からない、としています。</li>
+    <li><b>道具の版の違い：</b>GitHub のコメントからは、同じ道具の版の違いが分かりません。データは 2025 年 11 月までのものです。</li>
+  </ul>
+</section>
+
+<section id="human-on-ai">
+  <h2><span class="num">2</span>人が AI の書いたコードを見るとき、何が変わるか</h2>
+  <div class="key">
+    <p>人が AI の書いたコードを見るときは、人のコードを見るときより、「なぜこうしたのか」を聞く質問が減り、理由を言わずに直し案だけを出すことが増えました。やり取りは長くなりますが、最初の指摘のあとにコードが直された割合は、いちばん低くなりました。</p>
+  </div>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>比べたもの</th><th class="num">人が、人のコードを見るとき</th><th class="num">人が、AI のコードを見るとき</th></tr></thead>
+      <tbody>
+        <tr><th>「なぜこうしたのか」を聞く理解の質問</th><td class="num">31%</td><td class="num"><b>17%</b></td></tr>
+        <tr><th>質問も、弱いところの指摘もせず、直し案だけを出す</th><td class="num">11.7%</td><td class="num"><b>32.6%</b></td></tr>
+        <tr><th>知識の受け渡し</th><td class="num" colspan="2" style="text-align:center">どちらも 4〜6%</td></tr>
+        <tr><th>やり取りの長さ（平均）</th><td class="num">基準</td><td class="num"><b>11.8% 長い</b></td></tr>
+        <tr><th>最初の指摘のあと、コードが直された割合</th><td class="num">47.6%</td><td class="num"><b>17.5%</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の本文、表 IV、図 7 の数値です。</p>
+  <ul>
+    <li>人が AI のコードを見るときは、3 分の 2 のやり取りが最初の指摘のあとも続き、人と AI の往復になりました。</li>
+    <li>そのあとの段階ほど、直される割合は下がり、話し合いが続く割合は上がりました（66.4% から 77.5% へ）。</li>
+    <li>著者は、余分な往復には、AI が申し出たことを本当にできるのかを確かめる手間が含まれているのかもしれない、と書いています。</li>
+  </ul>
+</section>
+
+<section id="comments">
+  <h2><span class="num">3</span>人と AI のコメントは、何が違うか（Q1）</h2>
+  <div class="key">
+    <p>人も AI も、いちばん多いのはコードの改善の提案です。そのうえで AI は欠陥の指摘を多く出し、人は「なぜ」の質問や知識の受け渡しまで幅広く書きます。AI は弱いところと直し案をまとめて出し、人は質問で確かめることが多く、コメントも読みやすい。</p>
+  </div>
+
+  <figure class="chart" aria-labelledby="ch-defect">
+    <p class="chart-title" id="ch-defect">コメントのうち、欠陥を指摘するものはどれくらいあるか</p>
+    <p class="chart-sub">AI のコメントは 30〜40%、人のコメントは 7〜8%。各やり取りの最初のコメントの種類の割合です。</p>
+    <ul class="db-legend" aria-hidden="true">
+      <li><i class="sw ai"></i>AI のレビュー</li>
+      <li><i class="sw human"></i>人のレビュー</li>
+    </ul>
+    <ul class="bars" style="--max: 100">
+      <li title="AI が、人の書いたコードを見る：40%"><span class="bar-label">AI が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 40; background: var(--c-ai)"></span></span><span class="bar-val">40%</span></li>
+      <li title="AI が、AI の書いたコードを見る：30%"><span class="bar-label">AI が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 30; background: var(--c-ai)"></span></span><span class="bar-val">30%</span></li>
+      <li title="人が、AI の書いたコードを見る：8%"><span class="bar-label">人が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 8; background: var(--c-human)"></span></span><span class="bar-val">8%</span></li>
+      <li title="人が、人の書いたコードを見る：7%"><span class="bar-label">人が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 7; background: var(--c-human)"></span></span><span class="bar-val">7%</span></li>
+    </ul>
+    <figcaption>論文の図 5(a) の中に書かれた数値から作り直した図です。論文の図そのものは写していません。</figcaption>
+  </figure>
+
+  <figure class="chart" aria-labelledby="ch-understand">
+    <p class="chart-title" id="ch-understand">「なぜこうしたのか」を聞くコメントは、どれくらいあるか</p>
+    <p class="chart-sub">人が人のコードを見るときは 31%、AI のコードを見るときは 17%。AI のコメントには、ほとんどありません（下の注）。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="人が、人の書いたコードを見る：31%"><span class="bar-label">人が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 31; background: var(--c-human)"></span></span><span class="bar-val">31%</span></li>
+      <li title="人が、AI の書いたコードを見る：17%"><span class="bar-label">人が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 17; background: var(--c-human)"></span></span><span class="bar-val">17%</span></li>
+    </ul>
+    <figcaption>論文の本文の数値から作った図です。AI のコメントは、コードの改善と欠陥の指摘だけで 95% 以上を占めるので、理解のための質問は、ほかの種類と合わせても 5% 未満です。</figcaption>
+  </figure>
+
+  <ul>
+    <li><b>人もいちばん多いのは改善の提案：</b>人のコメントの 49〜55% は、コードの改善の提案でした。AI と同じく、いちばん多い種類です。</li>
+    <li><b>人は知識を渡す：</b>すでにあるコードや設定の場所を示すなど、知識の受け渡しが、人のコメントの 4〜6% ありました。著者は、人は質問で設計の意図を確かめ、プロジェクト固有の参照を共有する一方、AI は直し案の裏付けになる参照を示すことが少ない、とまとめています。</li>
+    <li><b>改善と欠陥の中身を細かく分けると：</b>統計ではっきりした差は 4 つありましたが、どれも差の大きさは小さいものでした。たとえば、AI が AI のコードを見るときは、文書についての指摘が多めでした（29%。人が人のコードを見るときは 18%）。</li>
+  </ul>
+
+  <figure class="chart" aria-labelledby="ch-form">
+    <p class="chart-title" id="ch-form">質問をせずに、弱いところと直し案を 1 つのコメントで出す割合</p>
+    <p class="chart-sub">AI は 9 割前後、人は 3 割ほど。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="AI が、AI の書いたコードを見る：94.5%"><span class="bar-label">AI が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 94.5; background: var(--c-ai)"></span></span><span class="bar-val">94.5%</span></li>
+      <li title="AI が、人の書いたコードを見る：87.7%"><span class="bar-label">AI が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 87.7; background: var(--c-ai)"></span></span><span class="bar-val">87.7%</span></li>
+      <li title="人が、AI の書いたコードを見る：31.9%"><span class="bar-label">人が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 31.9; background: var(--c-human)"></span></span><span class="bar-val">31.9%</span></li>
+      <li title="人が、人の書いたコードを見る：31.3%"><span class="bar-label">人が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 31.3; background: var(--c-human)"></span></span><span class="bar-val">31.3%</span></li>
+    </ul>
+    <figcaption>論文の表 IV の数値から作った図です。</figcaption>
+  </figure>
+  <ul>
+    <li><b>読みやすさ：</b>英文の読みやすさの点数（0〜100 で、高いほど読みやすい）は、人のコメントが 67.2〜72.8、AI のコメントが 43.0〜43.9 で、差は大きいものでした。</li>
+    <li><b>質問：</b>人は質問で確かめることが多く、人が人のコードを見るときは、質問だけのコメントも 21.1% ありました。</li>
+  </ul>
+</section>
+
+<section id="interactions">
+  <h2><span class="num">4</span>やり取りの流れと、そのあと直されたか（Q2）</h2>
+  <div class="key">
+    <p>AI が始めたレビューの多くは、最初の 1 件で終わりました。人が AI のコードを見るときは、やり取りが長くなりました。最初の指摘のあとにコードが直された割合は、人が人のコードを見たときがいちばん高く、AI がかかわると低くなりました。</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-changed">
+    <p class="chart-title" id="ch-changed">最初の指摘のあと、指摘に沿ってコードが直された割合</p>
+    <p class="chart-sub">人が人のコードを見たときがいちばん高く 47.6%。ほかのやり取りをはさまずに、直されて本流に残った割合です。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="人が、人の書いたコードを見る：47.6%"><span class="bar-label">人が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 47.6; background: var(--c-human)"></span></span><span class="bar-val">47.6%</span></li>
+      <li title="AI が、AI の書いたコードを見る：30.9%"><span class="bar-label">AI が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 30.9; background: var(--c-ai)"></span></span><span class="bar-val">30.9%</span></li>
+      <li title="AI が、人の書いたコードを見る：24.5%"><span class="bar-label">AI が、人の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 24.5; background: var(--c-ai)"></span></span><span class="bar-val">24.5%</span></li>
+      <li title="人が、AI の書いたコードを見る：17.5%"><span class="bar-label">人が、AI の書いたコードを見る</span><span class="bar-track"><span class="bar" style="--to: 17.5; background: var(--c-human)"></span></span><span class="bar-val">17.5%</span></li>
+    </ul>
+    <figcaption>論文の本文と図 7 の数値から作った図です。青は人のレビュー、桃は AI のレビューです。</figcaption>
+  </figure>
+  <ul>
+    <li><b>人どうし：</b>人が人のコードを見るとき、99.8% のやり取りは AI が加わらずに終わり、平均 1.76 往復でした。48.9% は複数の往復がありました。</li>
+    <li><b>AI から始まるとき：</b>85.2〜86.7% は、AI の最初の指摘のあと、誰も続けずに終わりました。人どうしのやり取りより 30.6% 短いものでした。</li>
+    <li><b>AI が答え続けると：</b>AI が人のコードを見るやり取りでは、AI の番が進むほど、直される割合が上がりました（24.5%、32.8%、35.3%）。一方、AI の指摘に人が返事をしたあと、さらに AI と人がもう 1 往復すると、直される割合は 19.1% から 7.2% に下がりました。</li>
+  </ul>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>論文は、やり取りを「誰が書いたか」の並びとして取り出し、状態と移り変わりのモデル（有限状態機械）で表しています。「直された」は、指摘に沿った変更が、PR が取り込まれたときに本流に残っていた場合です。</p>
+  </div>
+</section>
+
+<section id="suggestions">
+  <h2><span class="num">5</span>直し案は採用されたか、コードはどう変わったか（Q3）</h2>
+  <div class="key">
+    <p>AI は直し案を人よりずっと多く出しますが、採用されたのは 16.6% で、人の 56.5% より低い割合でした。採用されなかった理由は、直し案の間違いと、別の直し方をしたことが多い。採用された AI の直し案は、人のものより、複雑さと行数を増やす向きでした。</p>
+  </div>
+  <figure class="chart" aria-labelledby="ch-adopt">
+    <p class="chart-title" id="ch-adopt">直し案は、どれだけ採用されたか</p>
+    <p class="chart-sub">人の直し案は 56.5%、AI の直し案は 16.6%。</p>
+    <ul class="bars" style="--max: 100">
+      <li title="人の直し案（25,673 件）：56.5%"><span class="bar-label">人の直し案<small>25,673 件</small></span><span class="bar-track"><span class="bar" style="--to: 56.5; background: var(--c-human)"></span></span><span class="bar-val">56.5%</span></li>
+      <li title="AI の直し案（88,011 件）：16.6%"><span class="bar-label">AI の直し案<small>88,011 件</small></span><span class="bar-track"><span class="bar" style="--to: 16.6; background: var(--c-ai)"></span></span><span class="bar-val">16.6%</span></li>
+    </ul>
+    <figcaption>論文の表 V の数値から作った図です。</figcaption>
+  </figure>
+
+  <h3>直し案の種類ごとの採用の割合</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>直し案の種類</th><th class="num">人：件数</th><th class="num">人：採用</th><th class="num">AI：件数</th><th class="num">AI：採用</th></tr></thead>
+      <tbody>
+        <tr><th>知識の受け渡し</th><td class="num">2,038</td><td class="num"><b>75.8%</b></td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><th>コードの改善</th><td class="num">20,166</td><td class="num">59.2%</td><td class="num">53,501</td><td class="num">16.8%</td></tr>
+        <tr><th>欠陥の指摘</th><td class="num">616</td><td class="num">53.7%</td><td class="num">33,019</td><td class="num">16.7%</td></tr>
+        <tr><th>理解のための質問</th><td class="num">1,354</td><td class="num">51.0%</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><th>外への影響</th><td class="num">—</td><td class="num">—</td><td class="num">658</td><td class="num">6.5%</td></tr>
+        <tr><th>テスト</th><td class="num">—</td><td class="num">—</td><td class="num">833</td><td class="num">7.6%</td></tr>
+        <tr><th>合計</th><td class="num">25,673</td><td class="num"><b>56.5%</b></td><td class="num">88,011</td><td class="num"><b>16.6%</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の表 V の数値です。「—」はデータが足りないもの。人の「その他」（1,499 件、採用 1.2%）は省きました。</p>
+  <p>採用の差がいちばん大きいのは、プロジェクト固有の知識を伝える直し案（名前の変わったクラス、リポジトリの決まりなど）です。AI はこの種類の直し案をほとんど出しません。著者は、AI が直し案を出す前に、レビューするコードにかかわるプロジェクトの知識を取りに行くよう設計することを勧めています。</p>
+
+  <figure class="chart" aria-labelledby="ch-reasons">
+    <p class="chart-title" id="ch-reasons">採用されなかった AI の直し案は、なぜ採用されなかったか</p>
+    <p class="chart-sub">いちばん多いのは、直し案が間違っていた（28.7%）。採用されなかった AI の直し案から無作為に選んだ 383 件の内訳です。</p>
+    <ul class="bars" style="--max: 30">
+      <li class="main" title="直し案が間違い、またはコードを壊す：28.7%"><span class="bar-label">直し案が間違い、またはコードを壊す</span><span class="bar-track"><span class="bar" style="--to: 28.7"></span></span><span class="bar-val">28.7%</span></li>
+      <li title="開発者が別の直し方をした：24.0%"><span class="bar-label">開発者が別の直し方をした</span><span class="bar-track"><span class="bar" style="--to: 24.0"></span></span><span class="bar-val">24.0%</span></li>
+      <li title="要らない、すでに対応済み：16.4%"><span class="bar-label">要らない、すでに対応済み</span><span class="bar-track"><span class="bar" style="--to: 16.4"></span></span><span class="bar-val">16.4%</span></li>
+      <li title="「直した」と言ったが、対応するコミットがない：11.2%"><span class="bar-label">「直した」と言ったが、対応するコミットがない</span><span class="bar-track"><span class="bar" style="--to: 11.2"></span></span><span class="bar-val">11.2%</span></li>
+      <li title="開発者が別の書き方を好んだ：10.2%"><span class="bar-label">開発者が別の書き方を好んだ</span><span class="bar-track"><span class="bar" style="--to: 10.2"></span></span><span class="bar-val">10.2%</span></li>
+      <li title="あとで対応する：8.4%"><span class="bar-label">あとで対応する</span><span class="bar-track"><span class="bar" style="--to: 8.4"></span></span><span class="bar-val">8.4%</span></li>
+      <li title="はっきりしない：1.0%"><span class="bar-label">はっきりしない</span><span class="bar-track"><span class="bar" style="--to: 1.0"></span></span><span class="bar-val">1.0%</span></li>
+    </ul>
+    <figcaption>論文の表 VI の数値から作った図です。</figcaption>
+  </figure>
+
+  <h3>採用されたあと、コードはどう変わったか</h3>
+  <p>採用された直し案（人 3,467 件、AI 5,518 件）の前後で、ファイルの 111 の指標を比べました。人と AI ではっきり差が出たのは、次の指標です。値は、直し案 1 件を当てたときの変化の平均です。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>指標</th><th class="num">人の直し案</th><th class="num">AI の直し案</th></tr></thead>
+      <tbody>
+        <tr><th>循環的複雑度の合計（Sum CC）</th><td class="num">−0.063</td><td class="num">+0.044</td></tr>
+        <tr><th>平均の循環的複雑度（Average CC）</th><td class="num">−0.006</td><td class="num">+0.007</td></tr>
+        <tr><th>コードの行数（Code Lines）</th><td class="num">+0.087</td><td class="num">+0.241</td></tr>
+        <tr><th>実行文の数（Executable Statements）</th><td class="num">+0.033</td><td class="num">+0.093</td></tr>
+        <tr><th>関数の数（Functions）</th><td class="num">+0.003</td><td class="num">+0.010</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の表 VII から主な行を抜き出しました。複雑さの指標は、ほかに 4 つ（表 VII）で同じ向きの差があります。どちらも 1 件あたりでは小さな値で、差がはっきりしていることと、差が大きいことは別です。</p>
+  <p>人の直し案は複雑さをわずかに下げ、AI の直し案はわずかに上げました。著者は、採用した AI の直し案が保守のしやすさを下げないよう、注意して見る必要がある、と書いています。ただし道具によって違いがあり、Greptile の直し案は、採用されたあと循環的複雑度を下げていました（<a href="#tools">6</a>）。</p>
+</section>
+
+<section id="tools">
+  <h2><span class="num">6</span>AI の道具ごとの違い</h2>
+  <div class="key">
+    <p>多くの道具は、AI 全体と同じ傾向でした。ただ、ほぼ欠陥の指摘しか出さない道具（Cursor）や、採用された直し案が複雑さを下げた道具（Greptile）など、目立つ違いもありました。AI のレビューを 1 つにまとめて語るときは、この違いに注意が要ります。</p>
+  </div>
+  <p>指摘や直し案を十分に出していた 7 つの道具を、383 件ずつ無作為に選んで比べました。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>道具</th><th>AI 全体と比べた違い</th></tr></thead>
+      <tbody>
+        <tr><th>Cursor</th><td>ほぼ欠陥の指摘だけ（99%。AI 全体は 40%）。86.4% は、弱いところを示すだけで直し案を出さない（AI 全体は 4.6%）。読みやすさは低め。採用された直し案は、実行文の数を減らした</td></tr>
+        <tr><th>Claude Code</th><td>欠陥の指摘が少なめ（20%。AI 全体は 40%）。Claude Code が始めたレビューは、続きの話し合いが少なく（7.3%。全体は 14.6%）、そのあと直される割合も低い（22.5%。全体は 31.2%）</td></tr>
+        <tr><th>Gemini Code Assist</th><td>読みやすさは高め。続きの話し合いが多い（19.8%。全体は 14.6%）</td></tr>
+        <tr><th>Greptile</th><td>弱いところと直し案をまとめて出す割合が低め（71.3%。全体は 91.1%）。採用された直し案は、循環的複雑度を下げた（−0.979。AI 全体は +0.045）</td></tr>
+        <tr><th>Sourcery AI</th><td>読みやすさは低め。採用された直し案は、実行文の数を減らした</td></tr>
+        <tr><th>GitHub Copilot、CodeRabbit</th><td>はっきりした違いは見られなかった</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の本文の数値です。違いの多くは、差の大きさが小さいものでした（Cursor の欠陥の指摘の多さなどは大きい）。ほかの 6 つの道具では、いちばん多いのはコードの改善の提案（49〜62%）でした。</p>
+</section>
+
+<section id="study">
+  <h2><span class="num">7</span>調べたデータと、分け方</h2>
+
+  <h3>データ</h3>
+  <ul>
+    <li>GitHub の公開のプロジェクトのうち、スターが 100 以上、2022 年から 2025 年 11 月まで毎月 1 件以上 PR が閉じられていて、AI にレビューされた PR が 100 件以上あるもの。300 のプロジェクト、閉じた PR 54,330 件です。</li>
+    <li>変更の特定の行に付いたレビューのやり取り（行ごとのコメントのやり取り）278,790 件を見ました。</li>
+    <li>GitHub は「人」と「bot」は分けますが、bot が AI かどうかは分かりません。そこで bot の名前を 1 つずつ公式の説明で調べ、AI のレビューをする bot を 16 個特定しました。さらに、それぞれがエージェントとしての機能を発表した日より後だけを、AI のレビューとして数えました（たとえば GitHub Copilot は 2025-05-19 から）。</li>
+  </ul>
+
+  <h3>4 つの組み合わせ</h3>
+  <p>コードを書いたのが人か AI か、最初に指摘したのが人か AI かで、やり取りを 4 つに分けました。</p>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>組み合わせ</th><th class="num">やり取りの数</th><th class="num">割合</th></tr></thead>
+      <tbody>
+        <tr><th>人が、人の書いたコードを見る（HRH）</th><td class="num">116,874</td><td class="num">41.9%</td></tr>
+        <tr><th>人が、AI の書いたコードを見る（HRA）</th><td class="num">6,519</td><td class="num">2.3%</td></tr>
+        <tr><th>AI が、人の書いたコードを見る（ARH）</th><td class="num">154,469</td><td class="num">55.4%</td></tr>
+        <tr><th>AI が、AI の書いたコードを見る（ARA）</th><td class="num">928</td><td class="num">0.3%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="t-note">論文の表 I の数値です。AI が AI のコードを見た 928 件のうち 94.0% は、同じ AI が自分の書いたコードを見たものでした。</p>
+
+  <h3>この解説で使う言葉</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>言葉</th><th>この論文での意味</th></tr></thead>
+      <tbody>
+        <tr><th>変更（PR、プルリクエスト）</th><td>コードの変更を、本流に取り込む前に出す申し出。ここでレビューする</td></tr>
+        <tr><th>やり取り</th><td>変更の特定の行に付いたコメントのやり取り。論文では inline code review conversation</td></tr>
+        <tr><th>コードの改善（Code Improvement）</th><td>欠陥の修正ではなく、分かりやすさ、書き方、構造、保守のしやすさを良くする提案</td></tr>
+        <tr><th>欠陥の指摘（Defect Detection）</th><td>機能、論理、正しさの問題の指摘</td></tr>
+        <tr><th>理解のための質問（Understanding）</th><td>文脈、理由、設計の判断、実装の意図を確かめる質問</td></tr>
+        <tr><th>知識の受け渡し（Knowledge Transfer）</th><td>考え方、決まり、良いやり方を説明したり、参考になる場所を示したりすること</td></tr>
+        <tr><th>テスト（Testing）、外への影響（External Impact）</th><td>テストの追加や修正について。変更の外の、システム全体への影響について</td></tr>
+        <tr><th>直し案</th><td>コメントの中に書いた「このコードに置き換える」という提案。GitHub の suggestion の仕組みで、そのまま取り込める</td></tr>
+        <tr><th>採用</th><td>直し案の行が、同じ PR のあとのコミットで直し案に近い形に変わり、取り消されずに、PR が取り込まれたこと</td></tr>
+        <tr><th>循環的複雑度（CC）</th><td>コードの分かれ道の多さを表す、複雑さの指標</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>分け方と判定</h3>
+  <div class="note note-omit">
+    <p><b>この節は、教育用に省いた説明です。</b>論文は、統計の検定や判定の手順を細かく決めています。</p>
+  </div>
+  <ul>
+    <li><b>コメントの種類：</b>2013 年の Bacchelli と Bird の 9 つの分類を使い、各やり取りの最初のコメントを、AI（GPT-4.1-mini）で分類しました。確信度の低いものは除きました（全体の 96.4% は確信度が高かった）。著者が 383 件を自分で分類して比べると、ほぼ完全に一致しました（κ=0.85）。</li>
+    <li><b>コメントの形：</b>気づかいがあるか、質問しているか、弱いところを示しているか、直し案があるか、の 4 つを AI で判定しました（κ=0.9）。</li>
+    <li><b>直されたか：</b>直し案のあるコメントは、取り込まれたコードが、元のコードより直し案に近いかで判定し、言葉だけの指摘は AI に判定させました（50 件の確認ですべて一致）。</li>
+    <li><b>採用されたあとの変化：</b>静的解析の道具（SciTools Understand）で、111 の指標を直し案の前後で測りました。</li>
+  </ul>
+</section>
+
+<section id="advice">
+  <h2><span class="num">8</span>著者の提言と、この研究の限界</h2>
+
+  <h3>著者の提言</h3>
+  <p>著者は、この結果が、人と AI の得意に合わせてレビューの役目を割り振ること、人と AI の組み合わせの良さを生かすようにレビューの流れを整えること、AI の直し案がどこでいちばん役立つかを知ることの手がかりになる、としています。そのうえで、主に道具を作る人と研究者に向けて、次のことを勧めています。</p>
+  <ul>
+    <li><b>人と AI のあいだの溝を埋める：</b>人の指摘は、開発者の意図を確かめることに向かう。AI が意図を推し量って言葉にできるよう、確認のための質問や、プロジェクト固有の文脈を取りに行く仕組みを研究する。</li>
+    <li><b>直し案に、プロジェクト固有の文脈を渡す：</b>ビルドの設定、過去のレビューの判断などを渡すと、直し案の正しさと採用の割合が変わるかを調べる。</li>
+    <li><b>AI の指摘を、読みやすさと分かりやすさでも評価する：</b>指摘の範囲の広さだけで評価しない。</li>
+    <li><b>何往復ものやり取りで、AI が文脈を保てるようにする：</b>人が AI のコードを見るやり取りはいちばん長いのに、直される割合は低い。文脈の追跡と自分での確かめを強める。</li>
+  </ul>
+  <p>今後の研究として、AI がプロジェクトの文脈をつかめるようにすること、複数の AI でプロジェクトの知識を共有する仕組み、間違った直し案を減らすことを挙げています。</p>
+
+  <h3>この研究の限界（著者が書いているもの）</h3>
+  <div class="scroll">
+    <table class="t-wide">
+      <thead><tr><th>限界</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><th>人か AI かは、アカウントで分けた</th><td>人のアカウントの PR やコメントにも、AI で作ったり直したりしたものが混ざりうる。それは人の側に数えられているので、人と AI の差の見積もりに影響しうる</td></tr>
+        <tr><th>コードの質の指標は、ファイル単位</th><td>大きさ、複雑さ、つながり、まとまりの指標で、設計全体の変化、セキュリティの弱さ、欠陥の起きやすさは測っていない</td></tr>
+        <tr><th>ほかの要因</th><td>リポジトリ、言語、PR の大きさ、変更の量、開発者の経験、使った AI の道具の違いも、指標の変化に影響しうる</td></tr>
+        <tr><th>道具ごと、版ごとの違い</th><td>道具によって違いがある。同じ道具の版の違いは、GitHub のコメントからは分からないので、ほかの道具や版では結果が違いうる</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="reading">
+  <h2><span class="num">9</span>人のレビューの何を、ほかの形に移せるか（microtaro の読み方）</h2>
+  <div class="note note-view">
+    <p><b>この節は、microtaro の読み方です。</b>論文が言っていることではありません。論文は「信頼」という言葉では論じていません。</p>
+  </div>
+  <ul>
+    <li><b>人のレビューは、2 つの役目を担っていた。</b>このテーマの問いは「人がコードを読むことで得ていた信頼を、別の根拠へ移せるか」です。人が見ること自体が信頼の根拠で、それをテストなどほかの形に移せばよい、という見方があります。この論文のデータで見ると、人のレビューには少なくとも 2 つの役目がありました。1 つは欠陥のふるい分け、もう 1 つは「なぜこうしたのか」の確認とプロジェクトの知識の受け渡しです。</li>
+    <li><b>欠陥のふるい分けは、AI のレビューやテストに移しやすい。</b>AI のコメントの 30〜40% は欠陥の指摘で、人の 7〜8% よりずっと多い。<a href="review-agents-bugs.html">AI のレビュー役は、どこまでバグを見つけるか</a>でも、AI は重大なバグに人より強く、過去のバグで試験を作って見つける力を測れました。この部分は、見ることから、試験や AI のレビューへと移せる側だと読めます。</li>
+    <li><b>「なぜ」の確認と知識の受け渡しは、テストにも AI のレビューにも映らない。</b>人のコメントの 17〜31% は理解のための質問で、知識の受け渡しの直し案は 75.8% と最もよく採用されていました。AI はこの種類をほとんど出しません。ここは、テストの合否にも、AI のレビューの指摘にも出てこない部分です。移すなら、設計の意図や決まりを書き残すなど、別の形が要ると microtaro は考えます。</li>
+    <li><b>人が AI のコードを見ると、「なぜ」を聞かなくなる。</b>人が AI のコードを見るときは、理解の質問が 31% から 17% に減り、直し案だけのコメントが 11.7% から 32.6% に増えました。<a href="2x-mandate.html">AI が書く速さに、人のレビューが追いつかない</a>で減った「人がコメントを書くレビュー」も、こうした確認の部分だった可能性があります。</li>
+    <li><b>AI の直し案は、取り込む前に確かめる。</b>採用されなかった AI の直し案の 28.7% は間違いで、採用されたものも複雑さを増やす向きでした。1 人で AI と作るときも、AI のレビューの直し案は、意図に合うかを見てから取り込むのがよい、というのがこの論文から言える使い方だと思います。</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2><span class="num">&nbsp;</span>出典と照合</h2>
+  <ul class="sources">
+    <li><a href="https://arxiv.org/abs/2603.15911v3">Zhong, Noei, Zou, Adams「Human-AI Synergy in Agentic Code Review」</a>　arXiv:2603.15911v3、第 1 版 2026-03-16、第 2 版 10-26、第 3 版 10-30、未査読論文、ライセンスは <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">arXiv の標準ライセンス（非独占の配布許諾）</a><span class="use">所属は Queen's 大学（カナダ）。Zhong、Noei、Zou は電気・コンピュータ工学科、Adams は計算機科学の学部（MCIS 研究室）。この解説は第 3 版の HTML 版の本文と表、PDF 版の図 5 の中に書かれた数値によります</span></li>
+    <li><a href="../data/human-ai-review.json">data/human-ai-review.json</a><span class="use">この解説の図と表に使った数値と、論文の中の出典の場所</span></li>
+  </ul>
+  <h3>照合のメモ</h3>
+  <ul>
+    <li>数字は、第 3 版の本文と表 I〜VII から拾いました。欠陥の指摘の割合（人 7%・8%、AI 40%・30%）と、コードの改善の割合は、図 5(a) の中に書かれた数値で、PDF 版の図の文字から読み取りました（棒の長さは測っていません）。本文の記述（AI は 95% 以上が改善か欠陥、人は改善が 49〜55%、理解が 31% と 17%、道具ごとの比較で AI 全体の欠陥が 40%）と合うことを確かめました。</li>
+    <li>図 5(a) の小さい部分（数%）は、どの種類かが図の文字だけでは決められないので、載せていません。</li>
+    <li>理解のための質問が AI のコメントで「5% 未満」というのは、本文の「AI のコメントの 95% 以上が改善か欠陥」から言える範囲を書いたものです。</li>
+    <li>道具ごとの比較の細かい数字の一部は、論文の付録（別の資料）にあり、開いていません。本文に書かれた数字だけを載せました。</li>
+    <li>この論文は CC BY ではないので、原文からの引用は要旨の 1 文だけにし、ほかは microtaro の言葉で説明しています。図はすべて数値から作り直したもので、論文の図そのものは写していません。</li>
+    <li>2026-11-13 に下書きを作り、2026-11-16 に本文と表を読み直して、1 文ずつ照合し直しました。版とライセンスは、arXiv の論文のページで確かめました。</li>
+  </ul>
+  <p class="stamp">この解説の文章と図は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a> で公開しています。論文から引用した英文と数値は、上の論文のライセンス（arXiv の標準ライセンス）によります。</p>
+</section>
+
+</main>
+</div>
+
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "about": "解説「人のレビューと AI のレビューは、中身がどう違うか」の図と表に使った数値。論文の第 3 版から拾い、出典の場所を where に書いた。図 5(a) の値は、PDF 版の図の中に書かれた数値（棒の長さは測っていない）。この解説で計算した値は入れていない。",
+  "paper": {
+    "title": "Human-AI Synergy in Agentic Code Review",
+    "authors": ["Suzhen Zhong", "Shayan Noei", "Ying Zou", "Bram Adams"],
+    "url": "https://arxiv.org/abs/2603.15911v3",
+    "versions": { "v1": "2026-03-16", "v2": "2026-10-26", "v3": "2026-10-30" },
+    "license": "arXiv non-exclusive distribution license 1.0"
+  },
+  "checked": "2026-11-16",
+  "data": {
+    "where": "本文 II-B、表 I",
+    "projects": 300,
+    "closed_prs": 54330,
+    "conversations": 278790,
+    "period": "2022 年〜2025 年 11 月",
+    "ai_review_bots": 16,
+    "copilot_agent_from": "2025-05-19",
+    "categories": [
+      { "code": "HRH", "name": "人が、人の書いたコードを見る", "conversations": 116874, "share": 41.9 },
+      { "code": "HRA", "name": "人が、AI の書いたコードを見る", "conversations": 6519, "share": 2.3 },
+      { "code": "ARH", "name": "AI が、人の書いたコードを見る", "conversations": 154469, "share": 55.4 },
+      { "code": "ARA", "name": "AI が、AI の書いたコードを見る", "conversations": 928, "share": 0.3, "same_agent_self_review": 94.0 }
+    ]
+  },
+  "feedback_types": {
+    "where": "図 5(a) の中に書かれた数値（PDF 版）と本文 III-A",
+    "unit": "%",
+    "code_improvement": { "HRH": 49, "HRA": 55, "ARH": 56, "ARA": 65, "source": "図 5(a)。本文では人が 49〜55%" },
+    "defect_detection": { "HRH": 7, "HRA": 8, "ARH": 40, "ARA": 30, "source": "図 5(a)" },
+    "understanding": { "HRH": 31, "HRA": 17, "source": "本文" },
+    "knowledge_transfer_human": "4〜6",
+    "ai_improvement_plus_defect": "95 超",
+    "documentation_ARA_vs_HRH": { "ARA": 29, "HRH": 18 }
+  },
+  "comment_form": {
+    "where": "表 IV、本文 III-A",
+    "unit": "%",
+    "weakness_and_fix_without_question": { "HRH": 31.3, "HRA": 31.9, "ARA": 94.5, "ARH": 87.7 },
+    "fix_only": { "HRH": 11.7, "HRA": 32.6 },
+    "question_only_HRH": 21.1,
+    "reading_ease": { "human": "67.2〜72.8", "ai": "43.0〜43.9" }
+  },
+  "interactions": {
+    "where": "本文 III-B、図 7",
+    "hra_longer_than_hrh": 11.8,
+    "hrh_without_ai": 99.8,
+    "hrh_avg_rounds": 1.76,
+    "hrh_multiple_rounds": 48.9,
+    "ai_initiated_end_at_first": "85.2〜86.7",
+    "ai_initiated_fewer_rounds": 30.6,
+    "code_changed_after_first": { "HRH": 47.6, "ARA": 30.9, "ARH": 24.5, "HRA": 17.5 },
+    "arh_successive_ai_states": [24.5, 32.8, 35.3],
+    "after_human_reply_then_another_exchange": { "from": 19.1, "to": 7.2 },
+    "hra_continued_discussion": { "from": 66.4, "to": 77.5 }
+  },
+  "suggestions": {
+    "where": "本文 III-C、表 V・VI・VII",
+    "count": { "ai": 88011, "human": 25673 },
+    "share_of_conversations_with_suggestion": { "ai": 56.6, "human": 20.8 },
+    "adoption": { "human": 56.5, "ai": 16.6, "gap_points": 39.9 },
+    "adoption_by_type": [
+      { "type": "Knowledge Transfer", "human_count": 2038, "human_adopt": 75.8 },
+      { "type": "Code Improvement", "human_count": 20166, "human_adopt": 59.2, "ai_count": 53501, "ai_adopt": 16.8 },
+      { "type": "Defects", "human_count": 616, "human_adopt": 53.7, "ai_count": 33019, "ai_adopt": 16.7 },
+      { "type": "Understanding", "human_count": 1354, "human_adopt": 51.0 },
+      { "type": "Misc", "human_count": 1499, "human_adopt": 1.2 },
+      { "type": "External Impact", "ai_count": 658, "ai_adopt": 6.5 },
+      { "type": "Testing", "ai_count": 833, "ai_adopt": 7.6 }
+    ],
+    "unadopted_ai_reasons_n383": [
+      { "reason": "直し案が間違い、またはコードを壊す", "share": 28.7 },
+      { "reason": "開発者が別の直し方をした", "share": 24.0 },
+      { "reason": "要らない、すでに対応済み", "share": 16.4 },
+      { "reason": "「直した」と言ったが、対応するコミットがない", "share": 11.2 },
+      { "reason": "開発者が別の書き方を好んだ", "share": 10.2 },
+      { "reason": "あとで対応する", "share": 8.4 },
+      { "reason": "はっきりしない", "share": 1.0 }
+    ],
+    "adopted_analyzed": { "human": 3467, "ai": 5518 },
+    "metric_mean_delta": [
+      { "metric": "Sum CC", "human": -0.063, "ai": 0.044 },
+      { "metric": "Average CC", "human": -0.006, "ai": 0.007 },
+      { "metric": "Code Lines", "human": 0.087, "ai": 0.241 },
+      { "metric": "Executable Statements", "human": 0.033, "ai": 0.093 },
+      { "metric": "Functions", "human": 0.003, "ai": 0.010 }
+    ]
+  },
+  "tools": {
+    "where": "本文 III-A・III-B・III-C（道具ごとの比較。各 383 件）",
+    "cursor": { "defect_detection": 99, "weakness_without_fix": 86.4, "overall_weakness_without_fix": 4.6 },
+    "claude_code": { "defect_detection": 20, "further_discussion": 7.3, "code_changes": 22.5 },
+    "gemini_code_assist": { "further_discussion": 19.8 },
+    "greptile": { "weakness_and_fix": 71.3, "overall_weakness_and_fix": 91.1, "cc_change": -0.979, "overall_cc_change": 0.045 },
+    "overall": { "defect_detection": 40, "further_discussion": 14.6, "code_changes": 31.2 },
+    "code_improvement_range_six_tools": "49〜62"
+  },
+  "labeling": {
+    "where": "本文 II-C・II-D・III-A",
+    "feedback_type_kappa": 0.85,
+    "high_confidence_share": 96.4,
+    "quality_attribute_kappa": 0.9,
+    "manual_sample": 383,
+    "llm_change_check_agree": "50 件中 50 件"
+  }
+}
