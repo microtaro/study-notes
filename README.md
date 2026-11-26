@@ -2,7 +2,7 @@
 
 **English** · [日本語](README.ja.md)
 
-What makes AI-written code trustworthy? How does a web app update its UI when state changes? microtaro explores these questions through research and article explainers, alongside a lesson with diagrams and code examples. [Browse the study notes](https://microtaro.github.io/study-notes/en/)
+microtaro’s study notes collect explainers on papers and articles alongside original teaching materials. New topics will be added over time. [Browse the study notes](https://microtaro.github.io/study-notes/en/)
 
 ## AI and trust
 

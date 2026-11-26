@@ -2,7 +2,7 @@
 
 [English](README.md) · **日本語**
 
-AI が書いたコードを、何を根拠に信頼できるか。Web アプリの画面は、状態が変わったときにどう更新されるか。microtaro がこの二つの問いを、論文・記事の解説と図入りの講義資料にまとめています。 [学習ノートを開く](https://microtaro.github.io/study-notes/)
+論文・記事の解説や自作の講義資料を、テーマごとにまとめた microtaro の学習ノートです。今後もテーマを増やしていきます。 [学習ノートを開く](https://microtaro.github.io/study-notes/)
 
 ## AI と信頼
 
