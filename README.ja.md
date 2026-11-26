@@ -1,39 +1,31 @@
-# study-notes
+# 学習ノート
 
 [English](README.md) · **日本語**
 
-論文を自分なりに読み解いた解説と、そこから作った資料を、テーマごとに置くリポジトリです。
-GitHub Pages で、そのまま Web サイトとして読めます。
+AI が書いたコードを、何を根拠に信頼できるか。Web アプリの画面は、状態が変わったときにどう更新されるか。microtaro がこの二つの問いを、論文・記事の解説と図入りの講義資料にまとめています。 [学習ノートを開く](https://microtaro.github.io/study-notes/)
 
-[学習ノートを読む](https://microtaro.github.io/study-notes/)
+## AI と信頼
 
-## 構成
+AI がコードを書く量が増えると、人がすべてを読んで確かめるのは難しくなります。企業の開発記録や公開プロジェクトのレビュー、バグ検出の実験をもとに、AI に任せられる確認と、人が担う判断を考えます。 [テーマの入口](https://microtaro.github.io/study-notes/topics/ai-trust/)
 
-```
-index.html          トップ：テーマの一覧と更新履歴
-assets/site.css     全ページ共通の見た目
-assets/paper.css    論文の解説ページの共通の部品
-assets/nav.js       左の欄の目次（テーマ → 論文 → 今のページの節を 1 本の木で出す）
-topics/
-  <テーマ>/
-    index.html      テーマの入口：問い、収録の一覧、出典
-    papers/         論文の解説（1 論文 1 ページ）
-    articles/       記事の解説（1 記事 1 ページ）
-    materials/      自作の資料（複数の論文をまとめたものなど）
-    data/           資料に載せた数値の CSV / JSON
-en/                 英語のページ（上と同じ構成）
-```
+### 論文の解説 5 本
 
-ビルドは不要です。clone したら `index.html` をブラウザで開けば読めます。
+- AI の導入でコードの変更が増えた会社で、レビューの負荷と分担はどう変わったか。 [AI が書く速さに、人のレビューが追いつかない](https://microtaro.github.io/study-notes/topics/ai-trust/papers/2x-mandate.html)
+- 自動化の能力に見合った頼り方ができるよう、信頼はどう形成され、変わっていくか。 [自動化にどこまで頼るかは、信頼が導く](https://microtaro.github.io/study-notes/topics/ai-trust/papers/trust-in-automation.html)
+- 実際に見つかって修正されたバグを使うと、AI のレビュー役はどこまで検出できるか。 [AI のレビュー役は、どこまでバグを見つけるか](https://microtaro.github.io/study-notes/topics/ai-trust/papers/review-agents-bugs.html)
+- 同じ人が AI の変更を何度もレビューすると、承認やコメントの傾向はどう変わるか。 [人は、AI の変更のレビューに慣れていく](https://microtaro.github.io/study-notes/topics/ai-trust/papers/review-habituation.html)
+- 欠陥を見つける、設計の理由を確かめる、プロジェクトの知識を伝える。人と AI のレビューでは、何が多いか。 [人のレビューと AI のレビューは、中身がどう違うか](https://microtaro.github.io/study-notes/topics/ai-trust/papers/human-ai-review.html)
 
-## 書き方
+### 記事の解説 1 本
 
-- 論文が言っていることと、microtaro の読み方を分けて書いています。
-- 論文の原文は置かず、読んだ版の arXiv の URL にリンクしています。
-- 作成のルールは [AGENTS.md](AGENTS.md) にあります。
+- Anthropic のチームが、変更のリスクに応じて人の承認を求めながら、どの確認を自動化しているか。 [Claude Code のチームは、AI が書くコードをどうレビューしているか](https://microtaro.github.io/study-notes/topics/ai-trust/articles/claude-code-team-review.html)
 
-## ライセンス
+## WEBアプリの宣言型UIと状態管理
 
-- 自作の文章と図：[CC BY 4.0](LICENSE)
-- コード（`assets/` の CSS と JavaScript）：[MIT](LICENSE-CODE)
-- 論文から引用した文や数値：それぞれの論文のライセンスによります（各ページの「出典」に記載）
+入力欄に文字を打つと、表示欄も更新されます。その値を持つのはどの部品で、変更を画面に伝えるのは何か。挨拶や未読バッジの例を使って、図と短いコードでたどります。 [テーマの入口](https://microtaro.github.io/study-notes/topics/declarative-ui/)
+
+**第1章「画面と状態」**では、C++ の命令型UIと React の宣言型UI、WPF のデータバインディングと React の描画を比べます。続いて、複数の部品で状態を共有するときの置き場所、Zustand のストア、HTTP をまたいでブラウザとサーバーが担う役割を扱います。 [第1章を読む](https://microtaro.github.io/study-notes/topics/declarative-ui/materials/ui-and-state.html)
+
+---
+
+解説では、元の資料が示したことと microtaro の読み方を分けています。自作の文章と図は [CC BY 4.0](LICENSE)、サイトの CSS と JavaScript は [MIT](LICENSE-CODE) です。引用や数値の出典は各ページに記載しています。
