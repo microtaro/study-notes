@@ -20,6 +20,8 @@ As AI produces more code, people have less time to review it all. These readings
 
 - Which checks does Anthropic automate, and how does the team decide when a change needs human approval? [How the Claude Code team does code review](https://microtaro.github.io/study-notes/en/topics/ai-trust/articles/claude-code-team-review.html)
 
+---
+
 ## Declarative UI and state management in web apps
 
 When text typed into one field appears in another, which component owns the value and what tells the UI to update? Follow a greeting and an unread badge through diagrams and short code examples. [Explore this theme](https://microtaro.github.io/study-notes/en/topics/declarative-ui/)

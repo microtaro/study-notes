@@ -20,6 +20,8 @@ AI がコードを書く量が増えると、人がすべてを読んで確か�
 
 - Anthropic のチームが、変更のリスクに応じて人の承認を求めながら、どの確認を自動化しているか。 [Claude Code のチームは、AI が書くコードをどうレビューしているか](https://microtaro.github.io/study-notes/topics/ai-trust/articles/claude-code-team-review.html)
 
+---
+
 ## WEBアプリの宣言型UIと状態管理
 
 入力欄に文字を打つと、表示欄も更新されます。その値を持つのはどの部品で、変更を画面に伝えるのは何か。挨拶や未読バッジの例を使って、図と短いコードでたどります。 [テーマの入口](https://microtaro.github.io/study-notes/topics/declarative-ui/)
