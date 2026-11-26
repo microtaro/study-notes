@@ -1,5 +1,5 @@
-/* 左の欄の目次。サイト全体を 1 本の木で出す：学習ノート（トップ）→ テーマ → 論文 → 今読んでいる論文の節。
-   テーマや論文を足したら、下の SITE に足す（日本語と英語の名前、サイトの根からのパス）。
+/* 左の欄の目次。学習ノート（トップ）→ テーマ → 各ページ → 共通目次を使うページの節。
+   テーマやページを足したら、下の SITE に足す（日本語と英語の名前、サイトの根からのパス）。
    英語のページ（html lang="en"）では、en/ の下の同じパスにリンクする。
    - 今いるテーマだけ開く。テーマの名前はテーマのページへのリンク、▶▼ で開閉する。
    - 論文のページでは、ページに書いてある目次（nav.toc の ol）を、その論文の下に入れ子で移す。
@@ -37,6 +37,16 @@
           {
             name: { ja: '人のレビューと AI のレビューは、中身がどう違うか', en: 'Human-AI Synergy in Agentic Code Review' },
             path: 'topics/ai-trust/papers/human-ai-review.html',
+          },
+        ],
+      },
+      {
+        name: { ja: 'WEBアプリの宣言型UIと状態管理', en: 'Declarative UI and state management in web apps' },
+        path: 'topics/declarative-ui/index.html',
+        papers: [
+          {
+            name: { ja: '第1章　画面と状態', en: 'Chapter 1. The UI and its state' },
+            path: 'topics/declarative-ui/materials/ui-and-state.html',
           },
         ],
       },

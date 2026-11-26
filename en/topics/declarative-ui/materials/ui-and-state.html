@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1. The UI and its state | Study notes</title>
+<meta name="description" content="When you type in one field, how does the same text appear in another? Follow the value through C++, WPF, and React, then decide where to keep it when several components or users share it.">
+<link rel="stylesheet" href="../../../../assets/site.css">
+<link rel="alternate" hreflang="ja" href="../../../../topics/declarative-ui/materials/ui-and-state.html">
+<link rel="alternate" hreflang="en" href="ui-and-state.html">
+<style>
+  :root {
+    --arrow: #A8327A;
+    --arrow-tint: #F8E9F2;
+    --box: 6rem;
+    --gothic: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    --mincho: "BIZ UDPMincho", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+    --mono: "Cascadia Mono", "BIZ UDGothic", Consolas, "Noto Sans Mono CJK JP", monospace;
+  }
+  @media (min-width: 30rem) { :root { --box: 8rem; } }
+  body { font: 1rem/1.7 var(--gothic); }
+  html[lang="en"] body { font-family: system-ui, sans-serif; }
+  html { scroll-padding-top: 0; }
+  .lecture-shell { max-width: 38rem; margin: 0 auto; padding: 0 1rem; }
+  .lecture-shell main { max-width: 38rem; padding: 2.5rem 0 4rem; }
+  .lecture-shell a { color: var(--ink); }
+  .lecture-shell a:focus-visible { outline-color: var(--arrow); }
+  .lecture-shell code { background: none; padding: 0; }
+  .lecture-toc .chapter-link { margin: 1.2rem 0 0; font-size: .85rem; }
+  .lecture-toc .chapter-link a { text-decoration: underline; }
+  .lecture-header .series { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1rem; }
+  .lecture-header .series a { font-weight: 400; }
+  .lecture-header .stamp { margin: .4rem 0 0; font-size: .78rem; }
+  .part section { padding: 0; margin-top: 3rem; }
+  .part h3 { margin: 0 0 .9rem; font-size: 1.1rem; }
+  .part h4 { margin: 1.2rem 0 .35rem; }
+  .part .legend { display: block; padding: 0; }
+  .part pre { color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .part .box { min-width: 0; }
+  .part table th { white-space: normal; }
+  .part tbody th { min-width: 0; }
+  .part > h2 { margin: 0; font-size: 1rem; color: var(--sub); }
+  .part .section-lead { margin: .6rem 0 0; color: var(--sub); }
+  .part .note { max-width: none; padding: 1rem 0 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; }
+  .part section > :is(ol, ul, dl) { max-width: none; }
+
+  h1 { margin: 0; font-size: 1.45rem; line-height: 1.35; }
+  .subtitle { margin: .4rem 0 0; color: var(--sub); font-size: .95rem; }
+  .series { margin: 0 0 .3rem; color: var(--sub); font-size: .85rem; font-weight: 700; }
+  .toc-ch { margin: .9rem 0 0; }
+  .toc-ch-title { display: block; margin: 0; padding: .15rem 0 .15rem .6rem; border-left: 3px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--sub); text-decoration: none; }
+  .toc-ch.cur > .toc-ch-title { border-left-color: var(--arrow); color: var(--ink); }
+  .toc-ch.cur .toc-group { margin: .7rem 0 0 .9rem; }
+  /* 目次（広い画面では左に固定、狭い画面では上） */
+  .lecture-toc { padding-top: 1.8rem; font-size: .87rem; }
+  .lecture-toc .toc-title { margin: 0; font-weight: 700; color: var(--sub); }
+  .toc-group { margin: .8rem 0 0; }
+  .toc-group-label { margin: 0 0 .2rem; font-size: .75rem; font-weight: 700; color: var(--arrow); }
+  .lecture-toc ol { display: flex; flex-wrap: wrap; gap: .2rem 1.2rem; margin: 0; padding: 0; list-style: none; }
+  .lecture-toc li { line-height: 1.5; }
+  .lecture-toc a { text-decoration: none; }
+  .lecture-toc a:hover { text-decoration: underline; }
+  .lecture-toc .tn { color: var(--sub); margin-right: .2rem; font-variant-numeric: tabular-nums; }
+  @media (min-width: 58rem) {
+    .lecture-shell {
+      display: grid;
+      grid-template-columns: 13.8rem minmax(0, 38rem);
+      column-gap: 2.5rem;
+      justify-content: center;
+      max-width: none;
+    }
+    .lecture-toc { position: sticky; top: 0; align-self: start; padding-top: 2.6rem; max-height: 100vh; overflow-y: auto; padding-bottom: 2rem; }
+    .lecture-toc ol { flex-direction: column; gap: .18rem; }
+    .lecture-shell main { padding-top: 2.6rem; }
+  }
+
+  /* 最初の 2 文 */
+  .gist { margin: 1rem 0 0; border-top: 2px solid var(--ink); }
+  .gist > div { display: grid; grid-template-columns: 6rem 1fr; column-gap: .8rem; padding: .55rem 0; border-bottom: 1px solid var(--rule); }
+  .gist dt { font-weight: 700; }
+  .gist dd { margin: 0; font-family: var(--mincho); font-size: 1.08rem; }
+  @media (max-width: 30rem) { .gist > div { grid-template-columns: 1fr; } }
+  /* 部 */
+  .part { margin-top: 3rem; scroll-margin-top: 1rem; }
+  .part + .part { margin-top: 4.5rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+  .phrase {
+    margin: .3rem 0 0;
+    font-family: var(--mincho);
+    font-size: clamp(1.5rem, 7.5vw, 2.6rem);
+    line-height: 1.3;
+  }
+  /* ---------- 図 ---------- */
+  .diagram {
+    display: grid;
+    grid-template-columns: var(--box) minmax(3.5rem, 1fr) var(--box);
+    align-items: center;
+    column-gap: .6rem;
+    row-gap: .9rem;
+  }
+  .box {
+    align-self: stretch;
+    display: flex; flex-direction: column; justify-content: center;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: .5rem .25rem .6rem;
+    text-align: center;
+  }
+  .box .name { display: block; font-size: .9rem; font-weight: 700; }
+  .box .var { display: block; font-size: .85rem; color: var(--sub); }
+  .box .var b { color: var(--ink); }
+  .box .var code { font-family: var(--mono); }
+  .box .v { display: block; font-family: var(--mincho); font-size: 1.05rem; }
+
+  .arrow { text-align: center; }
+  .verb { display: block; color: var(--arrow); font-weight: 700; }
+  .shaft { position: relative; height: 4px; margin: .2rem 14px 0 0; background: var(--arrow); }
+  .shaft::after {
+    content: "";
+    position: absolute; top: 50%; right: -14px;
+    transform: translateY(-50%);
+    border-left: 16px solid var(--arrow);
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+  }
+  .reverse .shaft { margin: .2rem 0 0 14px; }
+  .reverse .shaft::after {
+    right: auto; left: -14px;
+    border-left: 0;
+    border-right: 16px solid var(--arrow);
+  }
+
+  .say {
+    grid-column: 1 / -1;
+    justify-self: start;
+    position: relative;
+    margin: 0;
+    padding: .45rem .9rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    font-family: var(--mincho);
+    font-size: 1.15rem;
+  }
+  .say::before {
+    content: "";
+    position: absolute; top: -9px; left: calc(var(--box) / 2 - 9px);
+    width: 16px; height: 16px;
+    background: var(--surface);
+    border-left: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
+    transform: rotate(45deg);
+  }
+  .reverse .say { justify-self: end; }
+  .reverse .say::before { left: auto; right: calc(var(--box) / 2 - 9px); }
+
+  .point { margin: 1rem 0 0; font-weight: 700; color: var(--arrow); }
+
+  /* ---------- コード ---------- */
+  .legend { margin: .3rem 0 0; font-size: .9rem; color: var(--sub); }
+  .swatch {
+    display: inline-block; width: 1.6rem; height: .9rem;
+    margin-right: .4rem; vertical-align: -.1rem;
+    border-left: 4px solid var(--arrow); background: var(--arrow-tint);
+  }
+  h4 { margin: 1.2rem 0 .35rem; font-size: .95rem; color: var(--sub); }
+
+  pre {
+    margin: 0;
+    padding: .7rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .92rem;
+    line-height: 1.75;
+  }
+  .c { color: var(--sub); }
+  .run {
+    display: block;
+    margin: 0 -1rem;
+    padding: 0 1rem 0 calc(1rem - 4px);
+    border-left: 4px solid var(--arrow);
+    background: var(--arrow-tint);
+  }
+  /* React の中で動く実行（自分では書かない） */
+  .inside {
+    margin: .4rem 0 0 1.5rem;
+    padding: .35rem .9rem .5rem;
+    border: 2px dashed var(--arrow);
+    border-radius: 8px;
+    color: var(--arrow);
+  }
+  .inside p { margin: 0; font-size: .85rem; font-weight: 700; }
+  .inside code { font-family: var(--mono); font-size: .92rem; }
+
+  /* ---------- 宣言型のよさ ---------- */
+  .eg { margin: 0 0 .6rem; font-size: .9rem; color: var(--sub); }
+  .vs { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--ink); }
+  .vs > div { padding: .6rem .9rem .8rem 0; }
+  .vs > div + div { padding: .6rem 0 .8rem .9rem; border-left: 1px solid var(--rule); }
+  .vs p { margin: .25rem 0 0; }
+  .vs .side { margin: 0; font-size: .9rem; font-weight: 700; color: var(--sub); }
+  .vs .how { font-family: var(--mincho); font-size: 1.02rem; }
+  @media (max-width: 30rem) {
+    .vs { grid-template-columns: 1fr; }
+    .vs > div + div { padding: .6rem 0 .8rem; border-left: 0; border-top: 1px solid var(--rule); }
+  }
+  .keep { margin: 0; padding-left: 1.2rem; }
+  .keep li { margin: .35rem 0; }
+  .keep code { font-family: var(--mono); font-size: .92em; }
+  .src { margin: .2rem 0 0; padding-left: 1.2rem; }
+
+  /* ---------- 購読と通知 ---------- */
+  .row-label { margin: 1.8rem 0 .5rem; font-size: .95rem; font-weight: 700; }
+  .row-label:first-of-type { margin-top: 0; }
+  .why { margin: 0; padding-left: 1.4rem; }
+  .why li { margin: .35rem 0; }
+  .why.marked { list-style: none; padding-left: 0; margin-top: .8rem; }
+  .after { margin: .8rem 0 0; }
+  .legend3 { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0 0 .5rem; font-size: .85rem; color: var(--sub); }
+  .legend3 .k { display: inline-block; width: 1.4rem; height: .9rem; margin-right: .35rem; vertical-align: -.1rem; border-radius: 3px; }
+  .k-hit { background: var(--arrow-tint); border: 2px solid var(--arrow); }
+  .k-redo { border: 2px dashed var(--arrow); }
+  .bind { --scr: calc(var(--box) + 1.5rem); grid-template-columns: var(--box) minmax(3rem, 1fr) var(--scr); }
+  /* 画面の箱。上の「画面」と同じ高さを下にも空け、真ん中の欄が矢印の高さに来るようにする */
+  .screen { gap: .3rem; padding: .3rem .4rem; }
+  .screen .name, .screen::after { height: 1.5rem; line-height: 1.5rem; }
+  .screen::after { content: ""; display: block; }
+  .spot { display: block; padding: .1rem .2rem; border: 2px solid var(--rule); border-radius: 6px; font-size: .85rem; background: var(--surface); }
+  .spot.redo { border-style: dashed; border-color: var(--arrow); }
+  .spot.hit { border-style: solid; border-color: var(--arrow); background: var(--arrow-tint); font-family: var(--mincho); font-size: .95rem; font-weight: 700; }
+  .say-r { justify-self: end; }
+  .say-r::before { left: auto; right: calc(var(--scr) / 2 - 9px); }
+  .callout .strong { margin-top: .8rem; font-weight: 700; color: var(--arrow); }
+  /* 矢印の線を、真ん中の欄の高さにそろえる（上の文字の高さの半分だけ上げる） */
+  .bind .arrow { position: relative; top: -.85rem; }
+  /* 親子＝関数の中から関数を呼ぶ（呼び出しとデータの流れの図） */
+  .callfig { display: block; width: 100%; max-width: 30rem; height: auto; margin: 0 auto; }
+  .callfig text { font-family: var(--gothic); font-size: 12px; fill: var(--ink); }
+  .callfig .mono { font-family: var(--mono); font-size: 11px; }
+  .callfig .big { font-size: 14px; font-weight: 700; }
+  .callfig .b { font-weight: 700; }
+  .callfig .ac { fill: var(--arrow); font-weight: 700; }
+  .callfig .sub { fill: var(--sub); font-size: 10px; }
+  .callfig .bx { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  .callfig .bx.redo { stroke: var(--arrow); stroke-dasharray: 6 4; }
+  .callfig .bx.hit { fill: var(--arrow-tint); stroke: var(--arrow); }
+  .callfig .bx.stale { fill: var(--surface); stroke: #9AA4B2; stroke-dasharray: 0; }
+  .callfig .ln { stroke: var(--arrow); stroke-width: 3; }
+  .callfig .head { fill: var(--arrow); }
+  .callfig .ln.up { stroke-dasharray: 5 4; }
+  .callfig .chip { fill: var(--arrow-tint); stroke: var(--arrow); stroke-width: 1.5; }
+  .callfig .ng { font-weight: 700; fill: var(--ink); }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem .8rem; margin-top: .6rem; }
+  .panels .callfig { max-width: none; }
+  .panels .callfig text { font-size: 14px; }
+  .panels .callfig .sub, .panels .callfig .mono { font-size: 12px; }
+  .panels .callfig .big { font-size: 16px; }
+  @media (max-width: 34rem) { .panels { grid-template-columns: 1fr; } }
+  .callfig .bx.muted { fill: var(--surface); stroke: #9AA4B2; }
+  .callfig .bx.store { fill: var(--b-tint); stroke: var(--b); }
+  .callfig .bx.srv { fill: var(--s-tint); stroke: var(--s-line); }
+  .callfig .bx.dbx { fill: var(--d-tint); stroke: var(--d-line); }
+  .callfig .ln-b { stroke: var(--b); stroke-width: 2.5; }
+  .callfig .ln-s { stroke: var(--s-line); stroke-width: 2.5; }
+  .callfig .head-b { fill: var(--b); }
+  .callfig .head-s { fill: var(--s-line); }
+  .callfig .cb { fill: var(--b); font-weight: 700; }
+  .callfig .cs { fill: var(--s); font-weight: 700; }
+  .callfig .cd { fill: var(--d); font-weight: 700; }
+  /* ---------- フロントとバック ---------- */
+  .crit { margin: 0; border-top: 2px solid var(--ink); }
+  .crit > div { display: grid; grid-template-columns: 7.5rem 1fr; column-gap: .8rem; padding: .6rem 0; border-bottom: 1px solid var(--rule); }
+  .crit dt { font-weight: 700; }
+  .crit dd { margin: 0; }
+  .crit .ex { display: block; margin-top: .15rem; font-size: .9rem; color: var(--sub); }
+  @media (max-width: 30rem) { .crit > div { grid-template-columns: 1fr; } }
+
+  /* 状態管理から見た表 */
+  .tri { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .95rem; }
+  .tri th, .tri td { padding: .55rem .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .tri thead th { font-size: .85rem; color: var(--sub); }
+  .tri tbody th { white-space: nowrap; }
+  .tri td:last-child { font-weight: 700; }
+  @media (max-width: 30rem) {
+    .tri thead { display: none; }
+    .tri tr, .tri th, .tri td { display: block; }
+    .tri tbody th { padding-bottom: 0; border-bottom: 0; }
+    .tri td::before { content: attr(data-label) " · "; color: var(--sub); font-weight: 400; }
+  }
+
+  /* どこに何を置くか（3 つの箱） */
+  .map { display: grid; grid-template-columns: 1.25fr 1fr .85fr; gap: .5rem; font-size: .88rem; line-height: 1.5; }
+  .col { border: 2px solid; border-radius: 10px; padding: .55rem .6rem .7rem; }
+  .col-b { border-color: var(--b); background: var(--b-tint); }
+  .col-s { border-color: var(--s-line); background: var(--s-tint); }
+  .col-d { border-color: var(--d-line); background: var(--d-tint); }
+  .col-name { margin: 0; font-size: 1.05rem; font-weight: 700; }
+  .col-b .col-name { color: var(--b); }
+  .col-s .col-name { color: var(--s); }
+  .col-d .col-name { color: var(--d); }
+  .col-sub { margin: 0 0 .4rem; color: var(--sub); }
+  .grp { margin: .6rem 0 .25rem; font-weight: 700; color: var(--sub); }
+  .items { margin: 0; padding: 0; list-style: none; }
+  .items li { margin: 0 0 .3rem; padding: .3rem .45rem; background: var(--surface); border-radius: 6px; }
+  .items b { display: block; }
+  .items code { display: block; font-family: var(--mono); font-size: .82rem; }
+  .items em { display: block; font-style: normal; color: var(--sub); font-size: .82rem; }
+  .tools { margin: .6rem 0 0; font-weight: 700; }
+  .span { padding: .35rem .7rem; background: var(--surface); border: 2px solid var(--ink); border-radius: 8px; }
+  .span-bs { grid-column: 1 / 3; }
+  .span-sd { grid-column: 2 / 4; }
+  @media (max-width: 30rem) {
+    .map { grid-template-columns: 1fr; }
+    .span-bs, .span-sd { grid-column: auto; }
+  }
+
+  /* 構成の決め方（流れ図） */
+  .legend2 { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .8rem; }
+  .chip { display: inline-block; padding: .05rem .5rem; border: 2px solid var(--ink); border-radius: 6px; font-size: .82rem; font-weight: 700; background: var(--surface); }
+  .chip.own { background: var(--ink); color: var(--surface); }
+  .chip.rent { border-style: dashed; }
+  .chip.none { border-color: var(--rule); color: #8A94A3; font-weight: 400; }
+  .chip.own.b { background: var(--b); border-color: var(--b); }
+  .chip.own.s { background: var(--s); border-color: var(--s); }
+  .chip.own.d { background: var(--d); border-color: var(--d); }
+  .chip.rent.s { border-color: var(--s-line); color: var(--s); }
+  .chip.rent.d { border-color: var(--d-line); color: var(--d); }
+  .flow { margin: 0; padding: 0; list-style: none; }
+  .flow .q { margin: 0; padding: .5rem .8rem; background: var(--surface); border: 2px solid var(--ink); border-radius: 10px; font-weight: 700; }
+  .flow .branch { display: grid; grid-template-columns: 6.5rem 1fr; gap: .6rem; align-items: center; margin: .5rem 0 0 1.2rem; }
+  .flow .ans { margin: 0; font-weight: 700; }
+  .flow .ans small { font-weight: 400; color: var(--sub); }
+  .flow .down { margin: .45rem 0 .45rem 1.2rem; font-weight: 700; color: var(--sub); }
+  .type { padding: .5rem .8rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+  .flow li:last-child > .type { margin-left: 1.2rem; }
+  .type p { margin: 0; }
+  .tname { font-weight: 700; }
+  .type .chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: .3rem 0; }
+  .tools2 { font-size: .9rem; }
+  @media (max-width: 30rem) { .flow .branch { grid-template-columns: 1fr; } }
+
+  /* ---------- 選択肢 ---------- */
+  .bargrid { display: grid; grid-template-columns: 1fr; gap: .9rem; }
+  .bg-name { margin: 0 0 .3rem; font-size: .9rem; font-weight: 700; }
+  .bg-name span { font-weight: 400; color: var(--sub); font-size: .8rem; }
+  .bars { margin: 0; padding: 0; list-style: none; font-size: .85rem; }
+  .bars li { display: grid; grid-template-columns: 8rem 1fr 6.4rem; align-items: center; column-gap: .5rem; padding: .12rem 0; }
+  .bars .bn { overflow-wrap: anywhere; }
+  .bars .bt { position: relative; height: 10px; }
+  .bars .bar { display: block; height: 10px; background: #5B6B82; border-radius: 0 4px 4px 0; }
+  .bars .bv { color: var(--sub); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 30rem) { .bars li { grid-template-columns: 6.5rem 1fr 5.8rem; } }
+
+  .ladder { margin: 0; padding: 0; list-style: none; counter-reset: rung; }
+  .ladder li { position: relative; margin: 0 0 .5rem; padding: .5rem .8rem .55rem 2.6rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; counter-increment: rung; }
+  .ladder li::before { content: counter(rung); position: absolute; left: .7rem; top: .5rem; width: 1.3rem; height: 1.3rem; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: .8rem; font-weight: 700; text-align: center; line-height: 1.3rem; }
+  .ladder p { margin: 0; }
+  .ladder .rung { font-weight: 700; }
+  .ladder .rung-tools { font-size: .92rem; }
+  .ladder .rung-note { font-size: .85rem; color: var(--sub); }
+
+  /* ---------- オブジェクト指向から ---------- */
+  .oopvs { display: grid; grid-template-columns: 1fr 1.4fr; gap: .8rem; }
+  .ov-side { padding: .7rem .8rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+  .ov-title { margin: 0 0 .5rem; font-weight: 700; }
+  .ov-note { margin: .6rem 0 0; font-size: .88rem; color: var(--sub); }
+  .obj { padding: .5rem .7rem; border: 2px solid var(--ink); border-radius: 8px; font-size: .92rem; }
+  .obj p { margin: .1rem 0; }
+  .obj .obj-name { font-weight: 700; border-bottom: 1px solid var(--rule); padding-bottom: .2rem; margin-bottom: .3rem; }
+  .obj code { font-family: var(--mono); }
+  .places { display: grid; gap: .45rem; }
+  .pl-box { padding: .4rem .55rem .5rem; border: 2px solid; border-radius: 8px; }
+  .pl-b { border-color: var(--b); background: var(--b-tint); }
+  .pl-s { border-color: var(--s-line); background: var(--s-tint); }
+  .pl-name { margin: 0 0 .3rem; font-size: .9rem; font-weight: 700; }
+  .pl-b .pl-name { color: var(--b); }
+  .pl-s .pl-name { color: var(--s); }
+  .pl-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: 0; }
+  .pl-chips span { padding: .05rem .45rem; background: var(--surface); border-radius: 5px; font-size: .82rem; }
+  @media (max-width: 30rem) { .oopvs { grid-template-columns: 1fr; } }
+
+  .myth { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .92rem; }
+  .myth th, .myth td { padding: .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .myth thead th { font-size: .85rem; color: var(--sub); }
+  .myth td:first-child { color: var(--sub); }
+  .myth td:last-child { font-weight: 700; }
+  .myth code { font-family: var(--mono); font-size: .92em; font-weight: 400; }
+  .speed { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .92rem; }
+  .speed th, .speed td { padding: .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .speed thead th { font-size: .85rem; color: var(--sub); }
+  @media (max-width: 30rem) {
+    .speed thead { display: none; }
+    .speed tr, .speed th, .speed td { display: block; }
+    .speed tbody th { padding-bottom: 0; border-bottom: 0; }
+    .speed td::before { content: attr(data-label) " · "; color: var(--sub); }
+  }
+
+  .note {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: .9rem;
+    color: var(--sub);
+  }
+  .callout {
+    margin-top: 2.5rem;
+    padding: .9rem 1.1rem 1rem;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+  }
+  .callout p { margin: .3rem 0 0; }
+  .callout .callout-title { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
+  .callout code { font-family: var(--mono); font-size: .95rem; }
+
+  .note p { margin: 0 0 .4rem; }
+  .note code { font-family: var(--mono); font-size: .92em; }
+  .part .tri tbody th { white-space: normal; }
+  .part .bars li { margin: 0; }
+  .part .box { align-items: center; }
+  .panels svg { min-width: 0; }
+  .part .items code { white-space: normal; }
+  @media (max-width: 34rem) {
+    .part .map { grid-template-columns: minmax(0, 1fr); }
+    .part .span { grid-column: auto; }
+    .part .verb { font-size: .8rem; }
+    .part .phrase { font-size: 1.65rem; }
+  }
+  @media (max-width: 22rem) { :root { --box: 5rem; } }
+</style>
+</head>
+<body>
+<div class="lecture-shell">
+<nav class="lecture-toc" aria-label="Contents">
+  <p class="toc-title">Contents</p>
+  <div class="toc-ch cur">
+    <p class="toc-ch-title">Chapter 1. The UI and its state</p>
+    <div class="toc-group">
+      <p class="toc-group-label">Writing a UI</p>
+      <ol>
+        <li><a href="#figure"><span class="tn">1.</span>Imperative and declarative UI</a></li>
+        <li><a href="#merit"><span class="tn">2.</span>Subscriptions and notifications</a></li>
+        <li><a href="#wpf"><span class="tn">3.</span>WPF and React</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">State management</p>
+      <ol>
+        <li><a href="#manage"><span class="tn">4.</span>Why manage state?</a></li>
+        <li><a href="#zustand"><span class="tn">5.</span>Zustand</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">Browser and server</p>
+      <ol>
+        <li><a href="#http"><span class="tn">6.</span>Stateless HTTP</a></li>
+        <li><a href="#split"><span class="tn">7.</span>Browser and server</a></li>
+        <li><a href="#options"><span class="tn">8.</span>Comparing tools</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">Summary</p>
+      <ol>
+        <li><a href="#oop"><span class="tn">9.</span>From object-oriented design</a></li>
+      </ol>
+    </div>
+  </div>
+  <p class="chapter-link"><a href="../index.html">Back to the theme</a></p>
+</nav>
+<main>
+<header class="lecture-header">
+  <p class="series">How web apps work <a href="../../../../topics/declarative-ui/materials/ui-and-state.html" hreflang="ja" lang="ja">日本語</a></p>
+  <h1>Chapter 1. The UI and its state</h1>
+  <p class="subtitle">From imperative and declarative UI to managing state and dividing work between browser and server</p>
+  <p class="stamp">microtaro · Created November 26, 2026</p>
+</header>
+
+<dl class="gist">
+    <div><dt>Imperative UI</dt><dd>Specify which parts of the screen to change when someone presses a button.</dd></div>
+    <div><dt>Declarative UI</dt><dd>Describe what the screen should show for the current state.</dd></div>
+  </dl>
+
+  <div class="part" id="figure">
+    <h2>1. Imperative and declarative UI</h2>
+    <p class="phrase">Display “Hello” on the screen</p>
+    <p class="section-lead">The same text reaches the screen in two different ways.</p>
+
+    <section>
+      <h3>Follow the arrows</h3>
+
+      <p class="row-label">Imperative UI</p>
+      <div class="diagram" role="img" aria-label="The program tells the screen to display message. This ordinary variable holds “Hello.”">
+        <div class="box"><span class="name">Program</span><span class="var"><b>Variable</b> <code>message</code></span><span class="v">Hello</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">tells</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">Screen</span><span class="v">Hello</span></div>
+        <p class="say">“Display message on the screen.”</p>
+      </div>
+      <p class="point">The program updates the screen explicitly. You can point to the line that does it.</p>
+
+      <p class="row-label">Declarative UI</p>
+      <div class="diagram reverse" role="img" aria-label="The view declares that this spot displays message. It reads the state value, currently “Hello.”">
+        <div class="box"><span class="name">Program</span><span class="var"><b>State</b> <code>message</code></span><span class="v">Hello</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">reads</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">Screen</span><span class="v">Hello</span></div>
+        <p class="say">“Show the value of message here.”</p>
+      </div>
+      <p class="point">Your code describes what to show for the current state. The framework applies the change to the screen.</p>
+    </section>
+
+    <section id="code">
+      <h3>The same example in C++ and React pseudocode</h3>
+      <p class="legend"><span class="swatch" aria-hidden="true"></span>The marked lines update the screen.</p>
+
+      <h4>Imperative UI in C++ sends a command for each change</h4>
+<pre><code><span class="c">// Start with an ordinary variable.</span>
+std::string message = "Hello";
+<span class="run">screen.show(message);</span>
+
+<span class="c">// Change the greeting.</span>
+<span class="c">// Tell the screen to display it again.</span>
+message = "Goodbye";
+<span class="run">screen.show(message);</span></code></pre>
+
+      <h4>Declarative UI in React updates the state</h4>
+<pre><code><span class="c">// React keeps the message in state.</span>
+const [message, setMessage] = useState("Hello");
+return &lt;Screen&gt;{message}&lt;/Screen&gt;;
+
+<span class="c">// Change the greeting.</span>
+<span class="c">// Update the state.</span>
+setMessage("Goodbye");</code></pre>
+      <div class="inside">
+        <p>The display update React handles (pseudocode)</p>
+        <code>screen.show(message);</code>
+      </div>
+
+      <div class="callout">
+        <p class="callout-title">What does each call update?</p>
+        <p><code>screen.show(message)</code> → updates the screen</p>
+        <p><code>setMessage("Goodbye")</code> → updates the state</p>
+      </div>
+    </section>
+
+    <div class="note">
+      <p>Both examples need a display update. The C++ example puts it in application code, and the React example delegates it to React. C++ also supports declarative frameworks. The distinction is in how you describe the UI.</p>
+    </div>
+  </div>
+
+  <div class="part" id="merit">
+    <h2>2. Keeping a view consistent with subscriptions and notifications</h2>
+    <p class="section-lead">As the number of controls grows, more of them need to agree about the same state. How does a view learn that the state has changed?</p>
+
+    <section>
+      <h3>One state keeps the controls in sync</h3>
+      <p class="eg">While a message is being sent, disable the Send button and display “Sending…”.</p>
+      <div class="vs">
+        <div>
+          <p class="side">Imperative</p>
+          <p>Update each control individually and restore each one when the request finishes. It is easy to forget one.</p>
+          <p class="how">Disable the button and show “Sending…”.<br>→ Enable the button and hide “Sending…”.</p>
+        </div>
+        <div>
+          <p class="side">Declarative</p>
+          <p>Describe both controls in terms of whether a send is in progress. Change that state when the request finishes.</p>
+          <p class="how">Sending → Idle</p>
+        </div>
+      </div>
+      <p class="after">The same reasoning applies to values you can calculate. If the Send button should be disabled when the input is empty, keep the text (<code>message</code>) in state. Derive the button’s availability from that text.</p>
+    </section>
+
+    <section id="notify">
+      <h3>How a subscription leads to a notification</h3>
+      <p class="eg">The view needs a way to learn about changes so it can display the latest state.</p>
+
+      <p class="row-label">① Subscribe once when the view starts listening</p>
+      <div class="diagram reverse" role="img" aria-label="The view asks the program to let it know when message changes.">
+        <div class="box"><span class="name">Program</span><span class="var"><b>State</b> <code>message</code></span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">subscribes</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">Screen</span></div>
+        <p class="say">“Tell me when message changes.”</p>
+      </div>
+
+      <p class="row-label">② Notify whenever the value changes</p>
+      <div class="diagram" role="img" aria-label="The program notifies the view that message has changed.">
+        <div class="box"><span class="name">Program</span><span class="var"><b>State</b> <code>message</code></span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">notifies</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">Screen</span></div>
+        <p class="say">“Message has changed.”</p>
+      </div>
+      <p class="point">A notification says that something changed. The view’s description determines what to draw.</p>
+
+      <h4>Why assigning to an ordinary variable does not update the screen</h4>
+<pre><code><span class="c">// An ordinary assignment does not schedule a render.</span>
+let message = "Hello";
+message = "Goodbye";
+
+<span class="c">// setMessage asks React to schedule a render.</span>
+const [message, setMessage] = useState("Hello");
+setMessage("Goodbye");</code></pre>
+      <p class="after">This resembles the Observer pattern in object-oriented programming. With useState, the setter requests another render. Immediately after <code>setMessage</code>, the variable <code>message</code> still holds the value from this render. The new value is available on the next render.</p>
+    </section>
+
+    <div class="note">
+      <p>Sources checked for the original lesson on November 23, 2026</p>
+      <ul class="src">
+        <li>React documentation · <a href="https://react.dev/learn/reacting-to-input-with-state">Reacting to Input with State</a> (imperative and declarative approaches), <a href="https://react.dev/learn/choosing-the-state-structure">Choosing the State Structure</a> (deriving values from state), and <a href="https://react.dev/learn/state-as-a-snapshot">State as a Snapshot</a> (when a new value becomes available).</li>
+        <li>React documentation · <a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a> (why an assignment alone does not trigger a render) and <a href="https://react.dev/reference/react/useSyncExternalStore">useSyncExternalStore</a> (subscribing to changes in an external store).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="wpf">
+    <h2>3. How WPF and React update a view</h2>
+    <p class="phrase">React recalculates the view from state</p>
+    <p class="section-lead">In WPF, a framework for Windows UIs, controls are objects that persist. In React, a state change can run a component function again. React applies the differences to the screen.</p>
+
+    <section>
+      <h3>What persists between changes?</h3>
+      <p class="eg">Type “Goodbye” in the input. The output should change to “Goodbye” too.</p>
+      <p class="legend3"><span><span class="k k-hit" aria-hidden="true"></span>Updated on screen</span><span><span class="k k-redo" aria-hidden="true"></span>Recalculated during render</span></p>
+
+      <p class="row-label">WPF data binding</p>
+      <div class="diagram bind" role="img" aria-label="The WPF output field is bound to the Message property. A change notification updates the bound field.">
+        <div class="box"><span class="name">Object</span><span class="var"><b>Property</b> <code>Message</code></span><span class="v">Goodbye</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">binds</span><div class="shaft"></div></div>
+        <div class="box screen"><span class="name">Screen</span><span class="spot">Input</span><span class="spot hit">Goodbye</span></div>
+        <p class="say say-r">“Bind this field to Message.”</p>
+      </div>
+      <p class="point">The binding updates the target field.</p>
+
+      <p class="row-label">React rendering</p>
+      <div class="diagram bind" role="img" aria-label="React calls the component again with the new message value. Only the changed output needs a corresponding DOM update.">
+        <div class="box"><span class="name">Component</span><span class="var"><b>State</b> <code>message</code></span><span class="v">Goodbye</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">re-render</span><div class="shaft"></div></div>
+        <div class="box screen"><span class="name">Screen</span><span class="spot redo">Input</span><span class="spot redo hit">Goodbye</span></div>
+        <p class="say say-r">“Show the value of message here.”</p>
+      </div>
+      <p class="point">Recalculate the component’s output and apply the differences to the DOM.</p>
+      <p class="after">A local variable inside the component is initialized again when the function runs. Store a value in React state when it needs to survive the next render.</p>
+    </section>
+
+    <section>
+      <h3>Which component should own the value?</h3>
+      <p class="eg">The input and output are nested inside a screen component. Both use <code>message</code>.</p>
+
+      <div class="panels">
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="If the input owns message, its sibling cannot read it. The output goes stale.">
+          <text x="10" y="20" class="b">✕ Too low in the tree</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">Screen</text>
+          <rect class="bx" x="18" y="66" width="124" height="80" rx="8"/>
+          <text x="80" y="90" class="b" text-anchor="middle">Input</text>
+          <rect class="chip" x="48" y="100" width="64" height="20" rx="5"/>
+          <text x="80" y="114" class="mono" text-anchor="middle">message</text>
+          <rect class="bx stale" x="158" y="66" width="124" height="80" rx="8"/>
+          <text x="220" y="90" class="b" text-anchor="middle">Output</text>
+          <text x="220" y="114" class="sub" text-anchor="middle">Cannot read it</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ The output stays stale</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="Separate copies allow the input to say “Goodbye” while the output still says “Hello.”">
+          <text x="10" y="20" class="b">✕ Two separate owners</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">Screen</text>
+          <rect class="bx" x="18" y="66" width="124" height="80" rx="8"/>
+          <text x="80" y="90" class="b" text-anchor="middle">Input</text>
+          <rect class="chip" x="48" y="100" width="64" height="20" rx="5"/>
+          <text x="80" y="114" class="mono" text-anchor="middle">message</text>
+          <text x="80" y="138" class="sub" text-anchor="middle">Goodbye</text>
+          <text x="150" y="112" class="big" text-anchor="middle">≠</text>
+          <rect class="bx" x="158" y="66" width="124" height="80" rx="8"/>
+          <text x="220" y="90" class="b" text-anchor="middle">Output</text>
+          <rect class="chip" x="188" y="100" width="64" height="20" rx="5"/>
+          <text x="220" y="114" class="mono" text-anchor="middle">message</text>
+          <text x="220" y="138" class="sub" text-anchor="middle">Hello</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ The two copies disagree</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="If the app owns message, even an unrelated Settings component can render again on each keystroke.">
+          <text x="10" y="20" class="b">✕ Too high in the tree</text>
+          <rect class="bx redo" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="52" class="b">App</text>
+          <rect class="chip" x="98" y="39" width="64" height="20" rx="5"/>
+          <text x="130" y="53" class="mono" text-anchor="middle">message</text>
+          <rect class="bx redo" x="14" y="66" width="180" height="82" rx="8"/>
+          <text x="24" y="84" class="b">Screen</text>
+          <rect class="bx redo" x="22" y="92" width="80" height="46" rx="6"/>
+          <text x="62" y="120" class="b" text-anchor="middle">Input</text>
+          <rect class="bx redo" x="106" y="92" width="80" height="46" rx="6"/>
+          <text x="146" y="120" class="b" text-anchor="middle">Output</text>
+          <rect class="bx redo" x="202" y="66" width="84" height="82" rx="8"/>
+          <text x="244" y="96" class="b" text-anchor="middle">Settings</text>
+          <text x="244" y="116" class="sub" text-anchor="middle">No use for it</text>
+          <text x="244" y="131" class="sub" text-anchor="middle">re-renders</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ Each keystroke re-renders more</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="The screen owns message and passes it to both children. The input calls the setter supplied by the screen, so both children read the same value.">
+          <defs><marker id="ah3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+          <text x="10" y="20" class="b">✓ A shared parent owns it</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">Screen</text>
+          <rect class="chip" x="86" y="40" width="64" height="20" rx="5"/>
+          <text x="118" y="54" class="mono" text-anchor="middle">message</text>
+          <rect class="bx" x="18" y="86" width="124" height="62" rx="8"/>
+          <text x="80" y="110" class="b" text-anchor="middle">Input</text>
+          <text x="80" y="132" class="sub" text-anchor="middle">Calls the setter</text>
+          <rect class="bx" x="158" y="86" width="124" height="62" rx="8"/>
+          <text x="220" y="110" class="b" text-anchor="middle">Output</text>
+          <text x="220" y="132" class="sub" text-anchor="middle">Shows the value</text>
+          <line class="ln" x1="44" y1="64" x2="44" y2="83" marker-end="url(#ah3)"/>
+          <text x="50" y="79" class="ac">pass</text>
+          <line class="ln up" x1="116" y1="84" x2="116" y2="65" marker-end="url(#ah3)"/>
+          <text x="122" y="79" class="ac">call</text>
+          <line class="ln" x1="220" y1="64" x2="220" y2="83" marker-end="url(#ah3)"/>
+          <text x="226" y="79" class="ac">pass</text>
+          <text x="150" y="182" class="ac" text-anchor="middle">→ Both read the same value</text>
+        </svg>
+      </div>
+    </section>
+
+    <div class="callout">
+      <p class="callout-title">In the WPF example, the bound object owns the value. In React, choose which component owns it.</p>
+      <p class="strong">Choosing the owner is part of managing state in React.</p>
+    </div>
+
+    <div class="note">
+      <p>In the WPF example you declare the binding and implement change notification on the source. In React you call the setter (<code>setMessage</code>). The examples use WPF for a Windows UI and React for a web UI.</p>
+      <p>Sources checked for the original lesson on November 24, 2026</p>
+      <ul class="src">
+        <li>Microsoft Learn · <a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/">Data binding overview (WPF .NET)</a> (binding a target to a source and reporting changes with INotifyPropertyChanged).</li>
+        <li>React documentation · <a href="https://react.dev/learn/render-and-commit">Render and Commit</a> (how React applies changes to the screen).</li>
+        <li>React documentation · <a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a> (why local variables do not persist across renders).</li>
+        <li>React documentation · <a href="https://react.dev/learn/sharing-state-between-components">Sharing State Between Components</a> (moving state to a shared parent and passing down the value and a callback).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="manage">
+    <h2>4. Why manage state?</h2>
+    <p class="section-lead">Placing message in the shared parent settled three questions at once.</p>
+
+    <section>
+      <h3>Three decisions about a state value</h3>
+      <p class="row-label">The shared-parent example from section 3</p>
+      <svg class="callfig" viewBox="0 0 340 214" role="img" aria-label="One screen owns message. The input calls the setter. Both the input and output receive the value.">
+        <defs><marker id="ah4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx" x="10" y="8" width="320" height="198" rx="12"/>
+        <text x="24" y="33" class="b">Screen</text>
+        <rect class="chip" x="96" y="18" width="72" height="22" rx="5"/>
+        <text x="132" y="33" class="mono" text-anchor="middle">message</text>
+        <text x="178" y="34" class="ac">① Owner</text>
+        <line class="ln" x1="48" y1="58" x2="48" y2="124" marker-end="url(#ah4)"/>
+        <text x="54" y="96" class="ac">③</text>
+        <line class="ln up" x1="128" y1="124" x2="128" y2="58" marker-end="url(#ah4)"/>
+        <text x="134" y="96" class="ac">② Update</text>
+        <line class="ln" x1="248" y1="58" x2="248" y2="124" marker-end="url(#ah4)"/>
+        <text x="254" y="96" class="ac">③ Readers</text>
+        <rect class="bx" x="24" y="128" width="136" height="64" rx="8"/>
+        <text x="92" y="154" class="b" text-anchor="middle">Input</text>
+        <text x="92" y="176" class="sub" text-anchor="middle">Calls the setter</text>
+        <rect class="bx" x="180" y="128" width="136" height="64" rx="8"/>
+        <text x="248" y="154" class="b" text-anchor="middle">Output</text>
+        <text x="248" y="176" class="sub" text-anchor="middle">Shows the value</text>
+      </svg>
+      <ol class="why marked">
+        <li><b>① Where does it live?</b> Keep one authoritative value. React calls this a single source of truth.</li>
+        <li><b>② Who can change it?</b> Give changes a clear entry point. Here it is the setter passed to the input.</li>
+        <li><b>③ Who needs to know?</b> Deliver the value to the components that use it, as in section 2.</li>
+      </ol>
+      <p class="after">Start with a shared parent. Context lets a parent supply a value to descendants without passing it through each intervening component. Section 5 considers an external store.</p>
+    </section>
+
+    <section>
+      <h3>A stale synchronization result</h3>
+      <p>An app microtaro built with AI kept the same synchronization result in four places. It lived in server memory, a file, browser storage, and the view’s cache. A stale result kept appearing. Correcting it took eleven revisions in one day.</p>
+      <p class="after">The right home depends on whether a value belongs to one component, the whole screen, a copy of server data, or the URL. <a href="#split">The diagram in section 7</a> gives examples for each kind of state.</p>
+    </section>
+
+    <div class="note">
+      <p>Sources checked for the original lesson on November 23, 2026</p>
+      <ul class="src">
+        <li>React documentation · <a href="https://react.dev/learn/sharing-state-between-components">Sharing State Between Components</a> (shared ownership and a single source of truth) and <a href="https://react.dev/learn/passing-data-deeply-with-context">Passing Data Deeply with Context</a> (passing values through Context).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="zustand">
+    <h2>5. Sharing state outside the component tree with Zustand</h2>
+    <p class="phrase">Components can subscribe directly to the values they use</p>
+    <p class="section-lead">Distant components can share a store outside their common tree. Zustand is one library for creating such a store.</p>
+
+    <section>
+      <h3>Where should an unread count live?</h3>
+      <p class="eg">The header contains an unread badge. The list contains a button that marks items as read.</p>
+
+      <p class="row-label">Let the screen own the count, as in section 3</p>
+      <svg class="callfig" viewBox="0 0 340 212" role="img" aria-label="The screen holds the count. The header and list pass props through to the badge and the button.">
+        <defs><marker id="zs1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx" x="10" y="8" width="320" height="196" rx="12"/>
+        <text x="24" y="30" class="b">Screen</text>
+        <text x="24" y="48" class="sub">Holds the count</text>
+        <rect class="bx" x="22" y="80" width="146" height="114" rx="8"/>
+        <text x="34" y="100" class="b">Header</text>
+        <text x="34" y="116" class="sub">Only passes props</text>
+        <rect class="bx hit" x="40" y="136" width="110" height="48" rx="6"/>
+        <text x="95" y="157" class="b" text-anchor="middle">Unread badge</text>
+        <text x="95" y="174" class="sub" text-anchor="middle">Reads count</text>
+        <rect class="bx" x="174" y="80" width="146" height="114" rx="8"/>
+        <text x="186" y="100" class="b">List</text>
+        <text x="186" y="116" class="sub">Only passes props</text>
+        <rect class="bx hit" x="192" y="136" width="110" height="48" rx="6"/>
+        <text x="247" y="157" class="b" text-anchor="middle">Mark as read</text>
+        <text x="247" y="174" class="sub" text-anchor="middle">Updates count</text>
+        <line class="ln" x1="95" y1="56" x2="95" y2="78" marker-end="url(#zs1)"/>
+        <line class="ln" x1="247" y1="56" x2="247" y2="78" marker-end="url(#zs1)"/>
+        <text x="103" y="72" class="ac">pass</text>
+        <text x="255" y="72" class="ac">pass</text>
+        <line class="ln" x1="95" y1="122" x2="95" y2="134" marker-end="url(#zs1)"/>
+        <line class="ln" x1="247" y1="122" x2="247" y2="134" marker-end="url(#zs1)"/>
+      </svg>
+      <p class="point">The header and list have to pass props they do not use. Updating state at the screen level normally renders the screen and its children again.</p>
+
+      <p class="row-label">Put the count in a Zustand store</p>
+      <svg class="callfig" viewBox="0 0 340 212" role="img" aria-label="The unread badge and button connect directly to the store, bypassing the header and list.">
+        <defs><marker id="zs2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx store" x="80" y="6" width="180" height="50" rx="10"/>
+        <text x="170" y="27" class="cb" text-anchor="middle">External store</text>
+        <text x="170" y="45" class="sub" text-anchor="middle">Count and update function</text>
+        <rect class="bx muted" x="10" y="80" width="320" height="124" rx="12"/>
+        <text x="24" y="100" class="b">Screen</text>
+        <rect class="bx muted" x="22" y="110" width="146" height="84" rx="8"/>
+        <text x="34" y="128" class="b">Header</text>
+        <rect class="bx hit" x="40" y="136" width="110" height="48" rx="6"/>
+        <text x="95" y="157" class="b" text-anchor="middle">Unread badge</text>
+        <text x="95" y="174" class="sub" text-anchor="middle">Reads count</text>
+        <rect class="bx muted" x="174" y="110" width="146" height="84" rx="8"/>
+        <text x="186" y="128" class="b">List</text>
+        <rect class="bx hit" x="192" y="136" width="110" height="48" rx="6"/>
+        <text x="247" y="157" class="b" text-anchor="middle">Mark as read</text>
+        <text x="247" y="174" class="sub" text-anchor="middle">Updates count</text>
+        <line class="ln" x1="120" y1="58" x2="96" y2="132" marker-end="url(#zs2)"/>
+        <line class="ln" x1="220" y1="58" x2="246" y2="132" marker-end="url(#zs2)"/>
+        <text x="104" y="72" class="ac" text-anchor="end">binds</text>
+        <text x="236" y="72" class="ac">binds</text>
+      </svg>
+      <p class="point">Each component selects what it needs. A count update triggers a render for subscribers whose selected value changed.</p>
+      <p class="after">For a list fetched from the server, the lesson uses TanStack Query to manage the cached copy and refetch it. Putting it in the UI store would leave that refetching logic to the application (section 7).</p>
+    </section>
+
+    <div class="note">
+      <p>In generated code, look for <code>create(...)</code> to create the store and a selector such as <code>useUnreadStore((s) =&gt; s.count)</code> to read the value a component needs.</p>
+      <p>Sources checked for the original lesson on November 25, 2026</p>
+      <ul class="src">
+        <li>Zustand · <a href="https://github.com/pmndrs/zustand">pmndrs/zustand</a> (using a store without a Provider and subscribing to a selected value).</li>
+        <li>React documentation · <a href="https://react.dev/reference/react/memo">memo</a> (when children normally render again).</li>
+        <li>TanStack Query · <a href="https://tanstack.com/query/latest/docs/framework/react/guides/does-this-replace-client-state">Does TanStack Query replace global state managers?</a> (managing a cache of server data alongside client state).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="http">
+    <h2>6. What stateless HTTP means for a server</h2>
+    <p class="phrase">Each HTTP request makes sense on its own</p>
+    <p class="section-lead">The UI can hold state while the page is open. With HTTP, the server can interpret each request independently of previous requests. For example, a cookie can identify the session the application should load for a signed-in user.</p>
+
+    <section>
+      <h3>Trace a request and its response</h3>
+      <svg class="callfig" viewBox="0 0 340 220" role="img" aria-label="The browser holds UI state in memory. In this example, the server reads shared records and session data from the database on each request.">
+        <defs>
+          <marker id="hp1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head-b" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="hp2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head-s" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        <rect class="bx store" x="8" y="10" width="124" height="200" rx="10"/>
+        <text x="70" y="34" class="cb" text-anchor="middle">Browser (UI)</text>
+        <text x="70" y="54" class="sub" text-anchor="middle">Page remains active</text>
+        <text x="70" y="68" class="sub" text-anchor="middle">while open</text>
+        <rect class="bx" x="18" y="84" width="104" height="54" rx="6"/>
+        <text x="70" y="106" class="b" text-anchor="middle">State in memory</text>
+        <text x="70" y="124" class="sub" text-anchor="middle">Sections 1–5</text>
+        <text x="70" y="166" class="sub" text-anchor="middle">Keeps a cookie</text>
+        <text x="70" y="181" class="sub" text-anchor="middle">and sends it back</text>
+        <rect class="bx srv" x="208" y="10" width="124" height="118" rx="10"/>
+        <text x="270" y="34" class="cs" text-anchor="middle">Server</text>
+        <text x="270" y="54" class="sub" text-anchor="middle">Handles one request</text>
+        <text x="270" y="68" class="sub" text-anchor="middle">on its own</text>
+        <text x="270" y="100" class="cs" text-anchor="middle">Stateless HTTP</text>
+        <rect class="bx dbx" x="208" y="156" width="124" height="54" rx="10"/>
+        <text x="270" y="178" class="cd" text-anchor="middle">DB</text>
+        <text x="270" y="196" class="sub" text-anchor="middle">Records and sessions</text>
+        <line class="ln-b" x1="134" y1="50" x2="204" y2="50" marker-end="url(#hp1)"/>
+        <text x="168" y="42" class="cb" text-anchor="middle">request</text>
+        <line class="ln-s" x1="206" y1="92" x2="138" y2="92" marker-end="url(#hp2)"/>
+        <text x="170" y="110" class="cs" text-anchor="middle">response</text>
+        <line class="ln-s" x1="270" y1="132" x2="270" y2="152" marker-start="url(#hp2)" marker-end="url(#hp2)"/>
+        <text x="278" y="146" class="sub">read/write</text>
+      </svg>
+      <p class="point">In this design each request can go to any server instance. The server checks the session identified by the cookie and reads the authoritative records from the database.</p>
+      <p class="after">The application can restart a server or add instances and still handle the next request.</p>
+    </section>
+
+    <section>
+      <h3>How UI state and stateless HTTP coexist</h3>
+      <div class="vs">
+        <div>
+          <p class="side">UI state (sections 1–5)</p>
+          <p>Values in browser memory can persist while the page is open.</p>
+        </div>
+        <div>
+          <p class="side">Stateless HTTP</p>
+          <p>The server can interpret a request without remembering previous requests.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="note">
+      <p>Sources checked for the original lesson on November 25, 2026</p>
+      <ul class="src">
+        <li>IETF · <a href="https://www.rfc-editor.org/rfc/rfc9110.html">RFC 9110 HTTP Semantics</a> (stateless HTTP semantics).</li>
+        <li>IETF · <a href="https://www.rfc-editor.org/rfc/rfc6265.html">RFC 6265 HTTP State Management Mechanism</a> (using cookies across requests).</li>
+        <li>MDN · <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview">An overview of HTTP</a> (how sessions work over stateless HTTP).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="split">
+    <h2>7. Dividing work between the browser and the server</h2>
+    <p class="section-lead">Start in the browser. Add a server when a particular responsibility calls for one.</p>
+
+    <section>
+      <h3>Revisit the three questions about state</h3>
+      <p class="eg">Once data crosses the network, the three questions from section 4 have different answers.</p>
+      <table class="tri">
+        <thead><tr><th>Decision</th><th>Within the UI (sections 2–5)</th><th>Across the network</th></tr></thead>
+        <tbody>
+          <tr><th>Where does it live?</th><td data-label="Within the UI">One shared owner.</td><td data-label="Across the network">The server’s database holds the authoritative shared record. The browser has a copy.</td></tr>
+          <tr><th>Who can change it?</th><td data-label="Within the UI">Limit the entry points for updates.</td><td data-label="Across the network">The server enforces allowed changes, including transitions such as approval or finalization.</td></tr>
+          <tr><th>Who needs to know?</th><td data-label="Within the UI">React propagates the state update.</td><td data-label="Across the network">The view can refetch or the server can send an update. Options include polling, server-sent events, and WebSockets.</td></tr>
+        </tbody>
+      </table>
+      <p class="point">When data is shared across users, the network separates the authoritative record from the browser’s copy.</p>
+      <p class="after">Each user and tab has its own in-memory UI state. A change made elsewhere appears after a refresh or notification. Checking the record’s version on save helps prevent one edit from overwriting another.</p>
+    </section>
+
+    <section>
+      <h3>Where the work and the data live</h3>
+      <div class="map" role="img" aria-label="The browser handles UI state, local storage, and immediate feedback. The server enforces rules, protects secrets, and runs background jobs. The database holds shared records.">
+        <div class="col col-b">
+          <p class="col-name">Browser</p>
+          <p class="col-sub">Displays the UI and handles input</p>
+          <p class="grp">State and storage</p>
+          <ul class="items">
+            <li><b>Local component state</b><code>useState</code><em>Cleared on reload by default</em></li>
+            <li><b>State shared across screens</b><code>Zustand</code><em>Cleared on reload by default</em></li>
+            <li><b>Cached server data</b><code>TanStack Query</code><em>Can go stale</em></li>
+            <li><b>Browser storage</b><code>localStorage</code><em>Persists on this device</em></li>
+          </ul>
+          <p class="grp">Processing</p>
+          <ul class="items">
+            <li><b>Immediate feedback</b></li>
+            <li><b>Validation while typing</b></li>
+            <li><b>Intensive computation</b><code>Web Workers, WebAssembly</code></li>
+          </ul>
+          <p class="tools">UI tools include React and Vite.</p>
+        </div>
+        <div class="col col-s">
+          <p class="col-name">Server</p>
+          <p class="col-sub">Handles requests and returns results</p>
+          <p class="grp">Processing</p>
+          <ul class="items">
+            <li><b>Decisions the server must enforce</b><em>Ownership and payment status</em></li>
+            <li><b>Validation on save</b></li>
+            <li><b>Operations that use secrets</b></li>
+            <li><b>Jobs that outlive the tab</b></li>
+            <li><b>Rules shared by several clients</b><em>Used by the UI, CLI, and MCP</em></li>
+          </ul>
+          <p class="tools">Server tools include FastAPI (Python), Hono, and Express (JavaScript).</p>
+        </div>
+        <div class="col col-d">
+          <p class="col-name">DB</p>
+          <p class="col-sub">Keeps records</p>
+          <p class="grp">Data</p>
+          <ul class="items">
+            <li><b>Authoritative shared data</b><em>Persists across devices and users</em></li>
+          </ul>
+          <p class="tools">Database tools include PostgreSQL and SQLite.</p>
+        </div>
+        <div class="span span-bs"><b>Next.js</b> can put the UI and server code in one project.</div>
+        <div class="span span-sd"><b>Supabase and Firebase</b> can supply managed authentication and storage.</div>
+      </div>
+      <p class="after">Validate inputs in both places. The browser gives immediate feedback. The server checks again before saving because clients can bypass browser validation.</p>
+    </section>
+
+    <section>
+      <h3>When does work belong on the server?</h3>
+      <p class="eg">A “yes” to any of these questions gives you a reason to put that responsibility on the server.</p>
+      <dl class="crit">
+        <div><dt>Enforcing rules</dt><dd>Must the application independently verify that an operation is allowed?<span class="ex">Examples include checking ownership, payment, approval, and inputs before saving.</span></dd></div>
+        <div><dt>Sharing</dt><dd>Do other users or devices need the same data?<span class="ex">A team task list is shared. Which menu a user has opened can stay in the browser.</span></dd></div>
+        <div><dt>Secrets and capabilities</dt><dd>Does the operation need a secret key or a capability such as starting a system command?<span class="ex">Users can inspect what is delivered to their browser.</span></dd></div>
+        <div><dt>Background work</dt><dd>Must the operation continue after the user closes the page?<span class="ex">Examples include scheduled jobs, long AI tasks, and notifications from external services.</span></dd></div>
+        <div><dt>Multiple clients</dt><dd>Do a CLI or MCP client and a web UI need to follow the same rules?<span class="ex">Rules embedded in a view have to be implemented again for each client.</span></dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h3>When does work belong in the browser?</h3>
+      <dl class="crit">
+        <div><dt>Immediate feedback</dt><dd>Does the operation run repeatedly during an interaction?<span class="ex">Dragging a shape, undoing an edit, and validating input can all respond without a network round trip.</span></dd></div>
+      </dl>
+      <p class="after">A browser can also handle intensive computation using Web Workers, WebAssembly, or WebGPU. Performance depends on the device, and closing the tab ends this work. Check WebGPU support on the browsers you target.</p>
+    </section>
+
+    <section>
+      <h3>Choosing an architecture</h3>
+      <p class="legend2">
+        <span class="chip own">Build</span>
+        <span class="chip rent">Use a managed service</span>
+        <span class="chip none">Omit</span>
+      </p>
+      <ol class="flow">
+        <li>
+          <p class="q">Does anything need a server?</p>
+          <div class="branch">
+            <p class="ans">No →</p>
+            <div class="type">
+              <p class="tname">A. Browser only</p>
+              <p class="chips"><span class="chip own b">Browser</span><span class="chip none">Server</span><span class="chip none">DB</span></p>
+              <p class="tools2">Use React and Vite, or plain HTML, CSS, and JavaScript.</p>
+            </div>
+          </div>
+          <p class="down">Yes ↓</p>
+        </li>
+        <li>
+          <p class="q">Do you need to write server logic?</p>
+          <div class="branch">
+            <p class="ans">No →<br><small>Managed authentication and a database are enough.</small></p>
+            <div class="type">
+              <p class="tname">B. Build the UI and use a managed backend</p>
+              <p class="chips"><span class="chip own b">Browser</span><span class="chip rent s">Server</span><span class="chip rent d">DB</span></p>
+              <p class="tools2">React and Vite with Supabase or Firebase.</p>
+            </div>
+          </div>
+          <p class="down">Yes ↓</p>
+        </li>
+        <li>
+          <p class="q">Do you need a separate server language, for instance to reuse existing Python code?</p>
+          <div class="branch">
+            <p class="ans">Yes →</p>
+            <div class="type">
+              <p class="tname">C. Build the UI and server separately</p>
+              <p class="chips"><span class="chip own b">Browser</span><span class="chip own s">Server</span><span class="chip own d">DB</span></p>
+              <p class="tools2">React and Vite with FastAPI and PostgreSQL.</p>
+            </div>
+          </div>
+          <p class="down">No ↓</p>
+        </li>
+        <li>
+          <div class="type">
+            <p class="tname">D. Keep the UI and server in one project</p>
+            <p class="chips"><span class="chip own b">Browser</span><span class="chip own s">Server</span><span class="chip own d">DB</span></p>
+            <p class="tools2">Next.js with PostgreSQL. If there is no shared data to persist, start without a database.</p>
+          </div>
+        </li>
+      </ol>
+      <p class="after">These options can be combined. For example, use Next.js for the application and Supabase for the database and sign-in. To put a UI around Python data quickly, another option is Streamlit or Gradio (E). <a href="#options">Section 8</a> compares the tools by role.</p>
+    </section>
+
+    <section>
+      <h3>Start with broad boundaries</h3>
+      <ol class="why">
+        <li>Place display logic in the browser and the authoritative shared records on the server.</li>
+        <li>Split responsibilities further when you see that they change for different reasons. The YAGNI principle suggests waiting until a separation is needed.</li>
+        <li>Put calculations in functions that can be called independently of the UI. Moving one across a network later will also require communication, authentication, and error handling.</li>
+      </ol>
+      <p class="point">Which responsibility a function serves (display, business rules, storage) and where it runs (browser, server) are separate design decisions.</p>
+    </section>
+
+    <div class="note">
+      <p>Sources checked for the original lesson on November 23, 2026</p>
+      <ul class="src">
+        <li>MDN · <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation">Client-side form validation</a> (validating inputs on the client and server).</li>
+        <li>MDN · <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API">Web Workers API</a>, <a href="https://developer.mozilla.org/en-US/docs/WebAssembly">WebAssembly</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API">WebGPU API</a> (browser support for WebGPU).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="options">
+    <h2>8. Comparing tools for each role</h2>
+    <p class="section-lead">For the roles in section 7, consider three questions. How widely is each tool used? What would it take to move it? Which kind of performance matters?</p>
+
+    <section>
+      <h3>How widely used is each tool?</h3>
+      <p class="eg">Each bar represents a week of package downloads. Compare tools within each group. Registries and reporting periods vary.</p>
+      <div class="bargrid">
+        <div class="bgroup">
+          <p class="bg-name">UI libraries <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="React · 252.21M weekly npm downloads"><span class="bn">React</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">252.21M</span></li>
+            <li title="Vue · 24.93M weekly npm downloads"><span class="bn">Vue</span><span class="bt"><span class="bar" style="width:9.9%"></span></span><span class="bv">24.93M</span></li>
+            <li title="Svelte · 9.44M weekly npm downloads"><span class="bn">Svelte</span><span class="bt"><span class="bar" style="width:3.7%"></span></span><span class="bv">9.44M</span></li>
+            <li title="Angular · 8.43M weekly npm downloads"><span class="bn">Angular</span><span class="bt"><span class="bar" style="width:3.3%"></span></span><span class="bv">8.43M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">Full-stack frameworks <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="Next.js · 91.91M weekly npm downloads"><span class="bn">Next.js</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">91.91M</span></li>
+            <li title="TanStack Start · 14.09M weekly npm downloads"><span class="bn">TanStack Start</span><span class="bt"><span class="bar" style="width:15.3%"></span></span><span class="bv">14.09M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">State shared across screens <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="Zustand · 91.84M weekly npm downloads"><span class="bn">Zustand</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">91.84M</span></li>
+            <li title="Redux Toolkit · 48.05M weekly npm downloads"><span class="bn">Redux Toolkit</span><span class="bt"><span class="bar" style="width:52.3%"></span></span><span class="bv">48.05M</span></li>
+            <li title="Jotai · 9.72M weekly npm downloads"><span class="bn">Jotai</span><span class="bt"><span class="bar" style="width:10.6%"></span></span><span class="bv">9.72M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">Cached server data <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="TanStack Query · 84.01M weekly npm downloads"><span class="bn">TanStack Query</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">84.01M</span></li>
+            <li title="SWR · 26.73M weekly npm downloads"><span class="bn">SWR</span><span class="bt"><span class="bar" style="width:31.8%"></span></span><span class="bv">26.73M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">JavaScript servers <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="Express · 195.49M weekly npm downloads"><span class="bn">Express</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">195.49M</span></li>
+            <li title="Hono · 104.31M weekly npm downloads"><span class="bn">Hono</span><span class="bt"><span class="bar" style="width:53.4%"></span></span><span class="bv">104.31M</span></li>
+            <li title="NestJS · 23.89M weekly npm downloads"><span class="bn">NestJS</span><span class="bt"><span class="bar" style="width:12.2%"></span></span><span class="bv">23.89M</span></li>
+            <li title="Fastify · 22.37M weekly npm downloads"><span class="bn">Fastify</span><span class="bt"><span class="bar" style="width:11.4%"></span></span><span class="bv">22.37M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">Python servers <span>(weekly PyPI downloads)</span></p>
+          <ul class="bars">
+            <li title="FastAPI · 128.12M weekly PyPI downloads"><span class="bn">FastAPI</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">128.12M</span></li>
+            <li title="Flask · 51.63M weekly PyPI downloads"><span class="bn">Flask</span><span class="bt"><span class="bar" style="width:40.3%"></span></span><span class="bv">51.63M</span></li>
+            <li title="Django · 12.19M weekly PyPI downloads"><span class="bn">Django</span><span class="bt"><span class="bar" style="width:9.5%"></span></span><span class="bv">12.19M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">Database clients for JavaScript <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="PostgreSQL · 95.90M weekly npm downloads"><span class="bn">PostgreSQL</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">95.90M</span></li>
+            <li title="MySQL · 23.65M weekly npm downloads"><span class="bn">MySQL</span><span class="bt"><span class="bar" style="width:24.7%"></span></span><span class="bv">23.65M</span></li>
+            <li title="MongoDB · 21.36M weekly npm downloads"><span class="bn">MongoDB</span><span class="bt"><span class="bar" style="width:22.3%"></span></span><span class="bv">21.36M</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">Managed backends <span>(weekly npm downloads)</span></p>
+          <ul class="bars">
+            <li title="Supabase · 69.18M weekly npm downloads"><span class="bn">Supabase</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">69.18M</span></li>
+            <li title="Firebase · 14.07M weekly npm downloads"><span class="bn">Firebase</span><span class="bt"><span class="bar" style="width:20.3%"></span></span><span class="bv">14.07M</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="eg"><a href="../../../../topics/declarative-ui/data/weekly-downloads-and-benchmarks.json">Chart and benchmark data (JSON)</a>. The longest bar in each group represents 100%. Downloads include repeated and automated installations.</p>
+      <p class="after">The longest bar gives you a starting point for research. React’s documentation suggests a framework such as Next.js for a new app. The lesson suggests considering Hono for a new JavaScript server and Express when the availability of examples matters.</p>
+    </section>
+
+    <section>
+      <h3>How easily can you move it?</h3>
+      <p class="eg">The options at the top have fewer hosting dependencies.</p>
+      <ol class="ladder">
+        <li><p class="rung">Static files</p><p class="rung-tools">A UI built with React and Vite</p><p class="rung-note">The same files can be served from another host.</p></li>
+        <li><p class="rung">A Node.js server or a Docker container</p><p class="rung-tools">Express, Hono, FastAPI, or Next.js with the appropriate runtime or container</p><p class="rung-note">You can move the application to another host that supports its runtime. Hono also runs outside Node.js, for example on Cloudflare.</p></li>
+        <li><p class="rung">A hosting-specific adapter</p><p class="rung-tools">Next.js adapters</p><p class="rung-note">Feature support may vary outside verified hosting environments such as Vercel.</p></li>
+        <li><p class="rung">Managed backends</p><p class="rung-tools">Supabase and Firebase</p><p class="rung-note">Moving means exporting records, user accounts, and files. Supabase uses PostgreSQL. Moving Firestore documents to a relational database also requires redesigning the data model.</p></li>
+      </ol>
+      <p class="point">Check whether you can export a complete dataset before adopting the service. Moving the data can be harder than moving the code.</p>
+    </section>
+
+    <section>
+      <h3>Which kind of speed matters?</h3>
+      <p class="eg">On November 20, 2026, microtaro measured a small page and API implemented with several tools on the same PC.</p>
+      <table class="speed">
+        <thead><tr><th>Measure</th><th>Who is affected?</th><th>Measurement</th></tr></thead>
+        <tbody>
+          <tr><th>What the user sees on opening the page</th><td data-label="Who is affected?">The user</td><td data-label="Measurement">With React and Vite, the initial HTML contained no note text and the compressed JavaScript was about 68 KB. Next.js App Router included the text in the HTML and sent about 135 KB of compressed JavaScript.</td></tr>
+          <tr><th>Responses per second</th><td data-label="Who is affected?">The operator paying for capacity under load</td><td data-label="Measurement">Hono handled 22,524 requests/s, Express 17,479, and Next.js 2,762.</td></tr>
+          <tr><th>Time spent waiting for a build</th><td data-label="Who is affected?">The developer</td><td data-label="Measurement">A production build took 0.3 seconds with Vite and 3.0 seconds with Next.js.</td></tr>
+        </tbody>
+      </table>
+      <p class="point">Ten colleagues each making one request every ten seconds average one request per second. That load is small compared with the throughput measured here.</p>
+      <p class="after">Throughput matters as concurrent use grows. These figures describe one small workload on one PC. Hardware and test conditions can change the results substantially. Each framework’s own benchmarks use different workloads.</p>
+    </section>
+
+    <section>
+      <h3>Choosing among the options</h3>
+      <ul class="keep">
+        <li>Widely used tools are a reasonable starting point when you need examples and answers.</li>
+        <li>If you may change hosts, consider static files or containers and check whether the service can export all your data.</li>
+        <li>Give throughput more weight when you know you will have enough traffic for it to matter.</li>
+      </ul>
+    </section>
+
+    <div class="note">
+      <p>Sources</p>
+      <ul class="src">
+        <li>Download counts · <a href="https://api.npmjs.org/downloads/point/2026-11-03:2026-11-09/react">npm downloads API</a> (November 3–9, 2026, or November 12–18 for TanStack Start) and <a href="https://pypistats.org/api/packages/fastapi/recent">PyPI Stats</a>. Query the corresponding package to retrieve its statistics.</li>
+        <li>React documentation · <a href="https://react.dev/learn/creating-a-react-app">Creating a React App</a> (using a framework for a new application).</li>
+        <li>Next.js documentation · <a href="https://nextjs.org/docs/app/getting-started/deploying">Deploying</a> (deployment options and verified adapters). <a href="https://hono.dev/docs/">Hono</a> (web standards and supported runtimes).</li>
+        <li>User-facing performance metrics · <a href="https://web.dev/articles/vitals">web.dev: Web Vitals</a>. Framework benchmarks · <a href="https://hono.dev/docs/concepts/benchmarks">Hono: Benchmarks</a>, <a href="https://fastify.dev/benchmarks/">Fastify: Benchmarks</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="oop">
+    <h2>9. Moving from object-oriented programming to React</h2>
+    <p class="section-lead">React and the web offer many places to keep state. Without an explicit owner, the same value can end up in several of them.</p>
+
+    <section>
+      <h3>How many places could hold this value?</h3>
+      <div class="oopvs" role="img" aria-label="In the single-program example, the Job object owns its state. A web app has several possible owners in the browser and on the server.">
+        <div class="ov-side">
+          <p class="ov-title">An object in a single program</p>
+          <div class="obj">
+            <p class="obj-name">Job</p>
+            <p><code>status</code> State</p>
+            <p><code>start()</code> Update method</p>
+          </div>
+          <p class="ov-note">The Job class defines the field that holds the state and the method that changes it.</p>
+        </div>
+        <div class="ov-side">
+          <p class="ov-title">React and the web</p>
+          <div class="places">
+            <div class="pl-box pl-b">
+              <p class="pl-name">Browser</p>
+              <p class="pl-chips"><span>Component</span><span>Shared parent</span><span>Context</span><span>Store</span><span>Cached server data</span><span>URL</span><span>Browser storage</span></p>
+            </div>
+            <div class="pl-box pl-s">
+              <p class="pl-name">Server</p>
+              <p class="pl-chips"><span>Authoritative database record</span></p>
+            </div>
+          </div>
+          <p class="ov-note">A web application needs an explicit choice among these locations.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Decisions a class used to make explicit</h3>
+      <table class="tri">
+        <thead><tr><th>Decision</th><th>Object-oriented example</th><th>React and the web</th></tr></thead>
+        <tbody>
+          <tr><th>Where does it live?</th><td data-label="Object-oriented example">A field on the object.</td><td data-label="React and the web">Choose a component, a shared parent, a store, cached server data, or the URL.</td></tr>
+          <tr><th>Who can change it?</th><td data-label="Object-oriented example">A private field can be changed through methods on the object.</td><td data-label="React and the web">A component with access to a setter can call it. Explicit update functions can limit who changes shared state.</td></tr>
+          <tr><th>Who needs to know?</th><td data-label="Object-oriented example">In the imperative example in section 1, the code that changes the value also tells the view what to display.</td><td data-label="React and the web">The update must reach React through a mechanism that triggers rendering (section 2).</td></tr>
+        </tbody>
+      </table>
+      <p class="point">An object already manages state. Its methods can hide the details from callers.</p>
+    </section>
+
+    <section>
+      <h3>Familiar habits and their React equivalents</h3>
+      <table class="myth">
+        <thead><tr><th>Familiar assumption</th><th>How React handles it</th></tr></thead>
+        <tbody>
+          <tr><td>Call a method to update the screen.</td><td>Update state and describe the view that follows from it (section 1).</td></tr>
+          <tr><td>Passing a shared object updates the view.</td><td>React needs a signal to render again when data changes (section 2).</td></tr>
+          <tr><td>Assigning to an ordinary variable updates the screen.</td><td><code>useState</code> is one way to retain a value and request a render (section 2).</td></tr>
+          <tr><td>Change the existing array in place (<code>items.push</code>).</td><td>Treat an array held in state as read-only. Build a new array and pass it to the setter.</td></tr>
+          <tr><td>The variable changes immediately after calling the setter.</td><td>The next render sees the updated value (section 2).</td></tr>
+          <tr><td>Put every shared value into a single store.</td><td>Unrestricted writes create the same problems as global variables. Share only the values that need a common owner.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>State ownership in AI-assisted development</h3>
+      <p>When asked to implement a feature, an AI can add state where the feature needs it. Without an ownership rule, several pieces of code can end up tracking the same fact.</p>
+      <p class="eg">In one app microtaro built with AI, 27 different places independently calculated which version was the latest.</p>
+    </section>
+
+    <div class="callout">
+      <p class="callout-title">What to carry over from object-oriented design</p>
+      <p>Objects can already share state. The additional question in React is how a change reaches the UI and how the component describes the view that follows from that state.</p>
+    </div>
+
+    <div class="note">
+      <p>Sources checked for the original lesson on November 23, 2026</p>
+      <ul class="src">
+        <li>React documentation · <a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a> (why ordinary variables do not trigger rendering), <a href="https://react.dev/learn/updating-arrays-in-state">Updating Arrays in State</a> (treating arrays in state as read-only), and <a href="https://react.dev/learn/state-as-a-snapshot">State as a Snapshot</a> (when a new value becomes available).</li>
+      </ul>
+    </div>
+  </div>
+</main>
+</div>
+<script src="../../../../assets/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+{
+  "source": "microtaro, Chapter 1, section 8: comparison by role and measurements on a small page and API. Download counts transcribed at the precision shown in the original chart (nearest 10,000).",
+  "sources": [
+    "https://api.npmjs.org/downloads/point/2026-11-03:2026-11-09/react",
+    "https://pypistats.org/api/packages/fastapi/recent"
+  ],
+  "npm_period": "2026-11-03 to 2026-11-09, except TanStack Start: 2026-11-12 to 2026-11-18",
+  "pypi_period": "Weekly values in the original lesson, checked 2026-11-11. The API above is a rolling endpoint.",
+  "weekly_downloads": [
+    {
+      "group": "UI libraries",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "React",
+          "approximate_weekly_downloads": 252210000
+        },
+        {
+          "tool": "Vue",
+          "approximate_weekly_downloads": 24930000
+        },
+        {
+          "tool": "Svelte",
+          "approximate_weekly_downloads": 9440000
+        },
+        {
+          "tool": "Angular",
+          "approximate_weekly_downloads": 8430000
+        }
+      ]
+    },
+    {
+      "group": "Full-stack frameworks",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "Next.js",
+          "approximate_weekly_downloads": 91910000
+        },
+        {
+          "tool": "TanStack Start",
+          "approximate_weekly_downloads": 14090000
+        }
+      ]
+    },
+    {
+      "group": "State shared across screens",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "Zustand",
+          "approximate_weekly_downloads": 91840000
+        },
+        {
+          "tool": "Redux Toolkit",
+          "approximate_weekly_downloads": 48050000
+        },
+        {
+          "tool": "Jotai",
+          "approximate_weekly_downloads": 9720000
+        }
+      ]
+    },
+    {
+      "group": "Cached server data",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "TanStack Query",
+          "approximate_weekly_downloads": 84010000
+        },
+        {
+          "tool": "SWR",
+          "approximate_weekly_downloads": 26730000
+        }
+      ]
+    },
+    {
+      "group": "JavaScript servers",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "Express",
+          "approximate_weekly_downloads": 195490000
+        },
+        {
+          "tool": "Hono",
+          "approximate_weekly_downloads": 104310000
+        },
+        {
+          "tool": "NestJS",
+          "approximate_weekly_downloads": 23890000
+        },
+        {
+          "tool": "Fastify",
+          "approximate_weekly_downloads": 22370000
+        }
+      ]
+    },
+    {
+      "group": "Python servers",
+      "registry": "PyPI",
+      "downloads": [
+        {
+          "tool": "FastAPI",
+          "approximate_weekly_downloads": 128120000
+        },
+        {
+          "tool": "Flask",
+          "approximate_weekly_downloads": 51630000
+        },
+        {
+          "tool": "Django",
+          "approximate_weekly_downloads": 12190000
+        }
+      ]
+    },
+    {
+      "group": "Database clients for JavaScript",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "PostgreSQL",
+          "approximate_weekly_downloads": 95900000
+        },
+        {
+          "tool": "MySQL",
+          "approximate_weekly_downloads": 23650000
+        },
+        {
+          "tool": "MongoDB",
+          "approximate_weekly_downloads": 21360000
+        }
+      ]
+    },
+    {
+      "group": "Managed backends",
+      "registry": "npm",
+      "downloads": [
+        {
+          "tool": "Supabase",
+          "approximate_weekly_downloads": 69180000
+        },
+        {
+          "tool": "Firebase",
+          "approximate_weekly_downloads": 14070000
+        }
+      ]
+    }
+  ],
+  "benchmark": {
+    "date": "2026-11-20",
+    "workload": "Three notes in a static view and three notes as JSON from an API. Single PC, WSL2, Ryzen 7 7840HS, Node.js 24.22.1. API throughput is the median of three 10-second runs at 10 concurrent connections.",
+    "compressed_javascript_approx_kb": {
+      "React and Vite": 68,
+      "Next.js App Router": 135
+    },
+    "responses_per_second": {
+      "Hono": 22524,
+      "Express": 17479,
+      "Next.js Route Handlers": 2762
+    },
+    "production_build_seconds": {
+      "Vite": 0.3,
+      "Next.js App Router": 3.0
+    }
+  }
+}

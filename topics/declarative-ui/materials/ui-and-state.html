@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第1章　画面と状態 | 学習ノート</title>
+<meta name="description" content="入力欄の文字を変えると、なぜ表示欄も変わるのか。C++、WPF、React の例を比べ、同じ値を複数の部品や利用者が使うときの置き場所を考えます。">
+<link rel="stylesheet" href="../../../assets/site.css">
+<link rel="alternate" hreflang="ja" href="ui-and-state.html">
+<link rel="alternate" hreflang="en" href="../../../en/topics/declarative-ui/materials/ui-and-state.html">
+<style>
+  :root {
+    --arrow: #A8327A;
+    --arrow-tint: #F8E9F2;
+    --box: 6rem;
+    --gothic: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    --mincho: "BIZ UDPMincho", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+    --mono: "Cascadia Mono", "BIZ UDGothic", Consolas, "Noto Sans Mono CJK JP", monospace;
+  }
+  @media (min-width: 30rem) { :root { --box: 8rem; } }
+  body { font: 1rem/1.7 var(--gothic); }
+  html[lang="en"] body { font-family: system-ui, sans-serif; }
+  html { scroll-padding-top: 0; }
+  .lecture-shell { max-width: 38rem; margin: 0 auto; padding: 0 1rem; }
+  .lecture-shell main { max-width: 38rem; padding: 2.5rem 0 4rem; }
+  .lecture-shell a { color: var(--ink); }
+  .lecture-shell a:focus-visible { outline-color: var(--arrow); }
+  .lecture-shell code { background: none; padding: 0; }
+  .lecture-toc .chapter-link { margin: 1.2rem 0 0; font-size: .85rem; }
+  .lecture-toc .chapter-link a { text-decoration: underline; }
+  .lecture-header .series { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1rem; }
+  .lecture-header .series a { font-weight: 400; }
+  .lecture-header .stamp { margin: .4rem 0 0; font-size: .78rem; }
+  .part section { padding: 0; margin-top: 3rem; }
+  .part h3 { margin: 0 0 .9rem; font-size: 1.1rem; }
+  .part h4 { margin: 1.2rem 0 .35rem; }
+  .part .legend { display: block; padding: 0; }
+  .part pre { color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .part .box { min-width: 0; }
+  .part table th { white-space: normal; }
+  .part tbody th { min-width: 0; }
+  .part > h2 { margin: 0; font-size: 1rem; color: var(--sub); }
+  .part .section-lead { margin: .6rem 0 0; color: var(--sub); }
+  .part .note { max-width: none; padding: 1rem 0 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; }
+  .part section > :is(ol, ul, dl) { max-width: none; }
+
+  h1 { margin: 0; font-size: 1.45rem; line-height: 1.35; }
+  .subtitle { margin: .4rem 0 0; color: var(--sub); font-size: .95rem; }
+  .series { margin: 0 0 .3rem; color: var(--sub); font-size: .85rem; font-weight: 700; }
+  .toc-ch { margin: .9rem 0 0; }
+  .toc-ch-title { display: block; margin: 0; padding: .15rem 0 .15rem .6rem; border-left: 3px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--sub); text-decoration: none; }
+  .toc-ch.cur > .toc-ch-title { border-left-color: var(--arrow); color: var(--ink); }
+  .toc-ch.cur .toc-group { margin: .7rem 0 0 .9rem; }
+  /* 目次（広い画面では左に固定、狭い画面では上） */
+  .lecture-toc { padding-top: 1.8rem; font-size: .87rem; }
+  .lecture-toc .toc-title { margin: 0; font-weight: 700; color: var(--sub); }
+  .toc-group { margin: .8rem 0 0; }
+  .toc-group-label { margin: 0 0 .2rem; font-size: .75rem; font-weight: 700; color: var(--arrow); }
+  .lecture-toc ol { display: flex; flex-wrap: wrap; gap: .2rem 1.2rem; margin: 0; padding: 0; list-style: none; }
+  .lecture-toc li { line-height: 1.5; }
+  .lecture-toc a { text-decoration: none; }
+  .lecture-toc a:hover { text-decoration: underline; }
+  .lecture-toc .tn { color: var(--sub); margin-right: .2rem; font-variant-numeric: tabular-nums; }
+  @media (min-width: 58rem) {
+    .lecture-shell {
+      display: grid;
+      grid-template-columns: 13.8rem minmax(0, 38rem);
+      column-gap: 2.5rem;
+      justify-content: center;
+      max-width: none;
+    }
+    .lecture-toc { position: sticky; top: 0; align-self: start; padding-top: 2.6rem; max-height: 100vh; overflow-y: auto; padding-bottom: 2rem; }
+    .lecture-toc ol { flex-direction: column; gap: .18rem; }
+    .lecture-shell main { padding-top: 2.6rem; }
+  }
+
+  /* 最初の 2 文 */
+  .gist { margin: 1rem 0 0; border-top: 2px solid var(--ink); }
+  .gist > div { display: grid; grid-template-columns: 6rem 1fr; column-gap: .8rem; padding: .55rem 0; border-bottom: 1px solid var(--rule); }
+  .gist dt { font-weight: 700; }
+  .gist dd { margin: 0; font-family: var(--mincho); font-size: 1.08rem; }
+  @media (max-width: 30rem) { .gist > div { grid-template-columns: 1fr; } }
+  /* 部 */
+  .part { margin-top: 3rem; scroll-margin-top: 1rem; }
+  .part + .part { margin-top: 4.5rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+  .phrase {
+    margin: .3rem 0 0;
+    font-family: var(--mincho);
+    font-size: clamp(1.5rem, 7.5vw, 2.6rem);
+    line-height: 1.3;
+  }
+  /* ---------- 図 ---------- */
+  .diagram {
+    display: grid;
+    grid-template-columns: var(--box) minmax(3.5rem, 1fr) var(--box);
+    align-items: center;
+    column-gap: .6rem;
+    row-gap: .9rem;
+  }
+  .box {
+    align-self: stretch;
+    display: flex; flex-direction: column; justify-content: center;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: .5rem .25rem .6rem;
+    text-align: center;
+  }
+  .box .name { display: block; font-size: .9rem; font-weight: 700; }
+  .box .var { display: block; font-size: .85rem; color: var(--sub); }
+  .box .var b { color: var(--ink); }
+  .box .var code { font-family: var(--mono); }
+  .box .v { display: block; font-family: var(--mincho); font-size: 1.05rem; }
+
+  .arrow { text-align: center; }
+  .verb { display: block; color: var(--arrow); font-weight: 700; }
+  .shaft { position: relative; height: 4px; margin: .2rem 14px 0 0; background: var(--arrow); }
+  .shaft::after {
+    content: "";
+    position: absolute; top: 50%; right: -14px;
+    transform: translateY(-50%);
+    border-left: 16px solid var(--arrow);
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+  }
+  .reverse .shaft { margin: .2rem 0 0 14px; }
+  .reverse .shaft::after {
+    right: auto; left: -14px;
+    border-left: 0;
+    border-right: 16px solid var(--arrow);
+  }
+
+  .say {
+    grid-column: 1 / -1;
+    justify-self: start;
+    position: relative;
+    margin: 0;
+    padding: .45rem .9rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    font-family: var(--mincho);
+    font-size: 1.15rem;
+  }
+  .say::before {
+    content: "";
+    position: absolute; top: -9px; left: calc(var(--box) / 2 - 9px);
+    width: 16px; height: 16px;
+    background: var(--surface);
+    border-left: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
+    transform: rotate(45deg);
+  }
+  .reverse .say { justify-self: end; }
+  .reverse .say::before { left: auto; right: calc(var(--box) / 2 - 9px); }
+
+  .point { margin: 1rem 0 0; font-weight: 700; color: var(--arrow); }
+
+  /* ---------- コード ---------- */
+  .legend { margin: .3rem 0 0; font-size: .9rem; color: var(--sub); }
+  .swatch {
+    display: inline-block; width: 1.6rem; height: .9rem;
+    margin-right: .4rem; vertical-align: -.1rem;
+    border-left: 4px solid var(--arrow); background: var(--arrow-tint);
+  }
+  h4 { margin: 1.2rem 0 .35rem; font-size: .95rem; color: var(--sub); }
+
+  pre {
+    margin: 0;
+    padding: .7rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .92rem;
+    line-height: 1.75;
+  }
+  .c { color: var(--sub); }
+  .run {
+    display: block;
+    margin: 0 -1rem;
+    padding: 0 1rem 0 calc(1rem - 4px);
+    border-left: 4px solid var(--arrow);
+    background: var(--arrow-tint);
+  }
+  /* React の中で動く実行（自分では書かない） */
+  .inside {
+    margin: .4rem 0 0 1.5rem;
+    padding: .35rem .9rem .5rem;
+    border: 2px dashed var(--arrow);
+    border-radius: 8px;
+    color: var(--arrow);
+  }
+  .inside p { margin: 0; font-size: .85rem; font-weight: 700; }
+  .inside code { font-family: var(--mono); font-size: .92rem; }
+
+  /* ---------- 宣言型のよさ ---------- */
+  .eg { margin: 0 0 .6rem; font-size: .9rem; color: var(--sub); }
+  .vs { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--ink); }
+  .vs > div { padding: .6rem .9rem .8rem 0; }
+  .vs > div + div { padding: .6rem 0 .8rem .9rem; border-left: 1px solid var(--rule); }
+  .vs p { margin: .25rem 0 0; }
+  .vs .side { margin: 0; font-size: .9rem; font-weight: 700; color: var(--sub); }
+  .vs .how { font-family: var(--mincho); font-size: 1.02rem; }
+  @media (max-width: 30rem) {
+    .vs { grid-template-columns: 1fr; }
+    .vs > div + div { padding: .6rem 0 .8rem; border-left: 0; border-top: 1px solid var(--rule); }
+  }
+  .keep { margin: 0; padding-left: 1.2rem; }
+  .keep li { margin: .35rem 0; }
+  .keep code { font-family: var(--mono); font-size: .92em; }
+  .src { margin: .2rem 0 0; padding-left: 1.2rem; }
+
+  /* ---------- 購読と通知 ---------- */
+  .row-label { margin: 1.8rem 0 .5rem; font-size: .95rem; font-weight: 700; }
+  .row-label:first-of-type { margin-top: 0; }
+  .why { margin: 0; padding-left: 1.4rem; }
+  .why li { margin: .35rem 0; }
+  .why.marked { list-style: none; padding-left: 0; margin-top: .8rem; }
+  .after { margin: .8rem 0 0; }
+  .legend3 { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0 0 .5rem; font-size: .85rem; color: var(--sub); }
+  .legend3 .k { display: inline-block; width: 1.4rem; height: .9rem; margin-right: .35rem; vertical-align: -.1rem; border-radius: 3px; }
+  .k-hit { background: var(--arrow-tint); border: 2px solid var(--arrow); }
+  .k-redo { border: 2px dashed var(--arrow); }
+  .bind { --scr: calc(var(--box) + 1.5rem); grid-template-columns: var(--box) minmax(3rem, 1fr) var(--scr); }
+  /* 画面の箱。上の「画面」と同じ高さを下にも空け、真ん中の欄が矢印の高さに来るようにする */
+  .screen { gap: .3rem; padding: .3rem .4rem; }
+  .screen .name, .screen::after { height: 1.5rem; line-height: 1.5rem; }
+  .screen::after { content: ""; display: block; }
+  .spot { display: block; padding: .1rem .2rem; border: 2px solid var(--rule); border-radius: 6px; font-size: .85rem; background: var(--surface); }
+  .spot.redo { border-style: dashed; border-color: var(--arrow); }
+  .spot.hit { border-style: solid; border-color: var(--arrow); background: var(--arrow-tint); font-family: var(--mincho); font-size: .95rem; font-weight: 700; }
+  .say-r { justify-self: end; }
+  .say-r::before { left: auto; right: calc(var(--scr) / 2 - 9px); }
+  .callout .strong { margin-top: .8rem; font-weight: 700; color: var(--arrow); }
+  /* 矢印の線を、真ん中の欄の高さにそろえる（上の文字の高さの半分だけ上げる） */
+  .bind .arrow { position: relative; top: -.85rem; }
+  /* 親子＝関数の中から関数を呼ぶ（呼び出しとデータの流れの図） */
+  .callfig { display: block; width: 100%; max-width: 30rem; height: auto; margin: 0 auto; }
+  .callfig text { font-family: var(--gothic); font-size: 12px; fill: var(--ink); }
+  .callfig .mono { font-family: var(--mono); font-size: 11px; }
+  .callfig .big { font-size: 14px; font-weight: 700; }
+  .callfig .b { font-weight: 700; }
+  .callfig .ac { fill: var(--arrow); font-weight: 700; }
+  .callfig .sub { fill: var(--sub); font-size: 10px; }
+  .callfig .bx { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  .callfig .bx.redo { stroke: var(--arrow); stroke-dasharray: 6 4; }
+  .callfig .bx.hit { fill: var(--arrow-tint); stroke: var(--arrow); }
+  .callfig .bx.stale { fill: var(--surface); stroke: #9AA4B2; stroke-dasharray: 0; }
+  .callfig .ln { stroke: var(--arrow); stroke-width: 3; }
+  .callfig .head { fill: var(--arrow); }
+  .callfig .ln.up { stroke-dasharray: 5 4; }
+  .callfig .chip { fill: var(--arrow-tint); stroke: var(--arrow); stroke-width: 1.5; }
+  .callfig .ng { font-weight: 700; fill: var(--ink); }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem .8rem; margin-top: .6rem; }
+  .panels .callfig { max-width: none; }
+  .panels .callfig text { font-size: 14px; }
+  .panels .callfig .sub, .panels .callfig .mono { font-size: 12px; }
+  .panels .callfig .big { font-size: 16px; }
+  @media (max-width: 34rem) { .panels { grid-template-columns: 1fr; } }
+  .callfig .bx.muted { fill: var(--surface); stroke: #9AA4B2; }
+  .callfig .bx.store { fill: var(--b-tint); stroke: var(--b); }
+  .callfig .bx.srv { fill: var(--s-tint); stroke: var(--s-line); }
+  .callfig .bx.dbx { fill: var(--d-tint); stroke: var(--d-line); }
+  .callfig .ln-b { stroke: var(--b); stroke-width: 2.5; }
+  .callfig .ln-s { stroke: var(--s-line); stroke-width: 2.5; }
+  .callfig .head-b { fill: var(--b); }
+  .callfig .head-s { fill: var(--s-line); }
+  .callfig .cb { fill: var(--b); font-weight: 700; }
+  .callfig .cs { fill: var(--s); font-weight: 700; }
+  .callfig .cd { fill: var(--d); font-weight: 700; }
+  /* ---------- フロントとバック ---------- */
+  .crit { margin: 0; border-top: 2px solid var(--ink); }
+  .crit > div { display: grid; grid-template-columns: 7.5rem 1fr; column-gap: .8rem; padding: .6rem 0; border-bottom: 1px solid var(--rule); }
+  .crit dt { font-weight: 700; }
+  .crit dd { margin: 0; }
+  .crit .ex { display: block; margin-top: .15rem; font-size: .9rem; color: var(--sub); }
+  @media (max-width: 30rem) { .crit > div { grid-template-columns: 1fr; } }
+
+  /* 状態管理から見た表 */
+  .tri { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .95rem; }
+  .tri th, .tri td { padding: .55rem .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .tri thead th { font-size: .85rem; color: var(--sub); }
+  .tri tbody th { white-space: nowrap; }
+  .tri td:last-child { font-weight: 700; }
+  @media (max-width: 30rem) {
+    .tri thead { display: none; }
+    .tri tr, .tri th, .tri td { display: block; }
+    .tri tbody th { padding-bottom: 0; border-bottom: 0; }
+    .tri td::before { content: attr(data-label) " · "; color: var(--sub); font-weight: 400; }
+  }
+
+  /* どこに何を置くか（3 つの箱） */
+  .map { display: grid; grid-template-columns: 1.25fr 1fr .85fr; gap: .5rem; font-size: .88rem; line-height: 1.5; }
+  .col { border: 2px solid; border-radius: 10px; padding: .55rem .6rem .7rem; }
+  .col-b { border-color: var(--b); background: var(--b-tint); }
+  .col-s { border-color: var(--s-line); background: var(--s-tint); }
+  .col-d { border-color: var(--d-line); background: var(--d-tint); }
+  .col-name { margin: 0; font-size: 1.05rem; font-weight: 700; }
+  .col-b .col-name { color: var(--b); }
+  .col-s .col-name { color: var(--s); }
+  .col-d .col-name { color: var(--d); }
+  .col-sub { margin: 0 0 .4rem; color: var(--sub); }
+  .grp { margin: .6rem 0 .25rem; font-weight: 700; color: var(--sub); }
+  .items { margin: 0; padding: 0; list-style: none; }
+  .items li { margin: 0 0 .3rem; padding: .3rem .45rem; background: var(--surface); border-radius: 6px; }
+  .items b { display: block; }
+  .items code { display: block; font-family: var(--mono); font-size: .82rem; }
+  .items em { display: block; font-style: normal; color: var(--sub); font-size: .82rem; }
+  .tools { margin: .6rem 0 0; font-weight: 700; }
+  .span { padding: .35rem .7rem; background: var(--surface); border: 2px solid var(--ink); border-radius: 8px; }
+  .span-bs { grid-column: 1 / 3; }
+  .span-sd { grid-column: 2 / 4; }
+  @media (max-width: 30rem) {
+    .map { grid-template-columns: 1fr; }
+    .span-bs, .span-sd { grid-column: auto; }
+  }
+
+  /* 構成の決め方（流れ図） */
+  .legend2 { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .8rem; }
+  .chip { display: inline-block; padding: .05rem .5rem; border: 2px solid var(--ink); border-radius: 6px; font-size: .82rem; font-weight: 700; background: var(--surface); }
+  .chip.own { background: var(--ink); color: var(--surface); }
+  .chip.rent { border-style: dashed; }
+  .chip.none { border-color: var(--rule); color: #8A94A3; font-weight: 400; }
+  .chip.own.b { background: var(--b); border-color: var(--b); }
+  .chip.own.s { background: var(--s); border-color: var(--s); }
+  .chip.own.d { background: var(--d); border-color: var(--d); }
+  .chip.rent.s { border-color: var(--s-line); color: var(--s); }
+  .chip.rent.d { border-color: var(--d-line); color: var(--d); }
+  .flow { margin: 0; padding: 0; list-style: none; }
+  .flow .q { margin: 0; padding: .5rem .8rem; background: var(--surface); border: 2px solid var(--ink); border-radius: 10px; font-weight: 700; }
+  .flow .branch { display: grid; grid-template-columns: 6.5rem 1fr; gap: .6rem; align-items: center; margin: .5rem 0 0 1.2rem; }
+  .flow .ans { margin: 0; font-weight: 700; }
+  .flow .ans small { font-weight: 400; color: var(--sub); }
+  .flow .down { margin: .45rem 0 .45rem 1.2rem; font-weight: 700; color: var(--sub); }
+  .type { padding: .5rem .8rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+  .flow li:last-child > .type { margin-left: 1.2rem; }
+  .type p { margin: 0; }
+  .tname { font-weight: 700; }
+  .type .chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: .3rem 0; }
+  .tools2 { font-size: .9rem; }
+  @media (max-width: 30rem) { .flow .branch { grid-template-columns: 1fr; } }
+
+  /* ---------- 選択肢 ---------- */
+  .bargrid { display: grid; grid-template-columns: 1fr; gap: .9rem; }
+  .bg-name { margin: 0 0 .3rem; font-size: .9rem; font-weight: 700; }
+  .bg-name span { font-weight: 400; color: var(--sub); font-size: .8rem; }
+  .bars { margin: 0; padding: 0; list-style: none; font-size: .85rem; }
+  .bars li { display: grid; grid-template-columns: 8rem 1fr 6.4rem; align-items: center; column-gap: .5rem; padding: .12rem 0; }
+  .bars .bn { overflow-wrap: anywhere; }
+  .bars .bt { position: relative; height: 10px; }
+  .bars .bar { display: block; height: 10px; background: #5B6B82; border-radius: 0 4px 4px 0; }
+  .bars .bv { color: var(--sub); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 30rem) { .bars li { grid-template-columns: 6.5rem 1fr 5.8rem; } }
+
+  .ladder { margin: 0; padding: 0; list-style: none; counter-reset: rung; }
+  .ladder li { position: relative; margin: 0 0 .5rem; padding: .5rem .8rem .55rem 2.6rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; counter-increment: rung; }
+  .ladder li::before { content: counter(rung); position: absolute; left: .7rem; top: .5rem; width: 1.3rem; height: 1.3rem; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: .8rem; font-weight: 700; text-align: center; line-height: 1.3rem; }
+  .ladder p { margin: 0; }
+  .ladder .rung { font-weight: 700; }
+  .ladder .rung-tools { font-size: .92rem; }
+  .ladder .rung-note { font-size: .85rem; color: var(--sub); }
+
+  /* ---------- オブジェクト指向から ---------- */
+  .oopvs { display: grid; grid-template-columns: 1fr 1.4fr; gap: .8rem; }
+  .ov-side { padding: .7rem .8rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+  .ov-title { margin: 0 0 .5rem; font-weight: 700; }
+  .ov-note { margin: .6rem 0 0; font-size: .88rem; color: var(--sub); }
+  .obj { padding: .5rem .7rem; border: 2px solid var(--ink); border-radius: 8px; font-size: .92rem; }
+  .obj p { margin: .1rem 0; }
+  .obj .obj-name { font-weight: 700; border-bottom: 1px solid var(--rule); padding-bottom: .2rem; margin-bottom: .3rem; }
+  .obj code { font-family: var(--mono); }
+  .places { display: grid; gap: .45rem; }
+  .pl-box { padding: .4rem .55rem .5rem; border: 2px solid; border-radius: 8px; }
+  .pl-b { border-color: var(--b); background: var(--b-tint); }
+  .pl-s { border-color: var(--s-line); background: var(--s-tint); }
+  .pl-name { margin: 0 0 .3rem; font-size: .9rem; font-weight: 700; }
+  .pl-b .pl-name { color: var(--b); }
+  .pl-s .pl-name { color: var(--s); }
+  .pl-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: 0; }
+  .pl-chips span { padding: .05rem .45rem; background: var(--surface); border-radius: 5px; font-size: .82rem; }
+  @media (max-width: 30rem) { .oopvs { grid-template-columns: 1fr; } }
+
+  .myth { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .92rem; }
+  .myth th, .myth td { padding: .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .myth thead th { font-size: .85rem; color: var(--sub); }
+  .myth td:first-child { color: var(--sub); }
+  .myth td:last-child { font-weight: 700; }
+  .myth code { font-family: var(--mono); font-size: .92em; font-weight: 400; }
+  .speed { width: 100%; border-collapse: collapse; border-top: 2px solid var(--ink); font-size: .92rem; }
+  .speed th, .speed td { padding: .5rem; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .speed thead th { font-size: .85rem; color: var(--sub); }
+  @media (max-width: 30rem) {
+    .speed thead { display: none; }
+    .speed tr, .speed th, .speed td { display: block; }
+    .speed tbody th { padding-bottom: 0; border-bottom: 0; }
+    .speed td::before { content: attr(data-label) " · "; color: var(--sub); }
+  }
+
+  .note {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: .9rem;
+    color: var(--sub);
+  }
+  .callout {
+    margin-top: 2.5rem;
+    padding: .9rem 1.1rem 1rem;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+  }
+  .callout p { margin: .3rem 0 0; }
+  .callout .callout-title { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 700; }
+  .callout code { font-family: var(--mono); font-size: .95rem; }
+
+  .note p { margin: 0 0 .4rem; }
+  .note code { font-family: var(--mono); font-size: .92em; }
+  .part .tri tbody th { white-space: normal; }
+  .part .bars li { margin: 0; }
+  .part .box { align-items: center; }
+  .panels svg { min-width: 0; }
+  .part .items code { white-space: normal; }
+  @media (max-width: 34rem) {
+    .part .map { grid-template-columns: minmax(0, 1fr); }
+    .part .span { grid-column: auto; }
+    .part .verb { font-size: .8rem; }
+    .part .phrase { font-size: 1.65rem; }
+  }
+  @media (max-width: 22rem) { :root { --box: 5rem; } }
+</style>
+</head>
+<body>
+<div class="lecture-shell">
+<nav class="lecture-toc" aria-label="目次">
+  <p class="toc-title">目次</p>
+  <div class="toc-ch cur">
+    <p class="toc-ch-title">第1章　画面と状態</p>
+    <div class="toc-group">
+      <p class="toc-group-label">画面の書き方</p>
+      <ol>
+        <li><a href="#figure"><span class="tn">1.</span>命令型UIと宣言型UI</a></li>
+        <li><a href="#merit"><span class="tn">2.</span>宣言型のよさと購読・通知</a></li>
+        <li><a href="#wpf"><span class="tn">3.</span>WPF と React の違い</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">状態管理</p>
+      <ol>
+        <li><a href="#manage"><span class="tn">4.</span>状態管理の必要性</a></li>
+        <li><a href="#zustand"><span class="tn">5.</span>Zustand</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">ブラウザとサーバー</p>
+      <ol>
+        <li><a href="#http"><span class="tn">6.</span>HTTP とステートレス</a></li>
+        <li><a href="#split"><span class="tn">7.</span>フロントとバック</a></li>
+        <li><a href="#options"><span class="tn">8.</span>道具の選択肢</a></li>
+      </ol>
+    </div>
+    <div class="toc-group">
+      <p class="toc-group-label">まとめ</p>
+      <ol>
+        <li><a href="#oop"><span class="tn">9.</span>オブジェクト指向から</a></li>
+      </ol>
+    </div>
+  </div>
+  <p class="chapter-link"><a href="../index.html">「WEBアプリの宣言型UIと状態管理」へ</a></p>
+</nav>
+<main>
+<header class="lecture-header">
+  <p class="series">Web アプリの仕組み <a href="../../../en/topics/declarative-ui/materials/ui-and-state.html" hreflang="en" lang="en">English</a></p>
+  <h1>第1章　画面と状態</h1>
+  <p class="subtitle">命令型UIと宣言型UIから、状態管理、ブラウザとサーバーの分け方まで</p>
+  <p class="stamp">microtaro · 2026-11-26 作成</p>
+</header>
+
+<dl class="gist">
+    <div><dt>命令型UI</dt><dd>「ボタンを押したら、画面のどこをどう変えるか」を書く</dd></div>
+    <div><dt>宣言型UI</dt><dd>「今の状態なら、どんな画面を見せるか」を書く</dd></div>
+  </dl>
+
+  <div class="part" id="figure">
+    <h2>1. 命令型UIと宣言型UI</h2>
+    <p class="phrase">画面に「こんにちは」を表示する</p>
+    <p class="section-lead">同じ一文を、逆の向きから見る</p>
+
+    <section>
+      <h3>図で見る</h3>
+
+      <p class="row-label">命令型UI</p>
+      <div class="diagram" role="img" aria-label="プログラムが画面に「画面に message を表示しろ」と命じる。message は変数で、中身はこんにちは">
+        <div class="box"><span class="name">プログラム</span><span class="var"><b>変数</b> <code>message</code></span><span class="v">こんにちは</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">命じる</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">画面</span><span class="v">こんにちは</span></div>
+        <p class="say">「画面に message を表示しろ」</p>
+      </div>
+      <p class="point">プログラムが自分で画面を書き換える。実行が見えている</p>
+
+      <p class="row-label">宣言型UI</p>
+      <div class="diagram reverse" role="img" aria-label="画面が「ここには message を表示する」と決め、プログラムの message を見る。message は状態で、中身はこんにちは">
+        <div class="box"><span class="name">プログラム</span><span class="var"><b>状態</b> <code>message</code></span><span class="v">こんにちは</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">見る</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">画面</span><span class="v">こんにちは</span></div>
+        <p class="say">「ここには message を表示する」</p>
+      </div>
+      <p class="point">「今の状態なら何を見せるか」だけを書く。誰が画面を書き換えるかは隠れている</p>
+    </section>
+
+    <section id="code">
+      <h3>コードで見る（C++ と React の仮想コード）</h3>
+      <p class="legend"><span class="swatch" aria-hidden="true"></span>色の行は、画面を書き換える実行</p>
+
+      <h4>命令型UI（C++）：変えるたびに画面へ命じる</h4>
+<pre><code><span class="c">// 最初（message はただの変数）</span>
+std::string message = "こんにちは";
+<span class="run">screen.show(message);</span>
+
+<span class="c">// 「さようなら」に変えるとき</span>
+<span class="c">// もう一度、画面に命じる</span>
+message = "さようなら";
+<span class="run">screen.show(message);</span></code></pre>
+
+      <h4>宣言型UI（React）：状態を変えるだけ</h4>
+<pre><code><span class="c">// 最初（message は状態。React が見ている）</span>
+const [message, setMessage] = useState("こんにちは");
+return &lt;Screen&gt;{message}&lt;/Screen&gt;;
+
+<span class="c">// 「さようなら」に変えるとき</span>
+<span class="c">// 状態だけを変える</span>
+setMessage("さようなら");</code></pre>
+      <div class="inside">
+        <p>React が担う表示更新（説明用の仮想コード）</p>
+        <code>screen.show(message);</code>
+      </div>
+
+      <div class="callout">
+        <p class="callout-title">どちらも命令の形。違うのは相手</p>
+        <p><code>screen.show(message)</code>　→　画面に命じる</p>
+        <p><code>setMessage("さようなら")</code>　→　状態に命じる</p>
+      </div>
+    </section>
+
+    <div class="note">
+      <p>画面を書き換える実行は、どちらにもある。自分のコードにあるか、React の中にあるかが違う。C++ でも宣言型で書く仕組みはある。分かれ目は言語ではなく書き方。</p>
+    </div>
+  </div>
+
+  <div class="part" id="merit">
+    <h2>2. 宣言型のよさと「購読と通知」</h2>
+    <p class="section-lead">部品が増えたときに何が楽になるか。そして、画面が状態を「見る」裏側の仕組み</p>
+
+    <section>
+      <h3>宣言型にすると、画面の食い違いが減る</h3>
+      <p class="eg">例：メッセージを送っている間は「送信」ボタンを押せなくし、「送信中…」を出す</p>
+      <div class="vs">
+        <div>
+          <p class="side">命令型</p>
+          <p>部品ごとに命じ、終わったら部品ごとに戻す。戻し忘れが起きやすい</p>
+          <p class="how">押せなくしろ、送信中を出せ<br>→ 押せるようにしろ、送信中を消せ</p>
+        </div>
+        <div>
+          <p class="side">宣言型</p>
+          <p>「送信中だけ押せない・見える」と書いておき、状態を変えるだけ</p>
+          <p class="how">送信中 → 待機中</p>
+        </div>
+      </div>
+      <p class="after">同じ理由で、計算で出せるものは状態にしない。「入力が空のときは送信ボタンを押せない」なら、持つのは入力中の文字（<code>message</code>）だけ。押せるかどうかは、そこから計算する。</p>
+    </section>
+
+    <section id="notify">
+      <h3>裏側では「購読と通知」が動いている</h3>
+      <p class="eg">宣言型では、プログラムは画面に命じない。だから、変わったら教えてもらう仕組みが要る</p>
+
+      <p class="row-label">① 購読＝通知の受け取り先として登録（最初に 1 回）</p>
+      <div class="diagram reverse" role="img" aria-label="購読：画面がプログラムに「message が変わったら教えて」と頼む">
+        <div class="box"><span class="name">プログラム</span><span class="var"><b>状態</b> <code>message</code></span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">購読</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">画面</span></div>
+        <p class="say">「message が変わったら教えて」</p>
+      </div>
+
+      <p class="row-label">② 通知（変わるたびに）</p>
+      <div class="diagram" role="img" aria-label="通知：プログラムが画面に「message が変わった」と知らせる">
+        <div class="box"><span class="name">プログラム</span><span class="var"><b>状態</b> <code>message</code></span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">通知</span><div class="shaft"></div></div>
+        <div class="box"><span class="name">画面</span></div>
+        <p class="say">「message が変わった」</p>
+      </div>
+      <p class="point">通知が伝えるのは「変わった」だけ。何を描くかは画面の記述が決める</p>
+
+      <h4>だから、ふつうの変数を変えても画面は変わらない</h4>
+<pre><code><span class="c">// ふつうの変数：誰にも知らせない。画面は変わらない</span>
+let message = "こんにちは";
+message = "さようなら";
+
+<span class="c">// useState：setMessage で React に次の描画を依頼する</span>
+const [message, setMessage] = useState("こんにちは");
+setMessage("さようなら");</code></pre>
+      <p class="after">この通知は、オブジェクト指向の Observer パターンにたとえられる。React の useState では、更新関数が次の描画を依頼する。ただし <code>setMessage</code> の直後は、<code>message</code> はまだ前の値。新しい値は、次に作り直したときから使える。</p>
+    </section>
+
+    <div class="note">
+      <p>講義資料の出典（原版での確認日 2026-11-23）</p>
+      <ul class="src">
+        <li>React 公式：<a href="https://react.dev/learn/reacting-to-input-with-state">Reacting to Input with State</a>（命令型と宣言型の比較）、<a href="https://react.dev/learn/choosing-the-state-structure">Choosing the State Structure</a>（計算で出せる値は状態にしない）、<a href="https://react.dev/learn/state-as-a-snapshot">State as a Snapshot</a>（新しい値は次の描画から）</li>
+        <li>React 公式：<a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a>（ふつうの変数を変えても描き直されない）、<a href="https://react.dev/reference/react/useSyncExternalStore">useSyncExternalStore</a>（subscribe で購読し、変わったら知らせる）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="wpf">
+    <h2>3. WPF と React の違い</h2>
+    <p class="phrase">React は、状態から画面の記述を計算し直す</p>
+    <p class="section-lead">WPF（Windows の画面を作る仕組み）では、画面の部品はオブジェクトで、ずっとそこにある。React では、状態が変わると部品の関数を呼び直し、前回と違う所を画面に反映する</p>
+
+    <section>
+      <h3>違い①：部品が居続けるか、毎回作り直すか</h3>
+      <p class="eg">例の画面：入力欄に「さようなら」と打つと、表示欄も「さようなら」に変わる</p>
+      <p class="legend3"><span><span class="k k-hit" aria-hidden="true"></span>書き換わる所</span><span><span class="k k-redo" aria-hidden="true"></span>作り直した所</span></p>
+
+      <p class="row-label">オブジェクトの流儀（WPF）</p>
+      <div class="diagram bind" role="img" aria-label="オブジェクトの流儀（WPF）：Message と画面の表示欄を先につないでおく。Message が変わると、つないだ表示欄だけが書き換わる">
+        <div class="box"><span class="name">オブジェクト</span><span class="var"><b>プロパティ</b> <code>Message</code></span><span class="v">さようなら</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">つなぐ</span><div class="shaft"></div></div>
+        <div class="box screen"><span class="name">画面</span><span class="spot">入力欄</span><span class="spot hit">さようなら</span></div>
+        <p class="say say-r">「ここは Message とつなぐ」</p>
+      </div>
+      <p class="point">つないだ所だけ書き換える</p>
+
+      <p class="row-label">React の流儀</p>
+      <div class="diagram bind" role="img" aria-label="React の流儀：message が変わると、画面の部品をまるごと作り直し、前と違う表示欄だけを書き換える">
+        <div class="box"><span class="name">部品</span><span class="var"><b>状態</b> <code>message</code></span><span class="v">さようなら</span></div>
+        <div class="arrow" aria-hidden="true"><span class="verb">作り直す</span><div class="shaft"></div></div>
+        <div class="box screen"><span class="name">画面</span><span class="spot redo">入力欄</span><span class="spot redo hit">さようなら</span></div>
+        <p class="say say-r">「ここには message を表示する」</p>
+      </div>
+      <p class="point">まるごと作り直し、前と違う所だけ書き換える</p>
+      <p class="after">作り直すので、部品の中に置いたふつうの変数は、毎回消える。残したい値は、React に預ける（状態）。</p>
+    </section>
+
+    <section>
+      <h3>違い②：React では、どの部品に預けるかが設計になる</h3>
+      <p class="eg">画面は、部品の中に部品が入った入れ子。入力欄と表示欄の両方が <code>message</code> を使う</p>
+
+      <div class="panels">
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="内すぎる：message を入力欄に預けると、表示欄からは入力欄の中が見えず、表示欄が古いままになる">
+          <text x="10" y="20" class="b">✕ 内すぎる（入力欄に預けた）</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">画面全体</text>
+          <rect class="bx" x="18" y="66" width="124" height="80" rx="8"/>
+          <text x="80" y="90" class="b" text-anchor="middle">入力欄</text>
+          <rect class="chip" x="48" y="100" width="64" height="20" rx="5"/>
+          <text x="80" y="114" class="mono" text-anchor="middle">message</text>
+          <rect class="bx stale" x="158" y="66" width="124" height="80" rx="8"/>
+          <text x="220" y="90" class="b" text-anchor="middle">表示欄</text>
+          <text x="220" y="114" class="sub" text-anchor="middle">中が見えない</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ 表示欄が古いまま</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="2 か所に別々に預ける：入力欄と表示欄がそれぞれ message を持つと、片方だけ変わり、さようならとこんにちはで食い違う">
+          <text x="10" y="20" class="b">✕ 2 か所に別々に預けた</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">画面全体</text>
+          <rect class="bx" x="18" y="66" width="124" height="80" rx="8"/>
+          <text x="80" y="90" class="b" text-anchor="middle">入力欄</text>
+          <rect class="chip" x="48" y="100" width="64" height="20" rx="5"/>
+          <text x="80" y="114" class="mono" text-anchor="middle">message</text>
+          <text x="80" y="138" class="sub" text-anchor="middle">さようなら</text>
+          <text x="150" y="112" class="big" text-anchor="middle">≠</text>
+          <rect class="bx" x="158" y="66" width="124" height="80" rx="8"/>
+          <text x="220" y="90" class="b" text-anchor="middle">表示欄</text>
+          <rect class="chip" x="188" y="100" width="64" height="20" rx="5"/>
+          <text x="220" y="114" class="mono" text-anchor="middle">message</text>
+          <text x="220" y="138" class="sub" text-anchor="middle">こんにちは</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ 片方だけ変わり、食い違う</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="外すぎる：message をアプリ全体に預けると、打つたびに、使わない設定画面まで作り直される">
+          <text x="10" y="20" class="b">✕ 外すぎる（アプリ全体に預けた）</text>
+          <rect class="bx redo" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="52" class="b">アプリ全体</text>
+          <rect class="chip" x="98" y="39" width="64" height="20" rx="5"/>
+          <text x="130" y="53" class="mono" text-anchor="middle">message</text>
+          <rect class="bx redo" x="14" y="66" width="180" height="82" rx="8"/>
+          <text x="24" y="84" class="b">画面全体</text>
+          <rect class="bx redo" x="22" y="92" width="80" height="46" rx="6"/>
+          <text x="62" y="120" class="b" text-anchor="middle">入力欄</text>
+          <rect class="bx redo" x="106" y="92" width="80" height="46" rx="6"/>
+          <text x="146" y="120" class="b" text-anchor="middle">表示欄</text>
+          <rect class="bx redo" x="202" y="66" width="84" height="82" rx="8"/>
+          <text x="244" y="96" class="b" text-anchor="middle">設定画面</text>
+          <text x="244" y="116" class="sub" text-anchor="middle">使わないのに</text>
+          <text x="244" y="131" class="sub" text-anchor="middle">作り直す</text>
+          <text x="150" y="182" class="ng" text-anchor="middle">→ 打つたびに、広く作り直す</text>
+        </svg>
+
+        <svg class="callfig" viewBox="0 0 300 196" role="img" aria-label="2 つを包む外側に預ける：画面全体に message を預け、入力欄と表示欄に渡す。入力欄は、渡された関数を呼んで変える。2 つとも同じ値を見る">
+          <defs><marker id="ah3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+          <text x="10" y="20" class="b">○ 2 つを包む外側に預けた</text>
+          <rect class="bx" x="6" y="32" width="288" height="124" rx="10"/>
+          <text x="18" y="54" class="b">画面全体</text>
+          <rect class="chip" x="86" y="40" width="64" height="20" rx="5"/>
+          <text x="118" y="54" class="mono" text-anchor="middle">message</text>
+          <rect class="bx" x="18" y="86" width="124" height="62" rx="8"/>
+          <text x="80" y="110" class="b" text-anchor="middle">入力欄</text>
+          <text x="80" y="132" class="sub" text-anchor="middle">関数を呼んで変える</text>
+          <rect class="bx" x="158" y="86" width="124" height="62" rx="8"/>
+          <text x="220" y="110" class="b" text-anchor="middle">表示欄</text>
+          <text x="220" y="132" class="sub" text-anchor="middle">渡された値を出す</text>
+          <line class="ln" x1="44" y1="64" x2="44" y2="83" marker-end="url(#ah3)"/>
+          <text x="50" y="79" class="ac">渡す</text>
+          <line class="ln up" x1="116" y1="84" x2="116" y2="65" marker-end="url(#ah3)"/>
+          <text x="122" y="79" class="ac">呼ぶ</text>
+          <line class="ln" x1="220" y1="64" x2="220" y2="83" marker-end="url(#ah3)"/>
+          <text x="226" y="79" class="ac">渡す</text>
+          <text x="150" y="182" class="ac" text-anchor="middle">→ 2 つとも同じ値を見る</text>
+        </svg>
+      </div>
+    </section>
+
+    <div class="callout">
+      <p class="callout-title">この WPF の例では、値をバインド先のオブジェクトに置いた。React では、どこに預けるかを決める</p>
+      <p class="strong">だから React では、状態管理を意識しないといけない</p>
+    </div>
+
+    <div class="note">
+      <p>WPF では、つなぐ（バインディング）と、値が変わったと知らせる処理を、自分で書く。React では、値を変える関数（<code>setMessage</code>）を呼ぶだけ。WPF は Windows の UI、React はこの例では Web の UI に使っている。</p>
+      <p>講義資料の出典（原版での確認日 2026-11-24）</p>
+      <ul class="src">
+        <li>Microsoft Learn：<a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/">Data binding overview (WPF .NET)</a>（バインディングは画面の側を値の側につなぐ。値の側は INotifyPropertyChanged などで変化を知らせる）</li>
+        <li>React 公式：<a href="https://react.dev/learn/render-and-commit">Render and Commit</a>（違いがあるときだけ画面を変える）</li>
+        <li>React 公式：<a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a>（部品の中のふつうの変数は、作り直すと残らない）</li>
+        <li>React 公式：<a href="https://react.dev/learn/sharing-state-between-components">Sharing State Between Components</a>（2 つの部品で使う値は、共通の外側の部品に置き、値と変える関数を渡す）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="manage">
+    <h2>4. なぜ状態管理が要るのか</h2>
+    <p class="section-lead">3 の ○ の図で決めていたのは、3 つのこと。これを決めるのが状態管理</p>
+
+    <section>
+      <h3>状態管理で決める 3 つ</h3>
+      <p class="row-label">3 の ○ の図（2 つを包む外側に預けた）</p>
+      <svg class="callfig" viewBox="0 0 340 214" role="img" aria-label="3 の図に、決める 3 つを書き込んだ図。① 置く所：message は画面全体の 1 か所。② 変える入口：入力欄は、渡された関数を呼んで変える。③ 伝える先：入力欄と表示欄に渡す">
+        <defs><marker id="ah4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx" x="10" y="8" width="320" height="198" rx="12"/>
+        <text x="24" y="33" class="b">画面全体</text>
+        <rect class="chip" x="96" y="18" width="72" height="22" rx="5"/>
+        <text x="132" y="33" class="mono" text-anchor="middle">message</text>
+        <text x="178" y="34" class="ac">① 置く所</text>
+        <line class="ln" x1="48" y1="58" x2="48" y2="124" marker-end="url(#ah4)"/>
+        <text x="54" y="96" class="ac">③</text>
+        <line class="ln up" x1="128" y1="124" x2="128" y2="58" marker-end="url(#ah4)"/>
+        <text x="134" y="96" class="ac">② 変える入口</text>
+        <line class="ln" x1="248" y1="58" x2="248" y2="124" marker-end="url(#ah4)"/>
+        <text x="254" y="96" class="ac">③ 伝える先</text>
+        <rect class="bx" x="24" y="128" width="136" height="64" rx="8"/>
+        <text x="92" y="154" class="b" text-anchor="middle">入力欄</text>
+        <text x="92" y="176" class="sub" text-anchor="middle">関数を呼んで変える</text>
+        <rect class="bx" x="180" y="128" width="136" height="64" rx="8"/>
+        <text x="248" y="154" class="b" text-anchor="middle">表示欄</text>
+        <text x="248" y="176" class="sub" text-anchor="middle">渡された値を出す</text>
+      </svg>
+      <ol class="why marked">
+        <li><b>① どこに置くか</b>：本物は 1 か所だけにする（React 公式は single source of truth と呼ぶ）</li>
+        <li><b>② 誰が変えてよいか</b>：変える入口を絞る。ここでは渡した関数 1 つ</li>
+        <li><b>③ 誰に伝えるか</b>：使う部品に届ける（2 の購読と通知）</li>
+      </ol>
+      <p class="after">画面の中での置き場所は、狭い順に、共通の外側の部品、Context（間の部品を飛ばして渡す React の仕組み）、ストア（次の 5 で見る）。</p>
+    </section>
+
+    <section>
+      <h3>実際にあった例</h3>
+      <p>microtaro が AI と作ったアプリで、同期の結果を 4 か所（サーバーのメモリ、ファイル、ブラウザ内の保存、画面のキャッシュ）に持っていた。古い表示が残り続け、直すのに 1 日で 11 回の修正が要った。</p>
+      <p class="after">置き場所は、値の種類（部品の中、画面全体、サーバーにあるデータの写し、URL など）で変わる。<a href="#split">第7節の配置図</a>で、種類ごとの例を見る。</p>
+    </section>
+
+    <div class="note">
+      <p>講義資料の出典（原版での確認日 2026-11-23）</p>
+      <ul class="src">
+        <li>React 公式：<a href="https://react.dev/learn/sharing-state-between-components">Sharing State Between Components</a>（共通の親に移す、single source of truth）、<a href="https://react.dev/learn/passing-data-deeply-with-context">Passing Data Deeply with Context</a>（間の部品を飛ばして渡す）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="zustand">
+    <h2>5. Zustand：部品の外に置く共有の箱</h2>
+    <p class="phrase">使う部品だけが、直接つなぐ</p>
+    <p class="section-lead">離れた部品が同じ値を使うなら、部品の入れ子の外に箱（ストア）を置く。Zustand は、その箱を作る定番の道具</p>
+
+    <section>
+      <h3>React の流儀：未読の件数をどこに置くか</h3>
+      <p class="eg">例：未読の件数。バッジはヘッダーの中、既読ボタンは一覧の中にある</p>
+
+      <p class="row-label">画面全体に預ける（3 の形）</p>
+      <svg class="callfig" viewBox="0 0 340 212" role="img" aria-label="画面全体の部品に件数を預ける。ヘッダーと一覧は使わないが、受け取って、未読バッジと既読ボタンに渡す">
+        <defs><marker id="zs1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx" x="10" y="8" width="320" height="196" rx="12"/>
+        <text x="24" y="30" class="b">画面全体</text>
+        <text x="24" y="48" class="sub">件数を預かる</text>
+        <rect class="bx" x="22" y="80" width="146" height="114" rx="8"/>
+        <text x="34" y="100" class="b">ヘッダー</text>
+        <text x="34" y="116" class="sub">使わない。渡すだけ</text>
+        <rect class="bx hit" x="40" y="136" width="110" height="48" rx="6"/>
+        <text x="95" y="157" class="b" text-anchor="middle">未読バッジ</text>
+        <text x="95" y="174" class="sub" text-anchor="middle">使う</text>
+        <rect class="bx" x="174" y="80" width="146" height="114" rx="8"/>
+        <text x="186" y="100" class="b">一覧</text>
+        <text x="186" y="116" class="sub">使わない。渡すだけ</text>
+        <rect class="bx hit" x="192" y="136" width="110" height="48" rx="6"/>
+        <text x="247" y="157" class="b" text-anchor="middle">既読ボタン</text>
+        <text x="247" y="174" class="sub" text-anchor="middle">変える</text>
+        <line class="ln" x1="95" y1="56" x2="95" y2="78" marker-end="url(#zs1)"/>
+        <line class="ln" x1="247" y1="56" x2="247" y2="78" marker-end="url(#zs1)"/>
+        <text x="103" y="72" class="ac">渡す</text>
+        <text x="255" y="72" class="ac">渡す</text>
+        <line class="ln" x1="95" y1="122" x2="95" y2="134" marker-end="url(#zs1)"/>
+        <line class="ln" x1="247" y1="122" x2="247" y2="134" marker-end="url(#zs1)"/>
+      </svg>
+      <p class="point">使わない部品も、受け取って渡す。件数が変わると、画面全体が作り直される</p>
+
+      <p class="row-label">ストアに置く（Zustand）</p>
+      <svg class="callfig" viewBox="0 0 340 212" role="img" aria-label="部品の入れ子の外にストアを置く。未読バッジと既読ボタンだけが、ヘッダーと一覧を通さずに、ストアへ直接つなぐ">
+        <defs><marker id="zs2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="bx store" x="80" y="6" width="180" height="50" rx="10"/>
+        <text x="170" y="27" class="cb" text-anchor="middle">ストア（入れ子の外）</text>
+        <text x="170" y="45" class="sub" text-anchor="middle">件数と、件数を変える関数</text>
+        <rect class="bx muted" x="10" y="80" width="320" height="124" rx="12"/>
+        <text x="24" y="100" class="b">画面全体</text>
+        <rect class="bx muted" x="22" y="110" width="146" height="84" rx="8"/>
+        <text x="34" y="128" class="b">ヘッダー</text>
+        <rect class="bx hit" x="40" y="136" width="110" height="48" rx="6"/>
+        <text x="95" y="157" class="b" text-anchor="middle">未読バッジ</text>
+        <text x="95" y="174" class="sub" text-anchor="middle">使う</text>
+        <rect class="bx muted" x="174" y="110" width="146" height="84" rx="8"/>
+        <text x="186" y="128" class="b">一覧</text>
+        <rect class="bx hit" x="192" y="136" width="110" height="48" rx="6"/>
+        <text x="247" y="157" class="b" text-anchor="middle">既読ボタン</text>
+        <text x="247" y="174" class="sub" text-anchor="middle">変える</text>
+        <line class="ln" x1="120" y1="58" x2="96" y2="132" marker-end="url(#zs2)"/>
+        <line class="ln" x1="220" y1="58" x2="246" y2="132" marker-end="url(#zs2)"/>
+        <text x="104" y="72" class="ac" text-anchor="end">つなぐ</text>
+        <text x="236" y="72" class="ac">つなぐ</text>
+      </svg>
+      <p class="point">使う部品だけが、直接つなぐ。件数が変わると、件数を使う部品だけが作り直される</p>
+      <p class="after">サーバーのデータの写し（一覧の中身など）は、ストアに入れない。取り直しを全部自分で書くことになる。写しは TanStack Query に任せる（7）。</p>
+    </section>
+
+    <div class="note">
+      <p>AI が書くコードでは、<code>create(...)</code> で箱を作り、<code>useUnreadStore((s) =&gt; s.count)</code> のように、使う値を選んで取り出す形で出てくる。</p>
+      <p>講義資料の出典（原版での確認日 2026-11-25）</p>
+      <ul class="src">
+        <li>Zustand：<a href="https://github.com/pmndrs/zustand">pmndrs/zustand</a>（Provider なしでどこからでも使える。選んだ値が変わったときだけ作り直す）</li>
+        <li>React 公式：<a href="https://react.dev/reference/react/memo">memo</a>（外の部品が作り直されると、中の部品もふつうは作り直される）</li>
+        <li>TanStack Query：<a href="https://tanstack.com/query/latest/docs/framework/react/guides/does-this-replace-client-state">Does TanStack Query replace global state managers?</a>（サーバーのデータは Query に任せ、ストアには画面の値だけを置く）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="http">
+    <h2>6. HTTP サーバーと「ステートレス」</h2>
+    <p class="phrase">HTTP のリクエストは、1 回ずつ意味が通る</p>
+    <p class="section-lead">画面（ブラウザ）は、開いている間ずっと動き続ける。HTTP では、サーバーは個々のお願い（リクエスト）の意味を、前のリクエストと切り離して解釈できる。ログインの続きは、例えばクッキーが示すセッションを読み出して扱う</p>
+
+    <section>
+      <h3>動き方の違い</h3>
+      <svg class="callfig" viewBox="0 0 340 220" role="img" aria-label="ブラウザは開いている間ずっと動き、メモリに状態を持つ。サーバーはお願いが来るたびに動き、返事をしたら忘れる。本物と続きは DB にある">
+        <defs>
+          <marker id="hp1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head-b" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="hp2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="head-s" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        <rect class="bx store" x="8" y="10" width="124" height="200" rx="10"/>
+        <text x="70" y="34" class="cb" text-anchor="middle">ブラウザ（画面）</text>
+        <text x="70" y="54" class="sub" text-anchor="middle">開いている間</text>
+        <text x="70" y="68" class="sub" text-anchor="middle">ずっと動き続ける</text>
+        <rect class="bx" x="18" y="84" width="104" height="54" rx="6"/>
+        <text x="70" y="106" class="b" text-anchor="middle">メモリに状態</text>
+        <text x="70" y="124" class="sub" text-anchor="middle">1〜5 の話</text>
+        <text x="70" y="166" class="sub" text-anchor="middle">クッキーを預かり</text>
+        <text x="70" y="181" class="sub" text-anchor="middle">毎回付けて送る</text>
+        <rect class="bx srv" x="208" y="10" width="124" height="118" rx="10"/>
+        <text x="270" y="34" class="cs" text-anchor="middle">サーバー</text>
+        <text x="270" y="54" class="sub" text-anchor="middle">お願いのたびに動き</text>
+        <text x="270" y="68" class="sub" text-anchor="middle">答えたら忘れる</text>
+        <text x="270" y="100" class="cs" text-anchor="middle">ステートレス</text>
+        <rect class="bx dbx" x="208" y="156" width="124" height="54" rx="10"/>
+        <text x="270" y="178" class="cd" text-anchor="middle">DB</text>
+        <text x="270" y="196" class="sub" text-anchor="middle">本物と続きはここ</text>
+        <line class="ln-b" x1="134" y1="50" x2="204" y2="50" marker-end="url(#hp1)"/>
+        <text x="168" y="42" class="cb" text-anchor="middle">お願い</text>
+        <line class="ln-s" x1="206" y1="92" x2="138" y2="92" marker-end="url(#hp2)"/>
+        <text x="170" y="110" class="cs" text-anchor="middle">返事</text>
+        <line class="ln-s" x1="270" y1="132" x2="270" y2="152" marker-start="url(#hp2)" marker-end="url(#hp2)"/>
+        <text x="278" y="146" class="sub">読み書き</text>
+      </svg>
+      <p class="point">サーバーのメモリに、利用者ごとの続きを置かない。誰かはクッキーで確かめ、本物は DB から読む</p>
+      <p class="after">こうしておくと、サーバーを再起動しても、台数を増やしても、どのお願いにも同じように答えられる。</p>
+    </section>
+
+    <section>
+      <h3>「ステートレス」は、状態がないという意味ではない</h3>
+      <div class="vs">
+        <div>
+          <p class="side">画面の状態（1〜5）</p>
+          <p>ブラウザのメモリにある値。画面を開いている間、残る</p>
+        </div>
+        <div>
+          <p class="side">ステートレス（HTTP）</p>
+          <p>サーバーが、前のお願いを覚えていなくても答えられる、という HTTP の決まり</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="note">
+      <p>講義資料の出典（原版での確認日 2026-11-25）</p>
+      <ul class="src">
+        <li>IETF：<a href="https://www.rfc-editor.org/rfc/rfc9110.html">RFC 9110 HTTP Semantics</a>（HTTP はステートレス）</li>
+        <li>IETF：<a href="https://www.rfc-editor.org/rfc/rfc6265.html">RFC 6265 HTTP State Management Mechanism</a>（クッキーで、続きのあるやり取りを保つ）</li>
+        <li>MDN：<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview">An overview of HTTP</a>（ステートレスだが、セッションがないわけではない）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="split">
+    <h2>7. フロントとバックをどう分けるか</h2>
+    <p class="section-lead">分けるのは、理由があるときだけ。理由がなければ、ブラウザだけで作る</p>
+
+    <section>
+      <h3>状態管理から見ると</h3>
+      <p class="eg">4 の「決める 3 つ」は、フロントとバックをまたぐと答えが変わる</p>
+      <table class="tri">
+        <thead><tr><th>決めること</th><th>画面の中（2〜5）</th><th>フロントとバックをまたぐと</th></tr></thead>
+        <tbody>
+          <tr><th>どこに置くか</th><td data-label="画面の中">共有の場所に 1 つ</td><td data-label="またぐと">皆で使う状態の本物はサーバー（DB）。ブラウザにあるのは写し</td></tr>
+          <tr><th>誰が変えてよいか</th><td data-label="画面の中">変える入口を絞る</td><td data-label="またぐと">サーバーが認めた変更だけ。承認・確定のような移り変わりは、サーバーが守る</td></tr>
+          <tr><th>誰に伝えるか</th><td data-label="画面の中">React が自動で通知する</td><td data-label="またぐと">自動では届かない。画面が取り直すか、サーバーから知らせる（ポーリング、SSE、WebSocket）</td></tr>
+        </tbody>
+      </table>
+      <p class="point">フロントとバックの境目は、状態の本物と写しの境目でもある</p>
+      <p class="after">ブラウザの状態は、利用者ごと・タブごとに別々。他の人がサーバーで変えた内容は、取り直すまで画面に出ない。2 人が同時に直したときの上書きは、保存するときに版を確かめて防ぐ。</p>
+    </section>
+
+    <section>
+      <h3>どこに何を置くか</h3>
+      <div class="map" role="img" aria-label="ブラウザには画面の状態・ブラウザ内の保存・すぐ反応する処理を、サーバーには任せられない判断・秘密・続ける処理を、DB には皆で使うデータの本物を置く図">
+        <div class="col col-b">
+          <p class="col-name">ブラウザ</p>
+          <p class="col-sub">画面を見せ、操作を受け取る</p>
+          <p class="grp">状態と保存</p>
+          <ul class="items">
+            <li><b>その場かぎりの状態</b><code>useState</code><em>再読み込みで消える</em></li>
+            <li><b>画面をまたぐ状態</b><code>Zustand</code><em>再読み込みで消える</em></li>
+            <li><b>サーバーのデータの写し</b><code>TanStack Query</code><em>古くなることがある</em></li>
+            <li><b>ブラウザ内の保存</b><code>localStorage</code><em>その端末だけに残る</em></li>
+          </ul>
+          <p class="grp">処理</p>
+          <ul class="items">
+            <li><b>すぐ反応する処理</b></li>
+            <li><b>入力中のチェック</b></li>
+            <li><b>重い計算</b><code>Web Workers・WebAssembly</code></li>
+          </ul>
+          <p class="tools">画面の道具：React、Vite</p>
+        </div>
+        <div class="col col-s">
+          <p class="col-name">サーバー</p>
+          <p class="col-sub">頼まれて処理し、返す</p>
+          <p class="grp">処理</p>
+          <ul class="items">
+            <li><b>任せられない判断</b><em>誰のデータか、払ったか</em></li>
+            <li><b>保存するときのチェック</b></li>
+            <li><b>秘密を使う処理</b></li>
+            <li><b>閉じても続ける処理</b></li>
+            <li><b>入口が複数の決まり</b><em>画面・CLI・MCP から使う</em></li>
+          </ul>
+          <p class="tools">道具：FastAPI（Python）、Hono・Express（JavaScript）</p>
+        </div>
+        <div class="col col-d">
+          <p class="col-name">DB</p>
+          <p class="col-sub">データを残す</p>
+          <p class="grp">データ</p>
+          <ul class="items">
+            <li><b>皆で使うデータの本物</b><em>残る。別の端末や他の人からも見える</em></li>
+          </ul>
+          <p class="tools">道具：PostgreSQL、SQLite</p>
+        </div>
+        <div class="span span-bs"><b>Next.js</b>　画面とサーバーを 1 つのプロジェクトで作る</div>
+        <div class="span span-sd"><b>Supabase・Firebase</b>　ログインと DB を借りる</div>
+      </div>
+      <p class="after">チェックは両方に置く。画面のチェックはすり抜けられるので、保存するときはサーバーでも確かめる。</p>
+    </section>
+
+    <section>
+      <h3>サーバーに置く理由</h3>
+      <p class="eg">どれか 1 つでも「はい」なら、その処理やデータはサーバーに置く</p>
+      <dl class="crit">
+        <div><dt>任せられない</dt><dd>利用者の画面に任せず、正しい操作だけを許したいか<span class="ex">例：誰のデータか、払ったか、承認・確定、保存するときのチェック</span></dd></div>
+        <div><dt>共有する</dt><dd>別の端末や他の人と、同じデータを使うか<span class="ex">例：チームで使う一覧。開いているメニューのような、その画面だけの値はブラウザでよい</span></dd></div>
+        <div><dt>秘密と環境</dt><dd>見せてはいけない鍵を使うか。コマンドの起動など、ブラウザにはできないことをするか<span class="ex">ブラウザに届いたものは、利用者が全部見られる</span></dd></div>
+        <div><dt>閉じても続ける</dt><dd>画面を閉じたあとも動かすか<span class="ex">例：決まった時刻の処理、長い AI の処理、外のサービスからの知らせの受け取り</span></dd></div>
+        <div><dt>入口が複数</dt><dd>画面のほかに、CLI や MCP からも同じ決まりを使うか<span class="ex">決まりを画面の中に書くと、入口ごとに書き直しになる</span></dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h3>ブラウザに置く理由</h3>
+      <dl class="crit">
+        <div><dt>すぐ反応する</dt><dd>操作している間に、何度も回す処理か<span class="ex">例：ドラッグ中の図形の計算、元に戻す・やり直す、入力中のチェック。通信を待たずに済む</span></dd></div>
+      </dl>
+      <p class="after">重いだけでは、サーバーに置く理由にならない。ブラウザにも重い計算の仕組みがある（Web Workers、WebAssembly、WebGPU）。ただし端末の性能に左右され、タブを閉じれば止まる。WebGPU は、まだ使えないブラウザもある。</p>
+    </section>
+
+    <section>
+      <h3>構成の決め方</h3>
+      <p class="legend2">
+        <span class="chip own">自分で作る</span>
+        <span class="chip rent">借りる</span>
+        <span class="chip none">使わない</span>
+      </p>
+      <ol class="flow">
+        <li>
+          <p class="q">サーバーに置く理由が、1 つでもある？</p>
+          <div class="branch">
+            <p class="ans">いいえ →</p>
+            <div class="type">
+              <p class="tname">型 A　ブラウザだけ</p>
+              <p class="chips"><span class="chip own b">ブラウザ</span><span class="chip none">サーバー</span><span class="chip none">DB</span></p>
+              <p class="tools2">React と Vite。HTML・CSS・JavaScript だけでもよい</p>
+            </div>
+          </div>
+          <p class="down">はい ↓</p>
+        </li>
+        <li>
+          <p class="q">サーバーの処理を、自分で書く？</p>
+          <div class="branch">
+            <p class="ans">書かない →<br><small>ログインと DB があれば足りる</small></p>
+            <div class="type">
+              <p class="tname">型 B　画面だけ作り、借りる</p>
+              <p class="chips"><span class="chip own b">ブラウザ</span><span class="chip rent s">サーバー</span><span class="chip rent d">DB</span></p>
+              <p class="tools2">React と Vite ＋ Supabase（または Firebase）</p>
+            </div>
+          </div>
+          <p class="down">書く ↓</p>
+        </li>
+        <li>
+          <p class="q">サーバー側を Python などで書きたい？（すでにその言語の処理がある）</p>
+          <div class="branch">
+            <p class="ans">はい →</p>
+            <div class="type">
+              <p class="tname">型 C　画面とサーバーを別々に作る</p>
+              <p class="chips"><span class="chip own b">ブラウザ</span><span class="chip own s">サーバー</span><span class="chip own d">DB</span></p>
+              <p class="tools2">React と Vite ＋ FastAPI ＋ PostgreSQL</p>
+            </div>
+          </div>
+          <p class="down">いいえ ↓</p>
+        </li>
+        <li>
+          <div class="type">
+            <p class="tname">型 D　画面とサーバーを 1 つにまとめる</p>
+            <p class="chips"><span class="chip own b">ブラウザ</span><span class="chip own s">サーバー</span><span class="chip own d">DB</span></p>
+            <p class="tools2">Next.js ＋ PostgreSQL。共有しないなら、DB なしで始める</p>
+          </div>
+        </li>
+      </ol>
+      <p class="after">この図は構成を選ぶ目安。唯一の正解ではない。型 B と型 D は人によって分かれ、組み合わせもできる（Next.js で作り、DB とログインだけ Supabase から借りる）。Python でデータを見せる画面を手早く作るだけなら、Streamlit・Gradio（型 E）もある。<a href="#options">第8節</a>で、使われている道具の規模を比べる。</p>
+    </section>
+
+    <section>
+      <h3>最初は大きく分けるだけ</h3>
+      <ol class="why">
+        <li>最初に決めるのは大きな境目だけ。表示はブラウザ、正式な保存と、皆で使うデータはサーバー</li>
+        <li>細かく分けるのは、別々の理由で変わることが見えてから。今要らない分け方は作らない（YAGNI：要るかもしれないだけのものは作らない、という考え方）</li>
+        <li>計算は画面の中に直接書かず、関数にしておく。あとで動く場所を移しやすい。ただし移すときは、通信・認証・失敗の扱いを書き足すことになる</li>
+      </ol>
+      <p class="point">役割の分け方（画面・業務・保存）と、動く場所の分け方（ブラウザ・サーバー）は、別の話</p>
+    </section>
+
+    <div class="note">
+      <p>講義資料の出典（原版での確認日 2026-11-23）</p>
+      <ul class="src">
+        <li>MDN：<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation">Client-side form validation</a>（画面のチェックはすり抜けられる。サーバーでも確かめる）</li>
+        <li>MDN：<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API">Web Workers API</a>、<a href="https://developer.mozilla.org/en-US/docs/WebAssembly">WebAssembly</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API">WebGPU API</a>（WebGPU は「Limited availability」）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="options">
+    <h2>8. どんな選択肢があるか</h2>
+    <p class="section-lead">7 の役割ごとの選択肢を、3 つの物差しで見る。主流か、移せるか、速いか</p>
+
+    <section>
+      <h3>主流か</h3>
+      <p class="eg">1 週間に取られた回数。比べるのは同じ役割の中だけ（数える場所と期間が違うので、役割どうしでは比べない）</p>
+      <div class="bargrid">
+        <div class="bgroup">
+          <p class="bg-name">画面の部品<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="React：2 億 5,221 万（npm・週）"><span class="bn">React</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">2 億 5,221 万</span></li>
+            <li title="Vue：2,493 万（npm・週）"><span class="bn">Vue</span><span class="bt"><span class="bar" style="width:9.9%"></span></span><span class="bv">2,493 万</span></li>
+            <li title="Svelte：944 万（npm・週）"><span class="bn">Svelte</span><span class="bt"><span class="bar" style="width:3.7%"></span></span><span class="bv">944 万</span></li>
+            <li title="Angular：843 万（npm・週）"><span class="bn">Angular</span><span class="bt"><span class="bar" style="width:3.3%"></span></span><span class="bv">843 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">画面とサーバーをまとめる<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="Next.js：9,191 万（npm・週）"><span class="bn">Next.js</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">9,191 万</span></li>
+            <li title="TanStack Start：1,409 万（npm・週）"><span class="bn">TanStack Start</span><span class="bt"><span class="bar" style="width:15.3%"></span></span><span class="bv">1,409 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">画面をまたぐ状態<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="Zustand：9,184 万（npm・週）"><span class="bn">Zustand</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">9,184 万</span></li>
+            <li title="Redux Toolkit：4,805 万（npm・週）"><span class="bn">Redux Toolkit</span><span class="bt"><span class="bar" style="width:52.3%"></span></span><span class="bv">4,805 万</span></li>
+            <li title="Jotai：972 万（npm・週）"><span class="bn">Jotai</span><span class="bt"><span class="bar" style="width:10.6%"></span></span><span class="bv">972 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">サーバーのデータの写し<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="TanStack Query：8,401 万（npm・週）"><span class="bn">TanStack Query</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">8,401 万</span></li>
+            <li title="SWR：2,673 万（npm・週）"><span class="bn">SWR</span><span class="bt"><span class="bar" style="width:31.8%"></span></span><span class="bv">2,673 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">サーバー（JavaScript）<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="Express：1 億 9,549 万（npm・週）"><span class="bn">Express</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">1 億 9,549 万</span></li>
+            <li title="Hono：1 億 431 万（npm・週）"><span class="bn">Hono</span><span class="bt"><span class="bar" style="width:53.4%"></span></span><span class="bv">1 億 431 万</span></li>
+            <li title="NestJS：2,389 万（npm・週）"><span class="bn">NestJS</span><span class="bt"><span class="bar" style="width:12.2%"></span></span><span class="bv">2,389 万</span></li>
+            <li title="Fastify：2,237 万（npm・週）"><span class="bn">Fastify</span><span class="bt"><span class="bar" style="width:11.4%"></span></span><span class="bv">2,237 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">サーバー（Python）<span>（PyPI・週）</span></p>
+          <ul class="bars">
+            <li title="FastAPI：1 億 2,812 万（PyPI・週）"><span class="bn">FastAPI</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">1 億 2,812 万</span></li>
+            <li title="Flask：5,163 万（PyPI・週）"><span class="bn">Flask</span><span class="bt"><span class="bar" style="width:40.3%"></span></span><span class="bv">5,163 万</span></li>
+            <li title="Django：1,219 万（PyPI・週）"><span class="bn">Django</span><span class="bt"><span class="bar" style="width:9.5%"></span></span><span class="bv">1,219 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">DB（JavaScript からつなぐ部品）<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="PostgreSQL：9,590 万（npm・週）"><span class="bn">PostgreSQL</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">9,590 万</span></li>
+            <li title="MySQL：2,365 万（npm・週）"><span class="bn">MySQL</span><span class="bt"><span class="bar" style="width:24.7%"></span></span><span class="bv">2,365 万</span></li>
+            <li title="MongoDB：2,136 万（npm・週）"><span class="bn">MongoDB</span><span class="bt"><span class="bar" style="width:22.3%"></span></span><span class="bv">2,136 万</span></li>
+          </ul>
+        </div>
+        <div class="bgroup">
+          <p class="bg-name">借りるバックエンド<span>（npm・週）</span></p>
+          <ul class="bars">
+            <li title="Supabase：6,918 万（npm・週）"><span class="bn">Supabase</span><span class="bt"><span class="bar" style="width:100.0%"></span></span><span class="bv">6,918 万</span></li>
+            <li title="Firebase：1,407 万（npm・週）"><span class="bn">Firebase</span><span class="bt"><span class="bar" style="width:20.3%"></span></span><span class="bv">1,407 万</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="eg"><a href="../data/weekly-downloads-and-benchmarks.json">図と実測表の数値（JSON）</a>。棒は同じ役割で最大の値を 100% としたもの。件数はパッケージの取得回数で、利用者数とは異なる。</p>
+      <p class="after">この講義では、候補を調べる出発点として、それぞれの役割でいちばん長い棒を見る。React の公式は、新しく作るならフレームワーク（Next.js など）から始めることを勧めている。サーバーを JavaScript で新しく作るなら Hono、情報の多さなら Express。</p>
+    </section>
+
+    <section>
+      <h3>移せるか（移植性）</h3>
+      <p class="eg">上ほど、別の置き場所へ移しやすい</p>
+      <ol class="ladder">
+        <li><p class="rung">ファイルを配るだけ</p><p class="rung-tools">React と Vite で組み立てた画面</p><p class="rung-note">同じファイルを別の所に置けば動く</p></li>
+        <li><p class="rung">Node.js のサーバー、Docker のコンテナ</p><p class="rung-tools">Express、Hono、FastAPI、Next.js（Node.js か Docker で動かす）</p><p class="rung-note">それが動く所なら、ほぼそのまま移せる。Hono は Node.js 以外（Cloudflare など）でも動く</p></li>
+        <li><p class="rung">公開先に合わせて変換するもの</p><p class="rung-tools">Next.js のアダプター</p><p class="rung-note">Vercel など検証済みの公開先でないと、機能の対応が違うことがある</p></li>
+        <li><p class="rung">借りるバックエンド</p><p class="rung-tools">Supabase、Firebase</p><p class="rung-note">データ、ログインの利用者、ファイルを全部移す。Supabase の DB は PostgreSQL なので移す道がある。Firestore は文書の形の DB で、表の DB へは作り直しが要る</p></li>
+      </ol>
+      <p class="point">移すときに困るのは、コードよりデータ。使い始める前に、丸ごと書き出せるかを確かめる</p>
+    </section>
+
+    <section>
+      <h3>速いか（何の速さか）</h3>
+      <p class="eg">「速い」は 1 つではない。microtaro の PC で、同じ小さな画面と API を道具ごとに作って測った（2026-11-20）</p>
+      <table class="speed">
+        <thead><tr><th>速さ</th><th>誰に影響するか</th><th>測った例</th></tr></thead>
+        <tbody>
+          <tr><th>開いてから見えるまで</th><td data-label="誰に影響するか">利用者</td><td data-label="測った例">React と Vite は最初の HTML にメモの本文がなく、圧縮後の JavaScript は約 68 KB。Next.js（App Router）は本文を含み、約 135 KB</td></tr>
+          <tr><th>サーバーが 1 秒に返せる件数</th><td data-label="誰に影響するか">大勢が使うときの、台数と費用</td><td data-label="測った例">Hono 22,524 件、Express 17,479 件、Next.js 2,762 件</td></tr>
+          <tr><th>作る人の待ち時間</th><td data-label="誰に影響するか">作る人</td><td data-label="測った例">公開用の組み立て：Vite 0.3 秒、Next.js 3.0 秒</td></tr>
+        </tbody>
+      </table>
+      <p class="point">社内の数人なら、サーバーの件数の差は効かない。10 人が 10 秒に 1 回ずつ操作しても、1 秒に 1 件</p>
+      <p class="after">差が効くのは、公開して大勢が同時に使うとき。1 台の PC の小さな例で測った値で、機械と条件で桁が変わる。道具の公式の速さの数字は、それぞれ測っている物が違う。</p>
+    </section>
+
+    <section>
+      <h3>まとめると</h3>
+      <ul class="keep">
+        <li>迷ったら主流から。使う人が多いほど、困ったときの情報が見つかる</li>
+        <li>移すかもしれないなら、ファイルか Docker で動く形にしておき、データを丸ごと書き出せる所を選ぶ</li>
+        <li>速さで選ぶのは、大勢が使うと分かってから</li>
+      </ul>
+    </section>
+
+    <div class="note">
+      <p>出典</p>
+      <ul class="src">
+        <li>利用規模：<a href="https://api.npmjs.org/downloads/point/2026-11-03:2026-11-09/react">npm のダウンロード数の公開 API</a>（2026-11-03〜09。TanStack Start は 2026-11-12〜18）、<a href="https://pypistats.org/api/packages/fastapi/recent">PyPI Stats</a>。URL の末尾の名前を替えると各道具の値が取れる</li>
+        <li>React 公式：<a href="https://react.dev/learn/creating-a-react-app">Creating a React App</a>（新しく作るならフレームワークから）</li>
+        <li>Next.js 公式：<a href="https://nextjs.org/docs/app/getting-started/deploying">Deploying</a>（動かし方と、検証済みのアダプター）。<a href="https://hono.dev/docs/">Hono</a>（Web の標準の上に作られ、多くの実行環境で動く）</li>
+        <li>速さの物差し：<a href="https://web.dev/articles/vitals">web.dev: Web Vitals</a>。道具の速さの数字：<a href="https://hono.dev/docs/concepts/benchmarks">Hono: Benchmarks</a>、<a href="https://fastify.dev/benchmarks/">Fastify: Benchmarks</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="part" id="oop">
+    <h2>9. オブジェクト指向をやってきた人が、意識すること</h2>
+    <p class="section-lead">React と Web では、状態の置き場所を自由に選べる。複雑にできる分、自分で決めないと散らばる</p>
+
+    <section>
+      <h3>置き場所の数が違う</h3>
+      <div class="oopvs" role="img" aria-label="オブジェクト指向では状態はオブジェクトの中に 1 か所。React と Web では、ブラウザとサーバーに置き場所がたくさんある">
+        <div class="ov-side">
+          <p class="ov-title">オブジェクト指向（1 つのプログラム）</p>
+          <div class="obj">
+            <p class="obj-name">Job</p>
+            <p><code>status</code>　状態</p>
+            <p><code>start()</code>　変える入口</p>
+          </div>
+          <p class="ov-note">状態はオブジェクトの中。クラスを書けば、置き場所も変え方も決まる</p>
+        </div>
+        <div class="ov-side">
+          <p class="ov-title">React と Web</p>
+          <div class="places">
+            <div class="pl-box pl-b">
+              <p class="pl-name">ブラウザ</p>
+              <p class="pl-chips"><span>部品の中</span><span>共通の親</span><span>Context</span><span>ストア</span><span>サーバーのデータの写し</span><span>URL</span><span>ブラウザ内の保存</span></p>
+            </div>
+            <div class="pl-box pl-s">
+              <p class="pl-name">サーバー</p>
+              <p class="pl-chips"><span>DB の本物</span></p>
+            </div>
+          </div>
+          <p class="ov-note">置き場所がたくさんある。選ばないと決まらない</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3>オブジェクト指向で、自然に決まっていたこと</h3>
+      <table class="tri">
+        <thead><tr><th>決めること</th><th>オブジェクト指向</th><th>React と Web</th></tr></thead>
+        <tbody>
+          <tr><th>どこに置くか</th><td data-label="オブジェクト指向">そのオブジェクトのフィールド</td><td data-label="React と Web">部品の中、共通の親、ストア、サーバーの写し、URL……から選ぶ</td></tr>
+          <tr><th>誰が変えてよいか</th><td data-label="オブジェクト指向">そのオブジェクトのメソッドだけ（private で守る）</td><td data-label="React と Web">set を渡せば、どこからでも変えられる（ストアは特に）。入口を絞るのは自分</td></tr>
+          <tr><th>誰に伝えるか</th><td data-label="オブジェクト指向">変えた本人が、画面に命じる（1 の命令型）</td><td data-label="React と Web">通知の仕組みに載せないと、画面に伝わらない（2）</td></tr>
+        </tbody>
+      </table>
+      <p class="point">オブジェクト指向でも状態は管理している。メソッドの中に隠れていて、意識しなかっただけ</p>
+    </section>
+
+    <section>
+      <h3>思いがちなこと</h3>
+      <table class="myth">
+        <thead><tr><th>オブジェクト指向の感覚</th><th>React では</th></tr></thead>
+        <tbody>
+          <tr><td>画面はメソッドで書き換えるもの</td><td>状態を変え、画面は状態から描く（1）</td></tr>
+          <tr><td>共有のオブジェクトを渡せば、画面も変わる</td><td>通知がないと、React は描き直しが要ると分からない（2）</td></tr>
+          <tr><td>ふつうの変数を変えれば、画面も変わる</td><td><code>useState</code> などで持つ（2）</td></tr>
+          <tr><td>配列は、そのまま書き換えればよい（<code>items.push</code>）</td><td>新しい配列を作って set に渡す。状態の配列は読み取り専用として扱う</td></tr>
+          <tr><td>set した直後に、値は変わっている</td><td>新しい値は、次の描画から（2）</td></tr>
+          <tr><td>共有の値は、全部 1 つのストアへ</td><td>どこからでも変えられる値は、グローバル変数と同じ問題を起こす。共有するのは必要なものだけ</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>AI と作るなら、なおさら</h3>
+      <p>AI は、頼まれた機能を動かすために、その場で状態を足していく。置き場所の決まりがないと、同じ値があちこちに増える。</p>
+      <p class="eg">実際にあった例：microtaro が AI と作ったアプリで、「最新の版」を 27 か所がそれぞれ自分で計算していた</p>
+    </section>
+
+    <div class="callout">
+      <p class="callout-title">最初に伝える一文</p>
+      <p>オブジェクト指向でも、状態は共有できる。React で新しく意識するのは、状態の変更をどう画面へ伝え、その状態から画面をどう作るか、という仕組み。</p>
+    </div>
+
+    <div class="note">
+      <p>講義資料の出典（原版での確認日 2026-11-23）</p>
+      <ul class="src">
+        <li>React 公式：<a href="https://react.dev/learn/state-a-components-memory">State: A Component's Memory</a>（ふつうの変数では描き直されない）、<a href="https://react.dev/learn/updating-arrays-in-state">Updating Arrays in State</a>（状態の配列は読み取り専用として扱う）、<a href="https://react.dev/learn/state-as-a-snapshot">State as a Snapshot</a>（新しい値は次の描画から）</li>
+      </ul>
+    </div>
+  </div>
+</main>
+</div>
+<script src="../../../assets/nav.js"></script>
+</body>
+</html>

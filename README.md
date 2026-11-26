@@ -1,36 +1,38 @@
-# study-notes
+# Study notes
 
-論文を自分なりに読み解いた解説と、そこから作った資料を、テーマごとに置くリポジトリです。
-GitHub Pages で、そのまま Web サイトとして読めます。
+**English** · [日本語](README.ja.md)
 
-サイト：https://microtaro.github.io/study-notes/
+microtaro’s readings of research papers and articles, with original study materials grouped by theme. Each page is available in English and Japanese.
 
-## 構成
+[Read the study notes](https://microtaro.github.io/study-notes/en/)
 
-```
-index.html          トップ：テーマの一覧と更新履歴
-assets/site.css     全ページ共通の見た目
-assets/paper.css    論文の解説ページの共通の部品
-assets/nav.js       左の欄の目次（テーマ → 論文 → 今のページの節を 1 本の木で出す）
+## Repository layout
+
+```text
+index.html          Japanese home page with themes and updates
+assets/site.css     Shared site styles
+assets/paper.css    Shared styles for explainers
+assets/nav.js       Site navigation by theme, page, and section
 topics/
-  <テーマ>/
-    index.html      テーマの入口：問い、収録の一覧、出典
-    papers/         論文の解説（1 論文 1 ページ）
-    materials/      自作の資料（複数の論文をまとめたものなど）
-    data/           資料に載せた数値の CSV / JSON
-en/                 英語のページ（上と同じ構成）
+  <theme>/
+    index.html      Theme question, contents, and sources
+    papers/         Paper explainers, one page per paper
+    articles/       Article explainers, one page per article
+    materials/      Original study materials
+    data/           Figures and measurements in CSV or JSON
+en/                 English pages, following the same structure
 ```
 
-ビルドは不要です。clone したら `index.html` をブラウザで開けば読めます。
+The site runs on GitHub Pages without a build step. To read it locally, clone the repository and open [en/index.html](en/index.html) in a browser.
 
-## 書き方
+## Editorial approach
 
-- 論文が言っていることと、私の読み方を分けて書いています。
-- 論文の原文は置かず、読んだ版の arXiv の URL にリンクしています。
-- 作成のルールは [AGENTS.md](AGENTS.md) にあります。
+- Each explainer distinguishes the authors’ findings from microtaro’s interpretation.
+- Paper explainers link to the specific arXiv version used. The original papers stay with their publishers or repositories.
+- The [contributor guidelines](AGENTS.md) describe how pages are written and checked.
 
-## ライセンス
+## Licenses
 
-- 自作の文章と図：[CC BY 4.0](LICENSE)
-- コード（`assets/` の CSS と JavaScript）：[MIT](LICENSE-CODE)
-- 論文から引用した文や数値：それぞれの論文のライセンスによります（各ページの「出典」に記載）
+- Original text and figures are licensed under [CC BY 4.0](LICENSE).
+- CSS and JavaScript in `assets/` are licensed under [MIT](LICENSE-CODE).
+- Quotations and numerical data drawn from a paper are subject to the rights stated in that page’s sources.
